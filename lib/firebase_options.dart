@@ -17,10 +17,7 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -49,6 +46,16 @@ class DefaultFirebaseOptions {
     }
   }
 
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyDvrIK16RySCeNgQb_NEJl95XBytgxyFnQ',
+    appId: '1:817463616147:web:67597718f9b3c125bd2366',
+    messagingSenderId: '817463616147',
+    projectId: 'resonance-chatroom',
+    authDomain: 'resonance-chatroom.firebaseapp.com',
+    storageBucket: 'resonance-chatroom.appspot.com',
+    measurementId: 'G-4N94Q90X3R',
+  );
+
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyBPjZDx9I1ylfdxksx_n2mp57mNaDSND3c',
     appId: '1:817463616147:android:d11af1b7b51fd672bd2366',
@@ -59,10 +66,12 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyB-NjIE1nkpnb9LC8RBTVFRNNBPsMIDvAI',
-    appId: '1:817463616147:ios:146e961beab4ba0abd2366',
+    appId: '1:817463616147:ios:9cdca607abb2fb79bd2366',
     messagingSenderId: '817463616147',
     projectId: 'resonance-chatroom',
     storageBucket: 'resonance-chatroom.appspot.com',
+    androidClientId: '817463616147-15ahgnhbbh1049qs02t2e0rcuhvf338n.apps.googleusercontent.com',
+    iosClientId: '817463616147-4n6214dmcgmlq044g7osp3o05b6egh53.apps.googleusercontent.com',
     iosBundleId: 'com.ntpu.resonanceChatroom',
   );
 }

@@ -24,44 +24,20 @@ class _InitPageState extends State<InitPage> {
   void _incrementCounter() {
     setState(() {
       _counter++;
-      // var user = const User(
-      //   id: "123",
-      //   displayName: "Gary",
-      //   photoUrl: "asdfghjkl",
-      //   email: "gary@gmail.com",
-      //   activities: [
-      //     UserActivity(
-      //       id: "aaa",
-      //       displayName: "AAA",
-      //       tags: [
-      //         UserTag(
-      //           id: "tags1",
-      //           displayName: "TAG!",
-      //         ),
-      //         UserTag(
-      //           id: "tags2",
-      //           displayName: "TAG@",
-      //         ),
-      //       ],
-      //     ),
-      //     UserActivity(
-      //       id: "bbb",
-      //       displayName: "BBB",
-      //       tags: [
-      //         UserTag(
-      //           id: "tags3",
-      //           displayName: "TAG#",
-      //         ),
-      //         UserTag(
-      //           id: "tags4",
-      //           displayName: "TAG%",
-      //         ),
-      //       ],
-      //     ),
-      //   ],
-      // );
-
-      // userProvider.setUser(user).then((value) => userProvider.getUser("123").then((value) => log(value!.toJson().toString())));
+      chatProvider.sendMessage(
+        'Hello $_counter',
+        MessageType.text,
+        'groupChatId',
+        'currentUserId',
+        'peerId',
+      );
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => const ChatPage(
+                  title: 'test',
+                )),
+      );
     });
     Navigator.push(
       context,

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:resonance_chatroom/constants/constants.dart';
+import 'package:resonance_chatroom/widgets/widgets.dart';
 
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key, required this.title});
@@ -10,6 +12,7 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> {
   bool isOn = true;
+  List<Object> _chatMessages = [];
 
   @override
   Widget build(BuildContext context) {
@@ -45,15 +48,77 @@ class _ChatPageState extends State<ChatPage> {
               },
             )
           ]),
-      body: const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
+
+      // body: const Center(
+      //   child: Column(
+      //     mainAxisAlignment: MainAxisAlignment.center,
+      //     children: <Widget>[
+      //       Text(
+      //         'You have pushed the button this many times:',
+      //       ),
+      //     ],
+      //   ),
+      // ),
+
+      body: Stack(
+        children: [
+          Container(
+            color: ColorConstants.yellowColor,
+            child: Column(
+              children: [
+                Flexible(
+                  child: GestureDetector(
+                          onTap: () {
+                            FocusManager.instance.primaryFocus?.unfocus();
+                            // widget.onBackgroundTap?.call();
+                          },
+                          child: LayoutBuilder(
+                            builder: (
+                              BuildContext context,
+                              BoxConstraints constraints,
+                            ) => Text("HI"),
+                            //     ChatList(
+                            //   bottomWidget: widget.listBottomWidget,
+                            //   bubbleRtlAlignment: widget.bubbleRtlAlignment!,
+                            //   isLastPage: widget.isLastPage,
+                            //   itemBuilder: (Object item, int? index) =>
+                            //       _messageBuilder(
+                            //     item,
+                            //     constraints,
+                            //     index,
+                            //   ),
+                            //   items: _chatMessages,
+                            //   keyboardDismissBehavior:
+                            //       widget.keyboardDismissBehavior,
+                            //   onEndReached: widget.onEndReached,
+                            //   onEndReachedThreshold:
+                            //       widget.onEndReachedThreshold,
+                            //   scrollController: _scrollController,
+                            //   scrollPhysics: widget.scrollPhysics,
+                            //   typingIndicatorOptions:
+                            //       widget.typingIndicatorOptions,
+                            //   useTopSafeAreaInset:
+                            //       widget.useTopSafeAreaInset ?? isMobile,
+                            // ),
+                          ),
+                        ),
+                ),
+                Input(
+                    onSendPressed: (){}, options: null,
+                )
+              ],
             ),
-          ],
-        ),
+          ),
+          // if (_isImageViewVisible)
+          //   ImageGallery(
+          //     imageHeaders: widget.imageHeaders,
+          //     imageProviderBuilder: widget.imageProviderBuilder,
+          //     images: _gallery,
+          //     pageController: _galleryPageController!,
+          //     onClosePressed: _onCloseGalleryPressed,
+          //     options: widget.imageGalleryOptions,
+          //   ),
+        ],
       ),
     );
   }

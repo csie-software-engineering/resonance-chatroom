@@ -40,6 +40,11 @@ dependencies:
   firebase_storage: ^11.5.1
   shared_preferences: ^2.2.2
   provider: ^6.1.1
+  firebase_auth: ^4.11.1
+  shared_preferences: ^2.2.2
+  fluttertoast: ^8.2.1
+  provider: ^6.1.1
+  google_sign_in: ^6.1.5
 
 dev_dependencies:
   flutter_test:

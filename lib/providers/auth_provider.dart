@@ -59,6 +59,7 @@ class AuthProviders extends ChangeNotifier {
     await FirebaseAuth.instance.signInWithCredential(facebookAuthCredential);
   }
   logout() async {
+    await FacebookAuth.instance.logOut();
     final GoogleSignIn googleSign = GoogleSignIn();
     await googleSign.signOut();
   }

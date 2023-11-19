@@ -26,6 +26,7 @@ class MyApp extends StatelessWidget {
   final SharedPreferences pref;
   final FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
   final FirebaseStorage firebaseStorage = FirebaseStorage.instance;
+  final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
 
   MyApp({super.key, required this.pref});
 
@@ -42,8 +43,8 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider<AuthProviders>(
           create: (_) => AuthProviders(
-            firebaseAuth: FirebaseAuth.instance,
-            prefs: this.pref,
+            firebaseAuth: firebaseAuth,
+            pref: pref,
           ),
         ),
       ],

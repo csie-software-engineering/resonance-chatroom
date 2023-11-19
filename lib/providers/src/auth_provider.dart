@@ -4,21 +4,24 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 
+
 class AuthProviders extends ChangeNotifier {
   final FirebaseAuth firebaseAuth;
-  final SharedPreferences prefs;
+  final SharedPreferences pref;
+  late UserCredential userCredential;
 
   AuthProviders({
     required this.firebaseAuth,
-    required this.prefs,
+    required this.pref,
   });
+
+  String? getUserId() {
+    return userCredential.user?.uid;
+  }
 
   signInWithAnonymous() async {
     try {
-      final userCredential =
-      await FirebaseAuth.instance.signInAnonymously();
-      print("Signed in with temporary account.");
-      print(userCredential.user?.uid);
+      userCredential = await firebaseAuth.signInAnonymously();
     } on FirebaseAuthException catch (e) {
       switch (e.code) {
         case "operation-not-allowed":
@@ -36,27 +39,20 @@ class AuthProviders extends ChangeNotifier {
       accessToken: googleAuth?.accessToken,
       idToken: googleAuth?.idToken,
     );
-    UserCredential userCredential =
-    await FirebaseAuth.instance.signInWithCredential(credential);
-    print(userCredential.user?.displayName);
-    print(userCredential.user?.email);
+    userCredential = await firebaseAuth.signInWithCredential(credential);
 
   }
   signInWithFacebook() async {
-    // Trigger the sign-in flow
     final LoginResult loginResult = await FacebookAuth.instance.login(
         permissions: ['email', 'public_profile', 'user_birthday']
     );
 
-    // Create a credential from the access token
     final OAuthCredential facebookAuthCredential = FacebookAuthProvider.credential(loginResult.accessToken!.token);
 
     final userData = await FacebookAuth.instance.getUserData();
+    userCredential = await firebaseAuth.signInWithCredential(facebookAuthCredential);
 
-    String userEmail = userData['email'];
-    print(userEmail);
-    // Once signed in, return the UserCredential
-    await FirebaseAuth.instance.signInWithCredential(facebookAuthCredential);
+
   }
   logout() async {
     await FacebookAuth.instance.logOut();

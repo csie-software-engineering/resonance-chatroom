@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:resonance_chatroom/constants/constants.dart';
 import 'package:resonance_chatroom/widgets/widgets.dart';
 
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key, required this.title});
   final String title;
+
+  get inputOptions => null;
+
 
   @override
   State<ChatPage> createState() => _ChatPageState();
@@ -63,7 +65,7 @@ class _ChatPageState extends State<ChatPage> {
       body: Stack(
         children: [
           Container(
-            color: ColorConstants.yellowColor,
+            color: Theme.of(context).colorScheme.background,
             child: Column(
               children: [
                 Flexible(
@@ -104,7 +106,7 @@ class _ChatPageState extends State<ChatPage> {
                         ),
                 ),
                 Input(
-                    onSendPressed: (){}, options: null,
+                    onSendPressed: (String){},
                 )
               ],
             ),

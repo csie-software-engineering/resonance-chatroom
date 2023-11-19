@@ -21,12 +21,12 @@ class Input extends StatefulWidget {
     super.key,
     // this.isAttachmentUploading,
     this.onAttachmentPressed,
-    required this.onSendPressed, required this.options,
+    required this.onSendPressed,
     // this.options = const InputOptions(),
   });
 
   // final void Function(types.PartialText) onSendPressed;
-  final void Function() onSendPressed;
+  final void Function(String) onSendPressed; // 暫時先用 string 塞著
 
   /// Whether attachment is uploading. Will replace attachment button with a
   /// [CircularProgressIndicator]. Since we don't have libraries for
@@ -43,7 +43,7 @@ class Input extends StatefulWidget {
   // final void Function(types.PartialText) onSendPressed;
 
   /// Customisation options for the [Input].
-  final InputOptions options;
+  final InputOptions options = const InputOptions();
 
   @override
   State<Input> createState() => _InputState();
@@ -98,7 +98,9 @@ class _InputState extends State<Input> {
   void _handleSendPressed() {
     final trimmedText = _textController.text.trim();
     if (trimmedText != '') {
-      final partialText = types.PartialText(text: trimmedText);
+      // final partialText = types.PartialText(text: trimmedText);
+      // widget.onSendPressed(partialText);
+      final partialText = trimmedText;
       widget.onSendPressed(partialText);
 
       if (widget.options.inputClearMode == InputClearMode.always) {
@@ -127,21 +129,19 @@ class _InputState extends State<Input> {
     return Focus(
       autofocus: !widget.options.autofocus,
       child: Padding(
-        padding: InheritedChatTheme.of(context).theme.inputMargin,
+        padding: EdgeInsets.zero,
         child: Material(
-          borderRadius: InheritedChatTheme.of(context).theme.inputBorderRadius,
-          color: InheritedChatTheme.of(context).theme.inputBackgroundColor,
-          surfaceTintColor:
-          InheritedChatTheme.of(context).theme.inputSurfaceTintColor,
-          elevation: InheritedChatTheme.of(context).theme.inputElevation,
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(20),
+          ),
+          color: Theme.of(context).colorScheme.primary,
+          surfaceTintColor: Theme.of(context).colorScheme.secondary,
+          elevation: 0,
           child: Container(
-            decoration:
-            InheritedChatTheme.of(context).theme.inputContainerDecoration,
             padding: safeAreaInsets,
             child: Row(
               textDirection: TextDirection.ltr,
               children: [
-                if (widget.onAttachmentPressed != null)
                   IconButton(
                     // Next
                     color: const Color(0xff5c8736),
@@ -173,27 +173,20 @@ class _InputState extends State<Input> {
                         autofocus: widget.options.autofocus,
                         enableSuggestions: widget.options.enableSuggestions,
                         controller: _textController,
-                        cursorColor: InheritedChatTheme.of(context)
-                            .theme
-                            .inputTextCursorColor,
-                        decoration: InheritedChatTheme.of(context)
-                            .theme
-                            .inputTextDecoration
-                            .copyWith(
-                          contentPadding:
-                          const EdgeInsets.fromLTRB(10, 5, 10, 5),
-                          hintStyle: InheritedChatTheme.of(context)
-                              .theme
-                              .inputTextStyle
-                              .copyWith(
-                            color: InheritedChatTheme.of(context)
-                                .theme
-                                .inputTextColor
-                                .withOpacity(0.5),
+                        cursorColor: Theme.of(context).colorScheme.secondary,
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: const Color(0xffc8d7a7),
+                          border: InputBorder.none,
+                          hintStyle: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            height: 1.5,
+                            color: Theme.of(context).colorScheme.secondary,
                           ),
-                          hintText: InheritedL10n.of(context)
-                              .l10n
-                              .inputPlaceholder,
+                          hintText: '輸入訊息',
+                          isCollapsed: true,
+                          contentPadding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
                         ),
                         // decoration: InputDecoration(
                         //   filled: true, // 启用背景填充
@@ -209,13 +202,11 @@ class _InputState extends State<Input> {
                         minLines: 1,
                         onChanged: widget.options.onTextChanged,
                         onTap: widget.options.onTextFieldTap,
-                        style: InheritedChatTheme.of(context)
-                            .theme
-                            .inputTextStyle
-                            .copyWith(
-                          color: InheritedChatTheme.of(context)
-                              .theme
-                              .inputTextColor,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          height: 1.5,
+                          color: Theme.of(context).colorScheme.secondary,
                         ),
                         textCapitalization: TextCapitalization.sentences,
                       ),

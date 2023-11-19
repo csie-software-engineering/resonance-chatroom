@@ -49,18 +49,22 @@ class MyApp extends StatelessWidget {
               pref: pref,
               firebaseAuth: firebaseAuth,
             ),
+        ),
+      ],
+      child: MaterialApp(
+        title: AppConstants.appTitle,
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.blue,
+            background: const Color(0xffFFFCE3),
+            primary: const Color(0xffA7D073),
+            secondary: Color(0xff1d1c21),
+            brightness: MediaQuery.platformBrightnessOf(context),
           ),
-        ],
-        child: MaterialApp(
-          title: AppConstants.appTitle,
-          theme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(
-              seedColor: Colors.blue,
-              brightness: MediaQuery.platformBrightnessOf(context),
-            ),
+        ),
+          home: const MyHomePage(
+            title: 'Home',
           ),
-          initialRoute: Routes.initPage.value,
-          routes: routes,
           debugShowCheckedModeBanner: false,
         ),
       );

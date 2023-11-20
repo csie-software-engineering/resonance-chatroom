@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:resonance_chatroom/models/models.dart';
 import 'package:resonance_chatroom/widgets/widgets.dart';
 // import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 
@@ -25,8 +26,7 @@ class Input extends StatefulWidget {
     // this.options = const InputOptions(),
   });
 
-  // final void Function(types.PartialText) onSendPressed;
-  final void Function(String) onSendPressed; // 暫時先用 string 塞著
+  final void Function(String, MessageType) onSendPressed; // 暫時先用 string 塞著
 
   /// Whether attachment is uploading. Will replace attachment button with a
   /// [CircularProgressIndicator]. Since we don't have libraries for
@@ -101,7 +101,7 @@ class _InputState extends State<Input> {
       // final partialText = types.PartialText(text: trimmedText);
       // widget.onSendPressed(partialText);
       final partialText = trimmedText;
-      widget.onSendPressed(partialText);
+      widget.onSendPressed(partialText, MessageType.text);
 
       if (widget.options.inputClearMode == InputClearMode.always) {
         _textController.clear();
@@ -135,7 +135,7 @@ class _InputState extends State<Input> {
             top: Radius.circular(20),
           ),
           color: Theme.of(context).colorScheme.primary,
-          surfaceTintColor: Theme.of(context).colorScheme.secondary,
+          surfaceTintColor: Theme.of(context).colorScheme.onPrimary,
           elevation: 0,
           child: Container(
             padding: safeAreaInsets,
@@ -173,7 +173,7 @@ class _InputState extends State<Input> {
                         autofocus: widget.options.autofocus,
                         enableSuggestions: widget.options.enableSuggestions,
                         controller: _textController,
-                        cursorColor: Theme.of(context).colorScheme.secondary,
+                        cursorColor: Theme.of(context).colorScheme.onPrimary,
                         decoration: InputDecoration(
                           filled: true,
                           fillColor: const Color(0xffc8d7a7),
@@ -182,7 +182,7 @@ class _InputState extends State<Input> {
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
                             height: 1.5,
-                            color: Theme.of(context).colorScheme.secondary,
+                            color: Theme.of(context).colorScheme.onPrimary,
                           ),
                           hintText: '輸入訊息',
                           isCollapsed: true,
@@ -206,7 +206,7 @@ class _InputState extends State<Input> {
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
                           height: 1.5,
-                          color: Theme.of(context).colorScheme.secondary,
+                          color: Theme.of(context).colorScheme.onPrimary,
                         ),
                         textCapitalization: TextCapitalization.sentences,
                       ),

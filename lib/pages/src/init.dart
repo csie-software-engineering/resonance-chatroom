@@ -34,7 +34,12 @@ class _InitPageState extends State<InitPage> {
       Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => const ChatPage(
+            builder: (context) => ChatPage(
+                  arguments: ChatPageArguments(
+                    "PeerAvatar", // Test
+                    peerId: "123",
+                    peerNickname: "Daniel",
+                  ),
                   title: 'test',
                 )),
       );

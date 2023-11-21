@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:resonance_chatroom/pages/routes.dart';
+import 'package:resonance_chatroom/pages/pages.dart';
 
 import '../../models/models.dart';
 import '../../providers/providers.dart';
@@ -70,7 +72,12 @@ class _InitPageState extends State<InitPage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
+        onPressed: (){
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => UserActivityMainPage()),
+          );
+        },
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ),

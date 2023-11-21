@@ -22,7 +22,7 @@ class SendButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        margin: const EdgeInsetsDirectional.fromSTEB(0, 0, 10, 0),
+        margin: const EdgeInsetsDirectional.fromSTEB(0, 0, 5, 0),
         child: IconButton(
           constraints: const BoxConstraints(
             minHeight: 24,

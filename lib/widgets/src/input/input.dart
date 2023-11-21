@@ -134,7 +134,7 @@ class _InputState extends State<Input> {
           borderRadius: const BorderRadius.vertical(
             top: Radius.circular(20),
           ),
-          color: Theme.of(context).colorScheme.primary,
+          color: Theme.of(context).colorScheme.surface,
           surfaceTintColor: Theme.of(context).colorScheme.onPrimary,
           elevation: 0,
           child: Container(
@@ -144,24 +144,24 @@ class _InputState extends State<Input> {
               children: [
                   IconButton(
                     // Next
-                    color: const Color(0xff5c8736),
+                    color: Theme.of(context).colorScheme.primary,
                     icon: const Icon(Icons.next_plan),
                     tooltip: "換話題",
                     onPressed: () {},
                     iconSize: 30,
                     splashRadius: 1,
-                    padding: EdgeInsets.fromLTRB(20, 0, 10, 0),
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
                   ),
-                IconButton( // sticker
-                  // isLoading: widget.isAttachmentUploading ?? false,
-                  color: const Color(0xff5c8736),
-                  icon: const Icon(Icons.emoji_emotions),
-                  tooltip: "貼圖",
-                  onPressed: () {}, //  插入 function
-                  iconSize: 30,
-                  splashRadius: 1,
-                  padding: EdgeInsets.fromLTRB(10, 0, 20, 0),
-                ),
+                // IconButton( // sticker
+                //   // isLoading: widget.isAttachmentUploading ?? false,
+                //   color: const Color(0xff5c8736),
+                //   icon: const Icon(Icons.emoji_emotions),
+                //   tooltip: "貼圖",
+                //   onPressed: () {}, //  插入 function
+                //   iconSize: 30,
+                //   splashRadius: 1,
+                //   padding: EdgeInsets.fromLTRB(10, 0, 20, 0),
+                // ),
                 Expanded(
                   child: Padding(
                     padding: textPadding,
@@ -219,7 +219,7 @@ class _InputState extends State<Input> {
                   ),
                   child: SendButton(
                     onPressed: _handleSendPressed,
-                    color: _sendButtonVisible ? Colors.black : Colors.black12,
+                    color: _sendButtonVisible ? Theme.of(context).colorScheme.primary : Colors.black12,
                     padding: buttonPadding,
                   ),
                 ),

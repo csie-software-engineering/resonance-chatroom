@@ -12,7 +12,7 @@ class ChatPage extends StatefulWidget {
   final String title;
   final ChatPageArguments arguments;
 
-  get inputOptions => null;
+  // get inputOptions => null;
 
   @override
   State<ChatPage> createState() => _ChatPageState();
@@ -402,14 +402,16 @@ class _ChatPageState extends State<ChatPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.surface,
+          elevation: 0,
           leading: const BackButton(),
-          title: const Center(
+          title: Center(
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: Colors.green,
-                borderRadius: BorderRadius.all(Radius.circular(16)),
+                color: Theme.of(context).colorScheme.background,
+                borderRadius: const BorderRadius.all(Radius.circular(16)),
               ),
-              child: SizedBox(
+              child: const SizedBox(
                 width: 160, // <-- box的寬度
                 height: 30,
                 child: Align(
@@ -423,6 +425,7 @@ class _ChatPageState extends State<ChatPage> {
           ),
           actions: <Widget>[
             IconButton(
+              padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
               icon: Icon(isOn ? Icons.lightbulb : Icons.lightbulb_outline),
               color: isOn ? Colors.amber : Colors.white,
               onPressed: () {
@@ -432,18 +435,6 @@ class _ChatPageState extends State<ChatPage> {
               },
             )
           ]),
-
-      // body: const Center(
-      //   child: Column(
-      //     mainAxisAlignment: MainAxisAlignment.center,
-      //     children: <Widget>[
-      //       Text(
-      //         'You have pushed the button this many times:',
-      //       ),
-      //     ],
-      //   ),
-      // ),
-
       body: Stack(
         children: [
           Container(
@@ -480,9 +471,9 @@ class _ChatPageState extends State<ChatPage> {
                                           controller: listScrollController,
                                         );
                                       } else {
-                                        return Center(
+                                        return const Center(
                                             child:
-                                                Text("No message here yet..."));
+                                                const Text("No message here yet..."));
                                       }
                                     } else {
                                       return Center(

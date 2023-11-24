@@ -4,6 +4,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import 'firebase_options.dart';
 import 'pages/pages.dart';
@@ -25,6 +26,7 @@ class MyApp extends StatelessWidget {
   final SharedPreferences pref;
   final FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
   final FirebaseStorage firebaseStorage = FirebaseStorage.instance;
+  final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
 
   MyApp({super.key, required this.pref});
 
@@ -37,6 +39,12 @@ class MyApp extends StatelessWidget {
             pref: pref,
             firebaseFirestore: firebaseFirestore,
             firebaseStorage: firebaseStorage,
+          ),
+        ),
+        ChangeNotifierProvider<AuthProviders>(
+          create: (_) => AuthProviders(
+            firebaseAuth: firebaseAuth,
+            pref: pref,
           ),
         ),
       ],

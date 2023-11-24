@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">resonance-chatroom</string>
+    <string name="facebook_app_id">352743990494620</string>
+    <string name="fb_login_protocol_scheme">352743990494620</string>
+    <string name="facebook_client_token">6728c057f43a4e5f972130bc06f26e0a</string>
+</resources>

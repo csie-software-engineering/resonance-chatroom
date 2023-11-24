@@ -4,3 +4,4 @@ export 'src/chat_queue_node.dart';
 export 'src/room_detail.dart';
 export 'src/user.dart';
 export 'src/firestore/fs_user.dart';
+export 'src/activities.dart';

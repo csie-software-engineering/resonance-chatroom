@@ -34,4 +34,12 @@ enum FirestoreConstants {
         throw Exception("Not found value for FirestoreConstants");
     }
   }
+
+  //activity set
+  static const pathActivityCollection = "activities";
+  static const activityname = "activityname";
+  static const ownerid = "ownerid";
+  static const activityid = "activityid";
+  static const activityinfo = "activityinfo";
+  static const enddate = "enddate";
 }

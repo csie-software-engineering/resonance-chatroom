@@ -41,3 +41,71 @@ class Activity {
     );
   }
 }
+
+class Tag {
+  final String activityid;
+  final String tagname;
+  final String tagid;
+
+  const Tag({
+    required this.activityid,
+    required this.tagname,
+    required this.tagid,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      FirestoreConstants.activityid: activityid,
+      FirestoreConstants.tagname: tagname,
+      FirestoreConstants.tagid: tagid,
+    };
+  }
+
+  factory Tag.fromDocument(DocumentSnapshot doc) {
+    String activityid = doc.get(FirestoreConstants.activityid);
+    String tagname = doc.get(FirestoreConstants.tagname);
+    String tagid = doc.get(FirestoreConstants.tagid);
+    return Tag(
+      activityid: activityid,
+      tagname: tagname,
+      tagid: tagid,
+    );
+  }
+}
+
+class Question {
+  final String activityid;
+  final String tagid;
+  final String questionid;
+  final String questionname;
+
+
+  const Question({
+    required this.activityid,
+    required this.tagid,
+    required this.questionid,
+    required this.questionname,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      FirestoreConstants.activityid: activityid,
+      FirestoreConstants.tagid: tagid,
+      FirestoreConstants.questionid: questionid,
+      FirestoreConstants.questionname: questionname,
+    };
+  }
+
+  factory Question.fromDocument(DocumentSnapshot doc) {
+    String activityid = doc.get(FirestoreConstants.activityid);
+    String tagid = doc.get(FirestoreConstants.tagid);
+    String questionid = doc.get(FirestoreConstants.questionid);
+    String questionname = doc.get(FirestoreConstants.questionname);
+    return Question(
+      activityid: activityid,
+      tagid: tagid,
+      questionid: questionid,
+      questionname: questionname,
+    );
+  }
+}

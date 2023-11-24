@@ -38,4 +38,49 @@ class SetActivityProvider{
     });
   }
 
+  void AddNewTag(String activityid, String name) {
+    String tagid = DateTime.now().millisecondsSinceEpoch.toString();
+    DocumentReference documentReference = firebaseFirestore
+        .collection(FirestoreConstants.pathActivityCollection)
+        .doc(activityid)
+        .collection(FirestoreConstants.pathTagCollection)
+        .doc(tagid);
+
+    Tag tag = Tag(
+        activityid: activityid,
+        tagname: name,
+        tagid: tagid,
+    );
+
+    FirebaseFirestore.instance.runTransaction((transaction) async {
+      transaction.set(
+        documentReference,
+        tag.toJson(),
+      );
+    });
+  }
+  void AddNewQusetion(String activityid, String tagid,String name) {
+    String questionid = DateTime.now().millisecondsSinceEpoch.toString();
+    DocumentReference documentReference = firebaseFirestore
+        .collection(FirestoreConstants.pathActivityCollection)
+        .doc(activityid)
+        .collection(FirestoreConstants.pathTagCollection)
+        .doc(tagid)
+        .collection(FirestoreConstants.pathQuestionCollection)
+        .doc(questionid);
+
+    Question question = Question(
+      activityid: activityid,
+      tagid: tagid,
+      questionid: questionid,
+      questionname: name,
+    );
+
+    FirebaseFirestore.instance.runTransaction((transaction) async {
+      transaction.set(
+        documentReference,
+        question.toJson(),
+      );
+    });
+  }
 }

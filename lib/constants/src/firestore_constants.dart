@@ -42,4 +42,11 @@ enum FirestoreConstants {
   static const activityid = "activityid";
   static const activityinfo = "activityinfo";
   static const enddate = "enddate";
+
+  static const pathTagCollection = "tags";
+  static const tagname = "tagname";
+  static const tagid = "tagid";
+  static const pathQuestionCollection = "questions";
+  static const questionid = "questionid";
+  static const questionname = "questionname";
 }

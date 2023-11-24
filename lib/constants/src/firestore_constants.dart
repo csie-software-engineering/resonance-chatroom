@@ -1,14 +1,40 @@
-class FirestoreConstants {
-  static const pathUserCollection = "users";
-  static const pathMessageCollection = "messages";
-  static const nickname = "nickname";
-  static const aboutMe = "aboutMe";
-  static const photoUrl = "photoUrl";
-  static const id = "id";
-  static const chattingWith = "chattingWith";
-  static const idFrom = "idFrom";
-  static const idTo = "idTo";
-  static const timestamp = "timestamp";
-  static const content = "content";
-  static const type = "type";
+enum FirestoreConstants {
+  userCollectionPath,
+  activityCollectionPath,
+  roomCollectionPath,
+  messageCollectionPath,
+  chatQueueNodeCollectionPath,
+
+  nickname,
+  aboutMe,
+  photoUrl,
+  id,
+  chattingWith;
+
+  String get value {
+    switch (this) {
+      case FirestoreConstants.userCollectionPath:
+        return "users";
+      case FirestoreConstants.activityCollectionPath:
+        return "activities";
+      case FirestoreConstants.roomCollectionPath:
+        return "rooms";
+      case FirestoreConstants.messageCollectionPath:
+        return "messages";
+      case FirestoreConstants.chatQueueNodeCollectionPath:
+        return "chatQueueNodes";
+      case FirestoreConstants.nickname:
+        return "nickname";
+      case FirestoreConstants.aboutMe:
+        return "aboutMe";
+      case FirestoreConstants.photoUrl:
+        return "photoUrl";
+      case FirestoreConstants.id:
+        return "id";
+      case FirestoreConstants.chattingWith:
+        return "chattingWith";
+      default:
+        throw Exception("Not found value for FirestoreConstants");
+    }
+  }
 }

@@ -31,36 +31,34 @@ class MyApp extends StatelessWidget {
   MyApp({super.key, required this.pref});
 
   @override
-  Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        Provider<ChatProvider>(
-          create: (_) => ChatProvider(
-            pref: pref,
-            firebaseFirestore: firebaseFirestore,
-            firebaseStorage: firebaseStorage,
+  Widget build(BuildContext context) => MultiProvider(
+        providers: [
+          Provider<ChatProvider>(
+            create: (_) => ChatProvider(
+              pref: pref,
+              firebaseFirestore: firebaseFirestore,
+              firebaseStorage: firebaseStorage,
+            ),
           ),
-        ),
-        ChangeNotifierProvider<AuthProviders>(
-          create: (_) => AuthProviders(
-            firebaseAuth: firebaseAuth,
-            pref: pref,
+          ChangeNotifierProvider<AuthProviders>(
+            create: (_) => AuthProviders(
+              firebaseAuth: firebaseAuth,
+              pref: pref,
+            ),
           ),
-        ),
-      ],
-      child: MaterialApp(
-        title: AppConstants.appTitle,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.blue,
-            brightness: MediaQuery.platformBrightnessOf(context),
+        ],
+        child: MaterialApp(
+          title: AppConstants.appTitle,
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: Colors.blue,
+              brightness: MediaQuery.platformBrightnessOf(context),
+            ),
           ),
+          home: const MyHomePage(
+            title: 'Home',
+          ),
+          debugShowCheckedModeBanner: false,
         ),
-        home: const MyHomePage(
-          title: 'Home',
-        ),
-        debugShowCheckedModeBanner: false,
-      ),
-    );
-  }
+      );
 }

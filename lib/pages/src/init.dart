@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../models/models.dart';
 import '../../providers/providers.dart';
+import '../pages.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
@@ -21,14 +22,11 @@ class _MyHomePageState extends State<MyHomePage> {
   void _incrementCounter() {
     setState(() {
       _counter++;
-      chatProvider.sendMessage(
-        'Hello $_counter',
-        MessageType.text,
-        'groupChatId',
-        'currentUserId',
-        'peerId',
-      );
     });
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const HostActivitySetPage(title: 'test',)),
+    );
   }
 
   @override

@@ -3,6 +3,8 @@ enum FirestoreConstants {
   roomCollectionPath,
   messageCollectionPath,
   chatQueueNodeCollectionPath,
+  tagCollectionPath,
+  questionCollectionPath,
 
   nickname,
   aboutMe,
@@ -20,6 +22,10 @@ enum FirestoreConstants {
         return "messages";
       case FirestoreConstants.chatQueueNodeCollectionPath:
         return "chatQueueNodes";
+      case FirestoreConstants.tagCollectionPath:
+        return "tags";
+      case FirestoreConstants.questionCollectionPath:
+        return "questions";
       case FirestoreConstants.nickname:
         return "nickname";
       case FirestoreConstants.aboutMe:
@@ -34,19 +40,4 @@ enum FirestoreConstants {
         throw Exception("Not found value for FirestoreConstants");
     }
   }
-
-  //activity set
-  static const pathActivityCollection = "activities";
-  static const activityname = "activityname";
-  static const ownerid = "ownerid";
-  static const activityid = "activityid";
-  static const activityinfo = "activityinfo";
-  static const enddate = "enddate";
-
-  static const pathTagCollection = "tags";
-  static const tagname = "tagname";
-  static const tagid = "tagid";
-  static const pathQuestionCollection = "questions";
-  static const questionid = "questionid";
-  static const questionname = "questionname";
 }

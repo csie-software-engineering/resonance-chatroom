@@ -14,12 +14,11 @@ class SetActivityProvider{
     required this.firebaseFirestore,
     required this.firebaseStorage,
   });
-
-  void SetNewActivity(String name, String UserId, String info, int EndYear, int EndMonth, int EndDay) {
-    String activityid = DateTime.now().millisecondsSinceEpoch.toString();
-    String Enddate = EndYear.toString() + '-' + EndMonth.toString() + '-' + EndDay.toString();
+  ///設置新活動
+  Future<void> SetNewActivity(String name, String UserId, String info, String startdate, String enddate, String photo) async {
+    String activityid = DateTime.now().millisecondsSinceEpoch.toString(); //guid
     DocumentReference documentReference = firebaseFirestore
-        .collection(FirestoreConstants.pathActivityCollection)
+        .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityid);
 
     Activity activity = Activity(
@@ -27,23 +26,20 @@ class SetActivityProvider{
       activityid: activityid,
       activityname: name,
       activityinfo: info,
-      enddate: Enddate
+      startdate: startdate,
+      enddate: enddate,
+      activitryphoto: photo,
     );
 
-    FirebaseFirestore.instance.runTransaction((transaction) async {
-      transaction.set(
-        documentReference,
-        activity.toJson(),
-      );
-    });
+    await documentReference.set(activity.toJson());
   }
 
   void AddNewTag(String activityid, String name) {
     String tagid = DateTime.now().millisecondsSinceEpoch.toString();
     DocumentReference documentReference = firebaseFirestore
-        .collection(FirestoreConstants.pathActivityCollection)
+        .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityid)
-        .collection(FirestoreConstants.pathTagCollection)
+        .collection(FirestoreConstants.tagCollectionPath.value)
         .doc(tagid);
 
     Tag tag = Tag(
@@ -62,11 +58,11 @@ class SetActivityProvider{
   void AddNewQusetion(String activityid, String tagid,String name) {
     String questionid = DateTime.now().millisecondsSinceEpoch.toString();
     DocumentReference documentReference = firebaseFirestore
-        .collection(FirestoreConstants.pathActivityCollection)
+        .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityid)
-        .collection(FirestoreConstants.pathTagCollection)
+        .collection(FirestoreConstants.tagCollectionPath.value)
         .doc(tagid)
-        .collection(FirestoreConstants.pathQuestionCollection)
+        .collection(FirestoreConstants.questionCollectionPath.value)
         .doc(questionid);
 
     Question question = Question(

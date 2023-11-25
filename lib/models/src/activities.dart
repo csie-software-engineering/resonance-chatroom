@@ -6,38 +6,48 @@ class Activity {
   final String activityid;
   final String activityname;
   final String activityinfo;
+  final String startdate;
   final String enddate;
+  final String activitryphoto;
 
   const Activity({
     required this.ownerid,
     required this.activityid,
     required this.activityname,
     required this.activityinfo,
+    required this.startdate,
     required this.enddate,
+    required this.activitryphoto,
   });
 
   Map<String, dynamic> toJson() {
     return {
-      FirestoreConstants.ownerid: ownerid,
-      FirestoreConstants.activityid: activityid,
-      FirestoreConstants.activityname: activityname,
-      FirestoreConstants.activityinfo: activityinfo,
-      FirestoreConstants.enddate: enddate,
+      Activityconstants.ownerid.value: ownerid,
+      Activityconstants.activityid.value: activityid,
+      Activityconstants.activityname.value: activityname,
+      Activityconstants.activityinfo.value: activityinfo,
+      Activityconstants.startdate.value: startdate,
+      Activityconstants.enddate.value: enddate,
+      Activityconstants.activitryphoto.value: activitryphoto,
     };
   }
 
   factory Activity.fromDocument(DocumentSnapshot doc) {
-    String ownerid = doc.get(FirestoreConstants.ownerid);
-    String activityid = doc.get(FirestoreConstants.activityid);
-    String activityname = doc.get(FirestoreConstants.activityname);
-    String activityinfo = doc.get(FirestoreConstants.activityinfo);
-    String enddate = doc.get(FirestoreConstants.enddate);
+    String ownerid = doc.get(Activityconstants.ownerid.value);
+    String activityid = doc.get(Activityconstants.activityid.value);
+    String activityname = doc.get(Activityconstants.activityname.value);
+    String activityinfo = doc.get(Activityconstants.activityinfo.value);
+    String startdate = doc.get(Activityconstants.startdate.value);
+    String enddate = doc.get(Activityconstants.enddate.value);
+    String activitryphoto = doc.get(Activityconstants.activitryphoto.value);
     return Activity(
       ownerid: ownerid,
       activityid: activityid,
       activityname: activityname,
       activityinfo: activityinfo,
+      startdate: startdate,
       enddate: enddate,
+      activitryphoto: activitryphoto,
     );
   }
 }
@@ -55,16 +65,16 @@ class Tag {
 
   Map<String, dynamic> toJson() {
     return {
-      FirestoreConstants.activityid: activityid,
-      FirestoreConstants.tagname: tagname,
-      FirestoreConstants.tagid: tagid,
+      Activityconstants.activityid.value: activityid,
+      Activityconstants.tagname.value: tagname,
+      Activityconstants.tagid.value: tagid,
     };
   }
 
   factory Tag.fromDocument(DocumentSnapshot doc) {
-    String activityid = doc.get(FirestoreConstants.activityid);
-    String tagname = doc.get(FirestoreConstants.tagname);
-    String tagid = doc.get(FirestoreConstants.tagid);
+    String activityid = doc.get(Activityconstants.activityid.value);
+    String tagname = doc.get(Activityconstants.tagname.value);
+    String tagid = doc.get(Activityconstants.tagid.value);
     return Tag(
       activityid: activityid,
       tagname: tagname,
@@ -89,18 +99,18 @@ class Question {
 
   Map<String, dynamic> toJson() {
     return {
-      FirestoreConstants.activityid: activityid,
-      FirestoreConstants.tagid: tagid,
-      FirestoreConstants.questionid: questionid,
-      FirestoreConstants.questionname: questionname,
+      Activityconstants.activityid.value: activityid,
+      Activityconstants.tagid.value: tagid,
+      Activityconstants.questionid.value: questionid,
+      Activityconstants.questionname.value: questionname,
     };
   }
 
   factory Question.fromDocument(DocumentSnapshot doc) {
-    String activityid = doc.get(FirestoreConstants.activityid);
-    String tagid = doc.get(FirestoreConstants.tagid);
-    String questionid = doc.get(FirestoreConstants.questionid);
-    String questionname = doc.get(FirestoreConstants.questionname);
+    String activityid = doc.get(Activityconstants.activityid.value);
+    String tagid = doc.get(Activityconstants.tagid.value);
+    String questionid = doc.get(Activityconstants.questionid.value);
+    String questionname = doc.get(Activityconstants.questionname.value);
     return Question(
       activityid: activityid,
       tagid: tagid,

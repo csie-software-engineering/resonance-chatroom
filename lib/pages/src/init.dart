@@ -22,23 +22,28 @@ class _InitPageState extends State<InitPage> {
   late final UserProvider userProvider = context.read<UserProvider>();
 
   void _incrementCounter() {
+
+    chatProvider.pairOrWait("Activity 1", <String>["Robot"], "Daniel");
+    chatProvider.pairOrWait("Activity 1", <String>["Robot"], "Jason");
+
     setState(() {
       _counter++;
       chatProvider.sendMessage(
-        'Hello $_counter',
-        MessageType.text,
         'groupChatId',
         'currentUserId',
         'peerId',
+        'Hello $_counter',
+        MessageType.text,
       );
       Navigator.push(
         context,
         MaterialPageRoute(
             builder: (context) => ChatPage(
                   arguments: ChatPageArguments(
-                    "PeerAvatar", // Test
-                    peerId: "123",
-                    peerNickname: "Daniel",
+                    "PeerAvatar",
+                    "Activity 1",// Test
+                    peerId: "Jason",
+                    peerNickname: "aaaaaaaaaaaaaa",
                   ),
                   title: 'test',
                 )),

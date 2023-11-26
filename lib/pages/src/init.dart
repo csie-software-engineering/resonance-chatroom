@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:resonance_chatroom/pages/routes.dart';
 
-import '../../models/models.dart';
 import '../../providers/providers.dart';
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+class InitPage extends StatefulWidget {
+  const InitPage({super.key, required this.title});
   final String title;
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<InitPage> createState() => _InitPageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _InitPageState extends State<InitPage> {
   int _counter = 0;
   late final ChatProvider chatProvider = context.read<ChatProvider>();
   late final AuthProviders authProvider = context.read<AuthProviders>();
@@ -21,13 +21,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void _incrementCounter() {
     setState(() {
       _counter++;
-      chatProvider.sendMessage(
-        'Hello $_counter',
-        MessageType.text,
-        'groupChatId',
-        'currentUserId',
-        'peerId',
-      );
+      Navigator.of(context).pushNamed(Routes.hostActivitySetPage.value);
     });
   }
 

@@ -61,7 +61,7 @@ class ChatProvider {
   }
 
   /// 配對成功或進入等待
-  Future<RoomDetail?> pairOrWait(
+  Future<Room?> pairOrWait(
     String activityId,
     List<String> tags,
     String userId,
@@ -83,15 +83,14 @@ class ChatProvider {
         final waitingUserData = await transaction.get(waitingUserRef);
         final waitingUser = ChatQueueNode.fromDocument(waitingUserData);
 
-        final roomId = _getRoomId([userId, waitingUser.userId]);
-        final roomDetail = await _createOrEnableRoom(
+        var room = await _createOrEnableRoom(
           activityId,
           roomId,
           _findMutualTag(tags, waitingUser.tags)!,
           transaction,
         );
         transaction.delete(waitingUserRef);
-        return roomDetail;
+        return room;
       } else {
         final queueNodeRef = activityRef
             .collection(FirestoreConstants.chatQueueNodeCollectionPath.value)
@@ -119,7 +118,7 @@ class ChatProvider {
   }
 
   /// 創建或啟用(更新)房間
-  Future<RoomDetail?> _createOrEnableRoom(
+  Future<Room?> _createOrEnableRoom(
     String activityId,
     String roomId,
     String tag, [
@@ -138,12 +137,12 @@ class ChatProvider {
     if (roomData.exists) {
       transaction == null
           ? roomDataRef.update({
-              RoomDetailConstants.isEnable.value: true,
-              RoomDetailConstants.tag.value: tag,
+              RoomConstants.isEnable.value: true,
+              RoomConstants.tag.value: tag,
             })
           : transaction.update(roomDataRef, {
-              RoomDetailConstants.isEnable.value: true,
-              RoomDetailConstants.tag.value: tag,
+              RoomConstants.isEnable.value: true,
+              RoomConstants.tag.value: tag,
             });
     } else {
       final roomDetail = RoomDetail(
@@ -153,12 +152,12 @@ class ChatProvider {
       );
 
       transaction == null
-          ? roomDataRef.set(roomDetail.toJson())
-          : transaction.set(roomDataRef, roomDetail.toJson());
+          ? roomDataRef.set(room.toJson())
+          : transaction.set(roomDataRef, room.toJson());
     }
 
     return transaction == null
-        ? RoomDetail.fromDocument(await roomDataRef.get())
+        ? Room.fromDocument(await roomDataRef.get())
         : null;
   }
 
@@ -175,9 +174,9 @@ class ChatProvider {
         .doc(roomId);
 
     final roomData = await roomQuery.get();
-    if (roomData.exists && roomData.get(RoomDetailConstants.isEnable.value)) {
+    if (roomData.exists && roomData.get(RoomConstants.isEnable.value)) {
       await roomQuery.update({
-        RoomDetailConstants.isEnable.value: false,
+        RoomConstants.isEnable.value: false,
       });
       return true;
     } else {
@@ -186,7 +185,7 @@ class ChatProvider {
   }
 
   /// 取得房間資訊
-  Future<RoomDetail?> getRoomDetail(
+  Future<Room?> getRoom(
     String activityId,
     List<String> userIds,
   ) async {
@@ -197,10 +196,10 @@ class ChatProvider {
         .collection(FirestoreConstants.roomCollectionPath.value)
         .doc(roomId);
 
-    final roomDetailData = await roomQuery.get();
-    if (roomDetailData.exists) {
-      final roomDetail = RoomDetail.fromDocument(roomDetailData);
-      return roomDetail;
+    final roomData = await roomQuery.get();
+    if (roomData.exists) {
+      final room = Room.fromDocument(roomData);
+      return room;
     } else {
       return null;
     }
@@ -214,8 +213,8 @@ class ChatProvider {
     String content,
     MessageType type,
   ) async {
-    final roomDetail = await getRoomDetail(activityId, [fromId, toId]);
-    assert(roomDetail != null && roomDetail.isEnable, '房間不存在或已關閉');
+    final room = await getRoom(activityId, [fromId, toId]);
+    assert(room != null && room.isEnable, '房間不存在或已關閉');
 
     final curTime = DateTime.now().millisecondsSinceEpoch.toString();
     final roomId = _getRoomId([fromId, toId]);

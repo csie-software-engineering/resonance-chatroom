@@ -63,8 +63,8 @@ class ChatProvider {
   /// 配對成功或進入等待
   Future<Room?> pairOrWait(
     String activityId,
-    List<String> tags,
     String userId,
+    List<String> tags,
   ) async {
     final activityRef = firebaseFirestore
         .collection(FirestoreConstants.activityCollectionPath.value)
@@ -85,7 +85,7 @@ class ChatProvider {
 
         var room = await _createOrEnableRoom(
           activityId,
-          roomId,
+          [userId, waitingUser.userId],
           _findMutualTag(tags, waitingUser.tags)!,
           transaction,
         );
@@ -120,7 +120,7 @@ class ChatProvider {
   /// 創建或啟用(更新)房間
   Future<Room?> _createOrEnableRoom(
     String activityId,
-    String roomId,
+    List<String> userIds,
     String tag, [
     Transaction? transaction,
   ]) async {
@@ -128,7 +128,7 @@ class ChatProvider {
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityId)
         .collection(FirestoreConstants.roomCollectionPath.value)
-        .doc(roomId);
+        .doc(_getRoomId(userIds));
 
     final roomData = transaction == null
         ? await roomDataRef.get()
@@ -145,10 +145,19 @@ class ChatProvider {
               RoomConstants.tag.value: tag,
             });
     } else {
-      final roomDetail = RoomDetail(
+      final room = Room(
         tag: tag,
         isEnable: true,
-        isShowSocialMedia: false,
+        users: [
+          RoomUser(
+            id: userIds.first,
+            shareSocialMedia: false,
+          ),
+          RoomUser(
+            id: userIds.last,
+            shareSocialMedia: false,
+          ),
+        ],
       );
 
       transaction == null

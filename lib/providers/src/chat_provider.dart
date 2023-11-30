@@ -81,7 +81,7 @@ class ChatProvider {
         final waitingUser = ChatQueueNode.fromDocument(waitingUserData);
 
         final roomId = _getRoomId([userId, waitingUser.userId]);
-        var roomDetail = await _createOrEnableRoom(
+        final roomDetail = await _createOrEnableRoom(
           activityId,
           roomId,
           _findMutualTag(tags, waitingUser.tags)!,

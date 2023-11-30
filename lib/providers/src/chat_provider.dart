@@ -162,6 +162,29 @@ class ChatProvider {
         : null;
   }
 
+  /// 離開房間
+  Future<bool> leaveRoom(
+    String activityId,
+    List<String> userIds,
+  ) async {
+    final roomId = _getRoomId(userIds);
+    final roomQuery = firebaseFirestore
+        .collection(FirestoreConstants.activityCollectionPath.value)
+        .doc(activityId)
+        .collection(FirestoreConstants.roomCollectionPath.value)
+        .doc(roomId);
+
+    final roomData = await roomQuery.get();
+    if (roomData.exists && roomData.get(RoomDetailConstants.isEnable.value)) {
+      await roomQuery.update({
+        RoomDetailConstants.isEnable.value: false,
+      });
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   /// 取得房間資訊
   Future<RoomDetail?> getRoomDetail(
     String activityId,

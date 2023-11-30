@@ -31,7 +31,7 @@ class Activity {
       Activityconstants.startdate.value: startdate,
       Activityconstants.enddate.value: enddate,
       Activityconstants.activitryphoto.value: activitryphoto,
-      Activityconstants.managers.value: managers,
+      Activityconstants.managers.value: managers
     };
   }
 
@@ -52,7 +52,7 @@ class Activity {
       startdate: startdate,
       enddate: enddate,
       activitryphoto: activitryphoto,
-      managers: managers.cast<String>(),
+      managers: managers.cast<String>()
     );
   }
 }
@@ -135,6 +135,7 @@ class Question {
   final String topicid;
   final String questionid;
   final String questionname;
+  final List<String> choices;
 
 
   const Question({
@@ -143,6 +144,7 @@ class Question {
     required this.topicid,
     required this.questionid,
     required this.questionname,
+    required this.choices
   });
 
   Map<String, dynamic> toJson() {
@@ -152,6 +154,7 @@ class Question {
       Activityconstants.topicid.value: topicid,
       Activityconstants.questionid.value: questionid,
       Activityconstants.questionname.value: questionname,
+      Activityconstants.choices.value: choices
     };
   }
 
@@ -161,12 +164,14 @@ class Question {
     String topicid = doc.get(Activityconstants.topicid.value);
     String questionid = doc.get(Activityconstants.questionid.value);
     String questionname = doc.get(Activityconstants.questionname.value);
+    List<dynamic> choices = doc.get(Activityconstants.choices.value);
     return Question(
       activityid: activityid,
       tagid: tagid,
       topicid: topicid,
       questionid: questionid,
       questionname: questionname,
+        choices: choices.cast<String>()
     );
   }
 }

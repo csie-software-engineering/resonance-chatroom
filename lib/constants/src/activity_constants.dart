@@ -15,7 +15,8 @@ enum Activityconstants {
   topicid,
 
   questionid,
-  questionname;
+  questionname,
+  choices;
 
   String get value {
     switch (this) {
@@ -47,6 +48,8 @@ enum Activityconstants {
         return "questionid";
       case Activityconstants.questionname:
         return "questionname";
+      case Activityconstants.choices:
+        return "choices";
       default:
         throw Exception("Not found value for FirestoreConstants");
     }

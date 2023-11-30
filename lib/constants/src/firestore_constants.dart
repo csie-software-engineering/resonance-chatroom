@@ -4,6 +4,7 @@ enum FirestoreConstants {
   messageCollectionPath,
   chatQueueNodeCollectionPath,
   tagCollectionPath,
+  topicCollectionPath,
   questionCollectionPath,
 
   nickname,
@@ -24,6 +25,8 @@ enum FirestoreConstants {
         return "chatQueueNodes";
       case FirestoreConstants.tagCollectionPath:
         return "tags";
+      case FirestoreConstants.topicCollectionPath:
+        return "topics";
       case FirestoreConstants.questionCollectionPath:
         return "questions";
       case FirestoreConstants.nickname:

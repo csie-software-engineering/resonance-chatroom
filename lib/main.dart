@@ -7,9 +7,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'firebase_options.dart';
-import 'pages/pages.dart';
 import 'constants/constants.dart';
 import 'providers/providers.dart';
+import 'pages/routes.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -55,9 +55,8 @@ class MyApp extends StatelessWidget {
               brightness: MediaQuery.platformBrightnessOf(context),
             ),
           ),
-          home: const MyHomePage(
-            title: 'Home',
-          ),
+          initialRoute: Routes.initPage.value,
+          routes: routes,
           debugShowCheckedModeBanner: false,
         ),
       );

@@ -279,13 +279,13 @@ class _ChatPageState extends State<ChatPage> {
                 color: Theme.of(context).colorScheme.background,
                 borderRadius: const BorderRadius.all(Radius.circular(16)),
               ),
-              child: const SizedBox(
+              child: SizedBox(
                 width: 160, // <-- box的寬度
                 height: 30,
                 child: Align(
                   alignment: Alignment.center, // <-- 這裡設定text的對齊方式
                   child: Text(
-                    'test',
+                    widget.title,
                   ),
                 ),
               ),

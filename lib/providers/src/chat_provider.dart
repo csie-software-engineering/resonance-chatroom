@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../models/models.dart';
@@ -8,12 +7,10 @@ import '../../constants/constants.dart';
 class ChatProvider {
   final SharedPreferences pref;
   final FirebaseFirestore firebaseFirestore;
-  final FirebaseStorage firebaseStorage;
 
   ChatProvider({
     required this.firebaseFirestore,
     required this.pref,
-    required this.firebaseStorage,
   });
 
   String? getPref(String key) {

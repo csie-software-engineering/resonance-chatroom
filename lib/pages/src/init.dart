@@ -1,7 +1,9 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:resonance_chatroom/pages/routes.dart';
 
+import '../../models/src/user.dart';
 import '../../providers/providers.dart';
 
 class InitPage extends StatefulWidget {
@@ -16,11 +18,49 @@ class _InitPageState extends State<InitPage> {
   int _counter = 0;
   late final ChatProvider chatProvider = context.read<ChatProvider>();
   late final AuthProviders authProvider = context.read<AuthProviders>();
-
+  late final UserProvider userProvider = context.read<UserProvider>();
 
   void _incrementCounter() {
     setState(() {
       _counter++;
+      // var user = const User(
+      //   id: "123",
+      //   displayName: "Gary",
+      //   photoUrl: "asdfghjkl",
+      //   email: "gary@gmail.com",
+      //   activities: [
+      //     UserActivity(
+      //       id: "aaa",
+      //       displayName: "AAA",
+      //       tags: [
+      //         UserTag(
+      //           id: "tags1",
+      //           displayName: "TAG!",
+      //         ),
+      //         UserTag(
+      //           id: "tags2",
+      //           displayName: "TAG@",
+      //         ),
+      //       ],
+      //     ),
+      //     UserActivity(
+      //       id: "bbb",
+      //       displayName: "BBB",
+      //       tags: [
+      //         UserTag(
+      //           id: "tags3",
+      //           displayName: "TAG#",
+      //         ),
+      //         UserTag(
+      //           id: "tags4",
+      //           displayName: "TAG%",
+      //         ),
+      //       ],
+      //     ),
+      //   ],
+      // );
+
+      // userProvider.setUser(user).then((value) => userProvider.getUser("123").then((value) => log(value!.toJson().toString())));
     });
   }
 

@@ -33,17 +33,22 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) => MultiProvider(
         providers: [
+          Provider<UserProvider>(
+            create: (_) => UserProvider(
+              pref: pref,
+              firebaseFirestore: firebaseFirestore,
+            ),
+          ),
           Provider<ChatProvider>(
             create: (_) => ChatProvider(
               pref: pref,
               firebaseFirestore: firebaseFirestore,
-              firebaseStorage: firebaseStorage,
             ),
           ),
           ChangeNotifierProvider<AuthProviders>(
             create: (_) => AuthProviders(
-              firebaseAuth: firebaseAuth,
               pref: pref,
+              firebaseAuth: firebaseAuth,
             ),
           ),
         ],

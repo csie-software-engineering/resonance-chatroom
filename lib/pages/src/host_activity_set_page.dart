@@ -7,9 +7,12 @@ class Event {
   String name; // 活動名稱
   List<DateTime> dates; // 活動時間
   String info; // 活動資訊
+  
   XFile? image; // 活動圖片
 
   Event(this.name, this.dates, this.info, this.image); // 建構子
+    //dates.first.millisecondsSinceEpoch;
+    //DateTime.parse(dates.first.millisecondsSinceEpoch.toString());
 }
 
 class HostActivitySetPage extends StatefulWidget {
@@ -29,21 +32,68 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
     });
   }
 
-  Future<void> _pickDates() async {
-    // 使用showDateRangePicker函數來顯示一個日期範圍選擇器
-    final dates = await showDateRangePicker(
+  Future<void> _pickStartDate() async {
+    // 使用showDatePicker函數來選擇日期
+    final date = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2023),
+      lastDate: DateTime(2024),
+    );
+    // 如果日期不為空，則繼續選擇時間
+    if (date != null) {
+      // 使用showTimePicker函數來選擇時間
+      final time = await showTimePicker(
         context: context,
-        initialDateRange: DateTimeRange(
-          start: DateTime.now(),
-          end: DateTime.now().add(Duration(days: 7)),
-        ),
-        firstDate: DateTime(2023),
-        lastDate: DateTime(2024));
-    if (dates != null) {
-      setState(() {
-        // 將dates轉換為List<DateTime>類型
-        _selectedDates = [dates.start, dates.end];
-      });
+        initialTime: TimeOfDay.now(),
+      );
+      // 如果時間不為空，則將日期和時間組合成一個DateTime物件
+      if (time != null) {
+        final start = DateTime(
+          date.year,
+          date.month,
+          date.day,
+          time.hour,
+          time.minute,
+        );
+        // 將DateTime物件傳遞給_selectedDates陣列的第一個元素
+        setState(() {
+          _selectedDates[0] = start;
+        });
+      }
+    }
+  }
+
+  Future<void> _pickEndDate() async {
+    // 使用showDatePicker函數來選擇日期
+    final date = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2023),
+      lastDate: DateTime(2024),
+    );
+    // 如果日期不為空，則繼續選擇時間
+    if (date != null) {
+      // 使用showTimePicker函數來選擇時間
+      final time = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.now(),
+      );
+      // 如果時間不為空，則將日期和時間組合成一個DateTime物件
+      if (time != null) {
+        final end = DateTime(
+          date.year,
+          date.month,
+          date.day,
+          time.hour,
+          time.minute,
+        );
+        // 將DateTime物件傳遞給_selectedDates陣列的第一個元素
+        setState(() {
+          
+          _selectedDates[1] = end;
+        });
+      }
     }
   }
 
@@ -81,36 +131,40 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
                     // 使用Expanded Widget來包裹TextFormField
                     flex: 2, // 指定flex因數為2
                     child: TextFormField(
-                      decoration:
-                          const InputDecoration(labelText: "活動名稱"),
+                      decoration: const InputDecoration(labelText: "活動名稱"),
                     ),
                   ),
                 ],
               ),
-              SizedBox(height: 16.0),
               Row(
                 children: [
-                  const Text('活動時間'),
-                  const SizedBox(width: 16.0),
+                  Text('活動開始時間'),
+                  SizedBox(width: 16.0),
                   Expanded(
-                    child: InkWell(
-                      onTap: _pickDates,
-                      child: Container(
-                        height: 48.0,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey),
-                          borderRadius: BorderRadius.circular(4.0),
-                        ),
-                        child: Center(
-                          child: Text(_selectedDates.isEmpty
-                              ? '選擇起訖時間'
-                              : '${_selectedDates[0].toLocal()} - ${_selectedDates[1].toLocal()}'),
-                        ),
-                      ),
+                    child: ElevatedButton(
+                      onPressed: _pickStartDate, // 按下按鈕可以選擇開始時間
+                      child: Text(_selectedDates[0] == null
+                          ? '選擇日期和時間'
+                          : '${_selectedDates[0]}'), // 顯示選擇的日期和時間
                     ),
                   ),
                 ],
               ),
+              Row(
+                children: [
+                  Text('活動結束時間'),
+                  SizedBox(width: 16.0),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: _pickEndDate, // 按下按鈕可以選擇結束時間
+                      child: Text(_selectedDates[1] == null
+                          ? '選擇日期和時間'
+                          : '${_selectedDates[1]}'), // 顯示選擇的日期和時間
+                    ),
+                  ),
+                ],
+              ),
+
               const SizedBox(height: 16.0),
               Row(
                 children: [

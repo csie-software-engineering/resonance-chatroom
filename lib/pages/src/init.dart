@@ -21,7 +21,6 @@ class _InitPageState extends State<InitPage> {
   void _incrementCounter() {
     setState(() {
       _counter++;
-      Navigator.of(context).pushNamed(Routes.hostActivitySetPage.value);
     });
   }
 

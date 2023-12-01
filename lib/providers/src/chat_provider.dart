@@ -37,10 +37,13 @@ class ChatProvider {
           .snapshots();
 
   /// 生成房間 ID
-  static String _getRoomId(List<String> userIds) =>
-      userIds[0].compareTo(userIds[1]) < 0
-          ? '${userIds[0]}-${userIds[1]}'
-          : '${userIds[1]}-${userIds[0]}';
+  static String _getRoomId(List<String> userIds) {
+    assert(userIds.length == 2, '人數須為 2 人');
+    assert(userIds.first != userIds.last, '不能跟自己配對');
+    return userIds[0].compareTo(userIds[1]) < 0
+        ? '${userIds[0]}-${userIds[1]}'
+        : '${userIds[1]}-${userIds[0]}';
+  }
 
   /// 取得共同標籤
   static String? _findMutualTag(
@@ -81,7 +84,7 @@ class ChatProvider {
         final waitingUser = ChatQueueNode.fromDocument(waitingUserData);
 
         final roomId = _getRoomId([userId, waitingUser.userId]);
-        var roomDetail = await _createOrEnableRoom(
+        final roomDetail = await _createOrEnableRoom(
           activityId,
           roomId,
           _findMutualTag(tags, waitingUser.tags)!,
@@ -90,6 +93,14 @@ class ChatProvider {
         transaction.delete(waitingUserRef);
         return roomDetail;
       } else {
+        final queueNodeRef = activityRef
+            .collection(FirestoreConstants.chatQueueNodeCollectionPath.value)
+            .doc(userId);
+
+        // 不能重複排隊
+        final queueNodeData = await transaction.get(queueNodeRef);
+        assert(!queueNodeData.exists, '不能重複排隊');
+
         final curTime = DateTime.now().millisecondsSinceEpoch.toString();
         final chatQueueNode = ChatQueueNode(
           tags: tags,
@@ -97,9 +108,7 @@ class ChatProvider {
           timestamp: curTime,
         );
         transaction.set(
-          activityRef
-              .collection(FirestoreConstants.chatQueueNodeCollectionPath.value)
-              .doc(curTime),
+          queueNodeRef,
           chatQueueNode.toJson(),
         );
         return null;
@@ -154,11 +163,11 @@ class ChatProvider {
   }
 
   /// 取得房間資訊
-  Future<RoomDetail?> _getRoomDetail(
+  Future<RoomDetail?> getRoomDetail(
     String activityId,
     List<String> userIds,
   ) async {
-    final roomId = _getRoomId([userIds.first, userIds.last]);
+    final roomId = _getRoomId(userIds);
     final roomQuery = firebaseFirestore
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityId)
@@ -182,11 +191,8 @@ class ChatProvider {
     String content,
     MessageType type,
   ) async {
-    final roomDetail = await _getRoomDetail(activityId, [fromId, toId]);
-    if (roomDetail == null || !roomDetail.isEnable) {
-      // 無房間或房間未啟用時不發送訊息
-      return;
-    }
+    final roomDetail = await getRoomDetail(activityId, [fromId, toId]);
+    assert(roomDetail != null && roomDetail.isEnable, '房間不存在或已關閉');
 
     final curTime = DateTime.now().millisecondsSinceEpoch.toString();
     final roomId = _getRoomId([fromId, toId]);

@@ -1,5 +1,4 @@
 import 'dart:developer';
-import 'dart:js_interop_unsafe';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -226,7 +225,7 @@ class SetActivityProvider{
     final topicquery = firebaseFirestore
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityid)
-        .collection(FirestoreConstants.tagCollectionPath.value)
+        .collection(FirestoreConstants.topicCollectionPath.value)
         .where('tagid', isEqualTo: tagid);
     if ((await topicquery.count().get()).count > 0){
       final topicdocs = (await topicquery.get()).docs;

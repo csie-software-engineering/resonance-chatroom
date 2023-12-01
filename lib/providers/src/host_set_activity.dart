@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:js_interop_unsafe';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -181,8 +182,13 @@ class SetActivityProvider{
   Future<void> EditTag(
       String activityid,
       String name,
+      String nowuser,
       String tagid)
   async {
+    if (!await IsManager(activityid, nowuser)) {
+      log("you are not manager.");
+      return;
+    }
     DocumentReference documentReference = firebaseFirestore
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityid)
@@ -202,9 +208,13 @@ class SetActivityProvider{
   ///刪除標籤
   Future<void> DeleteTag(
       String activityid,
-      String name,
+      String nowuser,
       String tagid)
   async {
+    if (!await IsManager(activityid, nowuser)) {
+      log("you are not manager.");
+      return;
+    }
     DocumentReference documentReference = firebaseFirestore
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityid)
@@ -219,7 +229,22 @@ class SetActivityProvider{
         .collection(FirestoreConstants.tagCollectionPath.value)
         .where('tagid', isEqualTo: tagid);
     if ((await topicquery.count().get()).count > 0){
-      (await topicquery.get()).docs.clear();
+      final topicdocs = (await topicquery.get()).docs;
+      for (final topicdoc in topicdocs){
+        await topicdoc.reference.delete();
+      }
+    }
+
+    final questionquery = firebaseFirestore
+        .collection(FirestoreConstants.activityCollectionPath.value)
+        .doc(activityid)
+        .collection(FirestoreConstants.questionCollectionPath.value)
+        .where('tagid', isEqualTo: tagid);
+    if ((await questionquery.count().get()).count > 0){
+      final questiondocs = (await questionquery.get()).docs;
+      for (final questiondoc in questiondocs){
+        await questiondoc.reference.delete();
+      }
     }
   }
 

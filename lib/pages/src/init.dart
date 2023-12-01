@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../../models/src/user.dart';
 import '../../providers/providers.dart';
+import '../pages.dart';
 
 class InitPage extends StatefulWidget {
   const InitPage({super.key, required this.title});
@@ -62,6 +63,10 @@ class _InitPageState extends State<InitPage> {
 
       // userProvider.setUser(user).then((value) => userProvider.getUser("123").then((value) => log(value!.toJson().toString())));
     });
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const HostActivitySetPage(title: 'test',)),
+    );
   }
 
   @override

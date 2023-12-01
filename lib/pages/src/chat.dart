@@ -31,7 +31,7 @@ class _ChatPageState extends State<ChatPage> {
 
   List<QueryDocumentSnapshot> _chatMessages = [];
 
-  final List<String> groupChatId = <String>[];
+  final List<String> groupMembers = <String>[];
   late final String currentUserId;
 
   late final ChatProvider chatProvider = context.read<ChatProvider>();
@@ -97,12 +97,12 @@ class _ChatPageState extends State<ChatPage> {
     currentUserId = "Daniel";
     String peerId = widget.arguments.peerId;
 
-    groupChatId.add(currentUserId);
-    groupChatId.add(peerId);
+    groupMembers.add(currentUserId);
+    groupMembers.add(peerId);
     // if (currentUserId.compareTo(peerId) > 0) {
-    //   groupChatId = '$currentUserId-$peerId';
+    //   groupMembers = '$currentUserId-$peerId';
     // } else {
-    //   groupChatId = '$peerId-$currentUserId';
+    //   groupMembers = '$peerId-$currentUserId';
     // }
 
     // chatProvider.updateDataFirestore(
@@ -146,10 +146,11 @@ class _ChatPageState extends State<ChatPage> {
                 // Text
                 ? Container(
                     padding: EdgeInsets.fromLTRB(15, 10, 15, 10),
-                    width: 200,
+                    constraints: const BoxConstraints(maxWidth: 200),
+                    // width: messageChat.content.length,
                     decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.primary,
-                        borderRadius: BorderRadius.circular(8)),
+                        borderRadius: BorderRadius.circular(12)),
                     margin: const EdgeInsets.only(
                         // bottom: isLastMessageRight(index) ? 20 : 10, right: 10),
                         bottom: 10,
@@ -191,7 +192,7 @@ class _ChatPageState extends State<ChatPage> {
                           ),
                           clipBehavior: Clip.hardEdge,
                           child: Image.network(
-                            widget.arguments.peerAvatar,
+                            widget.arguments.peerAvatar, // 會是一個 url 載入使用者的頭貼
                             loadingBuilder: (BuildContext context, Widget child,
                                 ImageChunkEvent? loadingProgress) {
                               if (loadingProgress == null) return child;
@@ -222,7 +223,7 @@ class _ChatPageState extends State<ChatPage> {
                   messageChat.type == MessageType.text
                       ? Container(
                           padding: const EdgeInsets.fromLTRB(15, 10, 15, 10),
-                          width: 200,
+                          constraints: const BoxConstraints(maxWidth: 200),
                           decoration: BoxDecoration(
                               color: Theme.of(context).colorScheme.onPrimary,
                               borderRadius: BorderRadius.circular(8)),
@@ -236,7 +237,7 @@ class _ChatPageState extends State<ChatPage> {
                           margin: EdgeInsets.only(
                               bottom: isLastMessageRight(index) ? 20 : 10,
                               right: 10),
-                          child: Icon(Icons.not_accessible)),
+                          child: const Icon(Icons.not_accessible)),
                 ],
               ),
 
@@ -323,7 +324,7 @@ class _ChatPageState extends State<ChatPage> {
                               ? StreamBuilder<QuerySnapshot>(
                                   stream: chatProvider.getChatStream(
                                       widget.arguments.activityId,
-                                      groupChatId,
+                                      groupMembers,
                                       _limit),
                                   builder: (BuildContext context,
                                       AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -371,15 +372,6 @@ class _ChatPageState extends State<ChatPage> {
               ],
             ),
           ),
-          // if (_isImageViewVisible)
-          //   ImageGallery(
-          //     imageHeaders: widget.imageHeaders,
-          //     imageProviderBuilder: widget.imageProviderBuilder,
-          //     images: _gallery,
-          //     pageController: _galleryPageController!,
-          //     onClosePressed: _onCloseGalleryPressed,
-          //     options: widget.imageGalleryOptions,
-          //   ),
         ],
       ),
     );

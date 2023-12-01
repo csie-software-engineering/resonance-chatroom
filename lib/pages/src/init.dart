@@ -28,13 +28,13 @@ class _InitPageState extends State<InitPage> {
 
     setState(() {
       _counter++;
-      chatProvider.sendMessage(
-        'groupChatId',
-        'currentUserId',
-        'peerId',
-        'Hello $_counter',
-        MessageType.text,
-      );
+      // chatProvider.sendMessage(
+      //   'groupChatId',
+      //   'currentUserId',
+      //   'peerId',
+      //   'Hello $_counter',
+      //   MessageType.text,
+      // );
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -45,7 +45,7 @@ class _InitPageState extends State<InitPage> {
                     peerId: "Jason",
                     peerNickname: "aaaaaaaaaaaaaa",
                   ),
-                  title: 'test',
+                  title: 'Robot',
                 )),
       );
     });

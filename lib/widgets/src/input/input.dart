@@ -2,17 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:resonance_chatroom/models/models.dart';
 import 'package:resonance_chatroom/widgets/widgets.dart';
-// import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
-
-// import '../../models/input_clear_mode.dart';
-// import '../../models/send_button_visibility_mode.dart';
-// import '../../util.dart';
-// import '../state/inherited_chat_theme.dart';
-// import '../state/inherited_l10n.dart';
-// // import 'attachment_button.dart';
-// import 'stickers_button.dart';
-// import 'input_text_field_controller.dart';
-// import 'send_button.dart';
 
 /// A class that represents bottom bar widget with a text field, attachment and
 /// send buttons inside. By default hides send button when text field is empty.
@@ -20,10 +9,8 @@ class Input extends StatefulWidget {
   /// Creates [Input] widget.
   const Input({
     super.key,
-    // this.isAttachmentUploading,
     this.onAttachmentPressed,
     required this.onSendPressed,
-    // this.options = const InputOptions(),
   });
 
   final void Function(String, MessageType) onSendPressed; // 暫時先用 string 塞著
@@ -55,7 +42,7 @@ class _InputState extends State<Input> {
     onKeyEvent: (node, event) {
       if (event.physicalKey == PhysicalKeyboardKey.enter &&
           !HardwareKeyboard.instance.physicalKeysPressed.any(
-                (el) => <PhysicalKeyboardKey>{
+            (el) => <PhysicalKeyboardKey>{
               PhysicalKeyboardKey.shiftLeft,
               PhysicalKeyboardKey.shiftRight,
             }.contains(el),
@@ -142,16 +129,16 @@ class _InputState extends State<Input> {
             child: Row(
               textDirection: TextDirection.ltr,
               children: [
-                  IconButton(
-                    // Next
-                    color: Theme.of(context).colorScheme.primary,
-                    icon: const Icon(Icons.next_plan),
-                    tooltip: "換話題",
-                    onPressed: () {},
-                    iconSize: 30,
-                    splashRadius: 1,
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
-                  ),
+                IconButton(
+                  // Next
+                  color: Theme.of(context).colorScheme.primary,
+                  icon: const Icon(Icons.next_plan),
+                  tooltip: "換話題",
+                  onPressed: () {},
+                  iconSize: 30,
+                  splashRadius: 1,
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                ),
                 // IconButton( // sticker
                 //   // isLoading: widget.isAttachmentUploading ?? false,
                 //   color: const Color(0xff5c8736),
@@ -166,7 +153,7 @@ class _InputState extends State<Input> {
                   child: Padding(
                     padding: textPadding,
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(15.0),
+                      borderRadius: BorderRadius.circular(18.0),
                       child: TextField(
                         enabled: widget.options.enabled,
                         autocorrect: widget.options.autocorrect,
@@ -184,18 +171,11 @@ class _InputState extends State<Input> {
                             height: 1.5,
                             color: Theme.of(context).colorScheme.onPrimary,
                           ),
-                          hintText: '輸入訊息',
+                          hintText: 'Aa',
                           isCollapsed: true,
-                          contentPadding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
+                          contentPadding:
+                              const EdgeInsets.fromLTRB(15, 5, 10, 5),
                         ),
-                        // decoration: InputDecoration(
-                        //   filled: true, // 启用背景填充
-                        //   fillColor: Colors.lightBlue, // 设置背景颜色
-                        //   labelText: 'Enter your text',
-                        //   border: OutlineInputBorder(
-                        //     borderRadius: BorderRadius.circular(10.0)
-                        //   )
-                        // ),
                         focusNode: _inputFocusNode,
                         keyboardType: widget.options.keyboardType,
                         maxLines: 5,
@@ -219,7 +199,9 @@ class _InputState extends State<Input> {
                   ),
                   child: SendButton(
                     onPressed: _handleSendPressed,
-                    color: _sendButtonVisible ? Theme.of(context).colorScheme.primary : Colors.black12,
+                    color: _sendButtonVisible
+                        ? Theme.of(context).colorScheme.primary
+                        : Colors.black12,
                     padding: buttonPadding,
                   ),
                 ),
@@ -249,9 +231,9 @@ class _InputState extends State<Input> {
 
   @override
   Widget build(BuildContext context) => GestureDetector(
-    onTap: () => _inputFocusNode.requestFocus(),
-    child: _inputBuilder(),
-  );
+        onTap: () => _inputFocusNode.requestFocus(),
+        child: _inputBuilder(),
+      );
 }
 
 enum SendButtonVisibilityMode {
@@ -268,6 +250,7 @@ enum SendButtonVisibilityMode {
 enum InputClearMode {
   /// Always clear [Input] regardless if message is sent or not.
   always,
+
   /// Never clear [Input]. You should do it manually, depending on your use case.
   /// To clear the input manually, use [Input.options.textEditingController] (see
   /// docs how to use it properly, but TL;DR set it to [InputTextFieldController]

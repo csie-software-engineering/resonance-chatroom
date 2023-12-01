@@ -43,9 +43,10 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
   File? _selectedImage;
   Future<void> _pickImage() async {
     final image = await ImagePicker().pickImage(source: ImageSource.gallery);
-    setState(() async {
-      _selectedImage = await File('some_path')
-          .writeAsBytes((await image?.readAsBytes()) as List<int>);
+    setState(() {
+      _selectedImage = File(image!.path); // 直接使用image.path來建立File物件
+      // 使用print函數來印出base64字串
+      print('圖片base64: ${base64Encode(_selectedImage!.readAsBytesSync())}');
     });
   }
 
@@ -212,22 +213,25 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
                   ),
                 ],
               ),
+
               SizedBox(height: 16.0),
               Container(
-                height: 200.0,
+                height: null, // 將高度改為null
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.grey),
                   borderRadius: BorderRadius.circular(4.0),
                 ),
                 child: _selectedImage == null
                     ? Center(child: Text('沒有選擇圖片'))
-                    : Column(
-                        children: [
-                          // 將base64字串轉回File物件，並使用Image.file來顯示圖片
-                          Image.file(
-                              File.fromRawPath(base64Decode(_selectedImage! as String))),
-                          Text('圖片路徑: ${_selectedImage!.path}'),
-                        ],
+                    : SingleChildScrollView(
+                        // 將Column放在SingleChildScrollView中
+                        child: Column(
+                          children: [
+                            // 使用Image.file來顯示圖片
+                            Image.file(_selectedImage!),
+                            Text('圖片路徑: ${_selectedImage!.path}'),
+                          ],
+                        ),
                       ),
               ),
 

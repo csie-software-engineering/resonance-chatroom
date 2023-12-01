@@ -1,18 +1,34 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'dart:convert';
 
 // 定義一個類別來儲存活動的所有內容
 class Event {
   String name; // 活動名稱
-  List<DateTime> dates; // 活動時間
+  late int startTime; // 活動起始時間
+  late int endTime; // 活動結束時間
   String info; // 活動資訊
-  
-  XFile? image; // 活動圖片
 
-  Event(this.name, this.dates, this.info, this.image); // 建構子
-    //dates.first.millisecondsSinceEpoch;
-    //DateTime.parse(dates.first.millisecondsSinceEpoch.toString());
+  String? image; // 活動圖片的base64字串
+
+  Event(this.name, DateTime start, DateTime end, this.info, File? image) {
+    // 改為File? image
+    // 將DateTime物件轉換為millisecondsSinceEpoch
+    startTime = start.millisecondsSinceEpoch;
+    endTime = end.millisecondsSinceEpoch;
+
+    // 將File物件轉換為base64字串
+    if (image != null) {
+      image = base64Encode(image.readAsBytesSync()) as File?;
+    }
+  }
+
+  // 將Event物件轉換為字串
+  @override
+  String toString() {
+    return 'Event(name: $name, startTime: $startTime, endTime: $endTime, info: $info, image: $image)';
+  }
 }
 
 class HostActivitySetPage extends StatefulWidget {
@@ -23,12 +39,13 @@ class HostActivitySetPage extends StatefulWidget {
 class _HostActivitySetPageState extends State<HostActivitySetPage> {
   TextEditingController _nameController = TextEditingController();
   TextEditingController _infoController = TextEditingController();
-  List<DateTime> _selectedDates = [];
-  XFile? _selectedImage;
+  final List<DateTime> _selectedDates = [DateTime.now(), DateTime.now()];
+  File? _selectedImage;
   Future<void> _pickImage() async {
     final image = await ImagePicker().pickImage(source: ImageSource.gallery);
-    setState(() {
-      _selectedImage = image;
+    setState(() async {
+      _selectedImage = await File('some_path')
+          .writeAsBytes((await image?.readAsBytes()) as List<int>);
     });
   }
 
@@ -90,7 +107,6 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
         );
         // 將DateTime物件傳遞給_selectedDates陣列的第一個元素
         setState(() {
-          
           _selectedDates[1] = end;
         });
       }
@@ -101,7 +117,8 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
   Event createEvent() {
     return Event(
       _nameController.text,
-      _selectedDates,
+      _selectedDates[0], // 活動起始時間
+      _selectedDates[1], // 活動結束時間
       _infoController.text,
       _selectedImage,
     );
@@ -204,7 +221,14 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
                 ),
                 child: _selectedImage == null
                     ? Center(child: Text('沒有選擇圖片'))
-                    : Image.file(File(_selectedImage!.path)), // 下方展示圖片
+                    : Column(
+                        children: [
+                          // 將base64字串轉回File物件，並使用Image.file來顯示圖片
+                          Image.file(
+                              File.fromRawPath(base64Decode(_selectedImage! as String))),
+                          Text('圖片路徑: ${_selectedImage!.path}'),
+                        ],
+                      ),
               ),
 
               SizedBox(height: 16.0),

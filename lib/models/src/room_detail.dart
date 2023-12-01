@@ -2,34 +2,67 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../constants/constants.dart';
 
-class RoomDetail {
+class Room {
   final String tag;
   final bool isEnable;
-  final bool isShowSocialMedia;
+  List<RoomUser> users;
 
-  const RoomDetail({
+  Room({
     required this.tag,
     required this.isEnable,
-    required this.isShowSocialMedia,
+    required this.users,
   });
 
   Map<String, dynamic> toJson() {
     return {
-      RoomDetailConstants.tag.value: tag,
-      RoomDetailConstants.isEnable.value: isEnable,
-      RoomDetailConstants.isShowSocialMedia.value: isShowSocialMedia
+      RoomConstants.tag.value: tag,
+      RoomConstants.isEnable.value: isEnable,
+      RoomConstants.users.value: users.map((e) => e.toJson()).toList(),
     };
   }
 
-  factory RoomDetail.fromDocument(DocumentSnapshot doc) {
-    String tag = doc.get(RoomDetailConstants.tag.value);
-    bool isEnable = doc.get(RoomDetailConstants.isEnable.value);
-    bool isShowSocialMedia =
-        doc.get(RoomDetailConstants.isShowSocialMedia.value);
-    return RoomDetail(
+  factory Room.fromJson(Map<String, dynamic> json) {
+    String tag = json[RoomConstants.tag.value];
+    bool isEnable = json[RoomConstants.isEnable.value];
+    List<RoomUser> users = (json[RoomConstants.users.value] as List)
+        .map((e) => RoomUser.fromJson(e))
+        .toList();
+    return Room(
       tag: tag,
       isEnable: isEnable,
-      isShowSocialMedia: isShowSocialMedia,
+      users: users,
     );
   }
+
+  factory Room.fromDocument(DocumentSnapshot<Map<String, dynamic>> doc) =>
+      Room.fromJson(doc.data()!);
+}
+
+class RoomUser {
+  String id;
+  bool shareSocialMedia;
+
+  RoomUser({
+    required this.id,
+    required this.shareSocialMedia,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      RoomUserConstants.id.value: id,
+      RoomUserConstants.shareSocialMedia.value: shareSocialMedia,
+    };
+  }
+
+  factory RoomUser.fromJson(Map<String, dynamic> json) {
+    String id = json[RoomUserConstants.id.value];
+    bool shareSocialMedia = json[RoomUserConstants.shareSocialMedia.value];
+    return RoomUser(
+      id: id,
+      shareSocialMedia: shareSocialMedia,
+    );
+  }
+
+  factory RoomUser.fromDocument(DocumentSnapshot<Map<String, dynamic>> doc) =>
+      RoomUser.fromJson(doc.data()!);
 }

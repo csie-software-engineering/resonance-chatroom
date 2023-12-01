@@ -45,21 +45,37 @@ enum QueueConstants {
   }
 }
 
-enum RoomDetailConstants {
+enum RoomConstants {
   tag,
-  isShowSocialMedia,
-  isEnable;
+  isEnable,
+  users;
 
   String get value {
     switch (this) {
-      case RoomDetailConstants.tag:
+      case RoomConstants.tag:
         return "tag";
-      case RoomDetailConstants.isEnable:
+      case RoomConstants.isEnable:
         return "isEnable";
-      case RoomDetailConstants.isShowSocialMedia:
-        return "isShowSocialMedia";
+      case RoomConstants.users:
+        return "users";
       default:
-        throw Exception("Not found value for RoomDetailConstants");
+        throw Exception("Not found value for RoomConstants");
+    }
+  }
+}
+
+enum RoomUserConstants {
+  id,
+  shareSocialMedia;
+
+  String get value {
+    switch (this) {
+      case RoomUserConstants.id:
+        return "id";
+      case RoomUserConstants.shareSocialMedia:
+        return "shareSocialMedia";
+      default:
+        throw Exception("Not found value for RoomUserConstants");
     }
   }
 }

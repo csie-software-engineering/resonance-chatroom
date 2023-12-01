@@ -65,7 +65,7 @@ class _InitPageState extends State<InitPage> {
     });
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const HostActivitySetPage(title: 'test',)),
+      MaterialPageRoute(builder: (context) => HostActivitySetPage()),
     );
   }
 

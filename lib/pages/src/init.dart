@@ -23,8 +23,8 @@ class _InitPageState extends State<InitPage> {
 
   void _incrementCounter() {
 
-    chatProvider.pairOrWait("Activity 1", <String>["Robot"], "Daniel");
-    chatProvider.pairOrWait("Activity 1", <String>["Robot"], "Jason");
+    chatProvider.pairOrWait("Activity 1", "Daniel", <String>["Robot"]);
+    chatProvider.pairOrWait("Activity 1", "Jason", <String>["Robot"]);
 
     setState(() {
       _counter++;

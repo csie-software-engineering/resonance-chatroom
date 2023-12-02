@@ -1,63 +1,67 @@
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:resonance_chatroom/constants/constants.dart';
 import 'package:resonance_chatroom/models/models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_guid/flutter_guid.dart';
 
-class SetActivityProvider{
+class SetActivityProvider {
   final SharedPreferences pref;
   final FirebaseFirestore firebaseFirestore;
-  final FirebaseStorage firebaseStorage;
 
   SetActivityProvider({
     required this.pref,
-    required this.firebaseFirestore,
-    required this.firebaseStorage,
+    required this.firebaseFirestore
   });
 
   ///設置新活動
   Future<void> SetNewActivity(
-      String name,
-      String UserId,
-      String info,
-      String startdate,
-      String enddate,
-      String photo)
+      Activity activitydata,
+      String UserId)
   async {
     String activityid = Guid.newGuid.toString();
-    List<String> managers = [UserId];
     DocumentReference documentReference = firebaseFirestore
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityid);
 
-    Activity activity = Activity(
-        ownerid: UserId,
-        activityid: activityid,
-        activityname: name,
-        activityinfo: info,
-        startdate: startdate,
-        enddate: enddate,
-        activitryphoto: photo,
-        managers: managers
-    );
+    activitydata.managers.add(UserId);
+    await documentReference.set(activitydata.toJson());
 
-    await documentReference.set(activity.toJson());
+    await documentReference.update({
+      Activityconstants.activityid.value: activityid
+    });
+  }
+
+  ///取得活動
+  Future<Activity?> Getactivity(
+      String activityid,
+      String UserId)
+  async{
+    if (!await IsManager(activityid, UserId)) {
+      log("you are not manager.");
+      return null;
+    }
+    DocumentReference documentReference = firebaseFirestore
+        .collection(FirestoreConstants.activityCollectionPath.value)
+        .doc(activityid);
+
+    var activitydata = await documentReference.get();
+    if (activitydata.exists){
+      return Activity.fromDocument(activitydata);
+    }
+    else{
+      return null;
+    }
   }
 
   ///編輯活動
   Future<void> EditActivity(
       String activityid,
-      String name,
-      String nowuser,
-      String info,
-      String startdate,
-      String enddate,
-      String photo)
+      Activity activity,
+      String UserId)
   async {
-    if (!await IsManager(activityid, nowuser)) {
+    if (!await IsManager(activityid, UserId)) {
       log("you are not manager.");
       return;
     }
@@ -66,29 +70,23 @@ class SetActivityProvider{
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityid);
 
-    final activitydata = Activity.fromDocument(await documentReference.get());
-      Activity activity = Activity(
-          ownerid: activitydata.ownerid,
-          activityid: activitydata.activityid,
-          activityname: name,
-          activityinfo: info,
-          startdate: startdate,
-          enddate: enddate,
-          activitryphoto: photo,
-          managers: activitydata.managers
-      );
-
-      await documentReference.set(activity.toJson());
+    await documentReference.update({
+      Activityconstants.activityname.value: activity.activityname,
+      Activityconstants.activityinfo.value: activity.activityinfo,
+      Activityconstants.startdate.value: activity.startdate,
+      Activityconstants.enddate.value: activity.enddate,
+      Activityconstants.activitryphoto.value: activity.activitryphoto
+    });
   }
 
   ///刪除活動
-  Future<void> DeleteActivity(String activityid, String nowuser) async {
+  Future<void> DeleteActivity(String activityid, String UserId) async {
     DocumentReference documentReference = firebaseFirestore
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityid);
 
-    final activitydata = Activity.fromDocument(await documentReference.get());
-    if (activitydata.ownerid == nowuser) {
+    var activitydata = Activity.fromDocument(await documentReference.get());
+    if (activitydata.ownerid == UserId) {
       await documentReference.delete();
     }
     else
@@ -101,8 +99,8 @@ class SetActivityProvider{
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityid);
 
-    final activitydata = Activity.fromDocument(await documentReference.get());
-    for(final manager in activitydata.managers){
+    var activitydata = Activity.fromDocument(await documentReference.get());
+    for(var manager in activitydata.managers){
       if (manager == UserId)
         return true;
     }
@@ -115,7 +113,7 @@ class SetActivityProvider{
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityid);
 
-    final activitydata = Activity.fromDocument(await documentReference.get());
+    var activitydata = Activity.fromDocument(await documentReference.get());
     if (activitydata.ownerid == nowuser){
       if (await IsManager(activityid, Adduser)){
         log("This user is already manager.");
@@ -134,7 +132,7 @@ class SetActivityProvider{
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityid);
 
-    final activitydata = Activity.fromDocument(await documentReference.get());
+    var activitydata = Activity.fromDocument(await documentReference.get());
     if (activitydata.ownerid == nowuser){
       if (nowuser == Deleteuser){
         log("Can't delete the owner.");
@@ -154,10 +152,10 @@ class SetActivityProvider{
   ///新增標籤
   Future<void> AddNewTag(
       String activityid,
-      String nowuser,
-      String name)
+      Tag tagdata,
+      String UserId,)
   async {
-    if (!await IsManager(activityid, nowuser)) {
+    if (!await IsManager(activityid, UserId)) {
       log("you are not manager.");
       return;
     }
@@ -168,23 +166,45 @@ class SetActivityProvider{
         .collection(FirestoreConstants.tagCollectionPath.value)
         .doc(tagid);
 
-    Tag tag = Tag(
-      activityid: activityid,
-      tagname: name,
-      tagid: tagid,
-    );
+    await documentReference.set(tagdata.toJson());
+    await documentReference.update({
+      Tagconstants.tagid.value: tagid
+    });
+  }
 
-    await documentReference.set(tag.toJson());
+  ///取得標籤
+  Future<Tag?> Gettag(
+      String activityid,
+      String tagid,
+      String UserId)
+  async{
+    if (!await IsManager(activityid, UserId)) {
+      log("you are not manager.");
+      return null;
+    }
+    DocumentReference documentReference = firebaseFirestore
+        .collection(FirestoreConstants.activityCollectionPath.value)
+        .doc(activityid)
+        .collection(FirestoreConstants.tagCollectionPath.value)
+        .doc(tagid);
+
+    var tagdata = await documentReference.get();
+    if (tagdata.exists){
+      return Tag.fromDocument(tagdata);
+    }
+    else{
+      return null;
+    }
   }
 
   ///編輯標籤
   Future<void> EditTag(
       String activityid,
-      String name,
-      String nowuser,
-      String tagid)
+      String tagid,
+      Tag, tagdata,
+      String UserId)
   async {
-    if (!await IsManager(activityid, nowuser)) {
+    if (!await IsManager(activityid, UserId)) {
       log("you are not manager.");
       return;
     }
@@ -194,23 +214,18 @@ class SetActivityProvider{
         .collection(FirestoreConstants.tagCollectionPath.value)
         .doc(tagid);
 
-    final tagdata = Tag.fromDocument(await documentReference.get());
-    Tag tag = Tag(
-      activityid: tagdata.activityid,
-      tagname: name,
-      tagid: tagdata.tagid,
-    );
-
-    await documentReference.set(tag.toJson());
+    await documentReference.update({
+      Tagconstants.tagname: tagdata.name
+    });
   }
 
   ///刪除標籤
   Future<void> DeleteTag(
       String activityid,
-      String nowuser,
+      String UserId,
       String tagid)
   async {
-    if (!await IsManager(activityid, nowuser)) {
+    if (!await IsManager(activityid, UserId)) {
       log("you are not manager.");
       return;
     }
@@ -222,70 +237,126 @@ class SetActivityProvider{
 
     await documentReference.delete();
 
-    final topicquery = firebaseFirestore
+    var topicquery = firebaseFirestore
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityid)
         .collection(FirestoreConstants.topicCollectionPath.value)
         .where('tagid', isEqualTo: tagid);
+
     if ((await topicquery.count().get()).count > 0){
-      final topicdocs = (await topicquery.get()).docs;
-      for (final topicdoc in topicdocs){
+      var topicdocs = (await topicquery.get()).docs;
+      for (var topicdoc in topicdocs){
         await topicdoc.reference.delete();
       }
     }
 
-    final questionquery = firebaseFirestore
+    var questionquery = firebaseFirestore
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityid)
         .collection(FirestoreConstants.questionCollectionPath.value)
         .where('tagid', isEqualTo: tagid);
+
     if ((await questionquery.count().get()).count > 0){
-      final questiondocs = (await questionquery.get()).docs;
-      for (final questiondoc in questiondocs){
+      var questiondocs = (await questionquery.get()).docs;
+      for (var questiondoc in questiondocs){
         await questiondoc.reference.delete();
       }
     }
   }
 
-  ///新增話題與問卷問題
-  Future<void> AddNewTopicandQuestion(
+  ///新增話題
+  Future<void> AddNewTopic(
       String activityid,
-      String UserId,
-      String tagid,
-      String topicname,
-      String questionname,
-      List<String> choices)
+      Topic topicdata,
+      String UserId)
   async {
     if (!await IsManager(activityid, UserId)){
       log("You are not manager.");
       return;
     }
-    for (var i = 0; i < choices.length; i++){
-      for (var j = i + 1; j < choices.length; j++){
-        if(choices[i] == choices[j]){
-          log("There are two same choices");
-          return;
-        }
-      }
-    }
 
     String topicid = Guid.newGuid.toString();
-    String questionid = Guid.newGuid.toString();
     DocumentReference topicdoc = firebaseFirestore
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityid)
         .collection(FirestoreConstants.topicCollectionPath.value)
         .doc(topicid);
 
-    Topic topic = Topic(
-      activityid: activityid,
-      tagid: tagid,
-      topicid: topicid,
-      questionid: questionid,
-      topicname: topicname,
-    );
+    await topicdoc.set(topicdata.toJson());
+    await topicdoc.update({
+      Topicconstants.topicid.value: topicid
+    });
+  }
 
-    await topicdoc.set(topic.toJson());
+  ///取得話題
+  Future<Topic?> Gettopic(
+      String activityid,
+      String topicid,
+      String UserId)
+  async{
+    if (!await IsManager(activityid, UserId)) {
+      log("you are not manager.");
+      return null;
+    }
+    DocumentReference documentReference = firebaseFirestore
+        .collection(FirestoreConstants.activityCollectionPath.value)
+        .doc(activityid)
+        .collection(FirestoreConstants.topicCollectionPath.value)
+        .doc(topicid);
+
+    var topicdata = await documentReference.get();
+    if (topicdata.exists){
+      return Topic.fromDocument(topicdata);
+    }
+    else{
+      return null;
+    }
+  }
+
+  ///編輯話題
+  Future<void> EditTopic(
+      String activityid,
+      String UserId,
+      String topicid,
+      Topic topicdata)
+  async {
+    if (!await IsManager(activityid, UserId)){
+      log("You are not manager.");
+      return;
+    }
+
+    DocumentReference topicdoc = firebaseFirestore
+        .collection(FirestoreConstants.activityCollectionPath.value)
+        .doc(activityid)
+        .collection(FirestoreConstants.topicCollectionPath.value)
+        .doc(topicid);
+
+    await topicdoc.update({
+      Topicconstants.topicname.value: topicdata.topicname
+    });
+  }
+
+  ///新增問卷題目
+  Future<void> AddNewQuestion(
+      String activityid,
+      Question questiondata,
+      String UserId)
+  async {
+    if (!await IsManager(activityid, UserId)) {
+      log("You are not manager.");
+      return;
+    }
+
+    for (var i = 0; i < questiondata.choices.length; i++){
+      for (var j = i + 1; j < questiondata.choices.length; j++){
+        if(questiondata.choices[i] == questiondata.choices[j]){
+          log("There are two same choices");
+          return;
+        }
+      }
+    }
+
+    String questionid = Guid.newGuid.toString();
 
     DocumentReference questiondoc = firebaseFirestore
         .collection(FirestoreConstants.activityCollectionPath.value)
@@ -293,81 +364,66 @@ class SetActivityProvider{
         .collection(FirestoreConstants.questionCollectionPath.value)
         .doc(questionid);
 
-    Question question = Question(
-      activityid: activityid,
-      tagid: tagid,
-      topicid: topicid,
-      questionid: questionid,
-      questionname: questionname,
-      choices: choices
-    );
-
-    await questiondoc.set(question.toJson());
+    await questiondoc.set(questiondata.toJson());
+    await questiondoc.update({
+      Questionconstants.questionid.value: questionid
+    });
   }
 
-  ///編輯話題與問卷題目
-  Future<void> EditTopicandQuestion(
+  ///編輯問卷題目
+  Future<void> EditQuestion(
       String activityid,
       String UserId,
-      String topicid,
-      String topicname,
-      String questionname,
-      List<String> choices)
+      String questionid,
+      Question questiondata)
   async {
     if (!await IsManager(activityid, UserId)){
       log("You are not manager.");
       return;
     }
-    for (var i = 0; i < choices.length; i++){
-      for (var j = i + 1; j < choices.length; j++){
-        if(choices[i] == choices[j]){
-          log("There are two same choices");
-          return;
-        }
-      }
-    }
-
-    DocumentReference topicdoc = firebaseFirestore
-        .collection(FirestoreConstants.activityCollectionPath.value)
-        .doc(activityid)
-        .collection(FirestoreConstants.topicCollectionPath.value)
-        .doc(topicid);
-
-    final topicdata = Topic.fromDocument(await topicdoc.get());
-    Topic topic = Topic(
-      activityid: topicdata.activityid,
-      tagid: topicdata.tagid,
-      topicid: topicdata.topicid,
-      questionid: topicdata.questionid,
-      topicname: topicname,
-    );
-
-    await topicdoc.set(topic.toJson());
 
     DocumentReference questiondoc = firebaseFirestore
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityid)
         .collection(FirestoreConstants.questionCollectionPath.value)
-        .doc(topicdata.questionid);
+        .doc(questionid);
 
-    final questiondata = Question.fromDocument(await questiondoc.get());
-    Question question = Question(
-      activityid: questiondata.activityid,
-      tagid: questiondata.tagid,
-      topicid: questiondata.topicid,
-      questionid: questiondata.questionid,
-      questionname: questionname,
-      choices: choices
-    );
+    await questiondoc.update({
+      Questionconstants.questionname.value: questiondata.questionname
+    });
+  }
 
-    await questiondoc.set(question.toJson());
+  ///取得問卷題目
+  Future<Question?> Getquestion(
+      String activityid,
+      String questionid,
+      String UserId)
+  async{
+    if (!await IsManager(activityid, UserId)) {
+      log("you are not manager.");
+      return null;
+    }
+    DocumentReference documentReference = firebaseFirestore
+        .collection(FirestoreConstants.activityCollectionPath.value)
+        .doc(activityid)
+        .collection(FirestoreConstants.questionCollectionPath.value)
+        .doc(questionid);
+
+    var questiondata = await documentReference.get();
+    if (questiondata.exists){
+      return Question.fromDocument(questiondata);
+    }
+    else{
+      return null;
+    }
   }
 
   ///刪除話題與問卷問題
   Future<void> DeleteTopicandQuestion(
       String activityid,
       String UserId,
-      String topicid)
+      String topicid,
+      String questionid)
   async{
     if (!await IsManager(activityid, UserId)){
       log("You are not manager.");
@@ -380,13 +436,11 @@ class SetActivityProvider{
         .collection(FirestoreConstants.topicCollectionPath.value)
         .doc(topicid);
 
-    final topicdata = Topic.fromDocument(await topicdoc.get());
-
     DocumentReference questiondoc = firebaseFirestore
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityid)
         .collection(FirestoreConstants.questionCollectionPath.value)
-        .doc(topicdata.questionid);
+        .doc(questionid);
 
     await topicdoc.delete();
     await questiondoc.delete();

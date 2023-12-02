@@ -27,8 +27,7 @@ class MyApp extends StatelessWidget {
 			Provider<SetActivityProvider>(
             create: (_) => SetActivityProvider(
               pref: pref,
-              firebaseFirestore: firebaseFirestore,
-              firebaseStorage: firebaseStorage,
+              firebaseFirestore: firebaseFirestore
             ),
           ),
         ],

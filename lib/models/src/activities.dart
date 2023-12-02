@@ -70,16 +70,16 @@ class Tag {
 
   Map<String, dynamic> toJson() {
     return {
-      Activityconstants.activityid.value: activityid,
-      Activityconstants.tagname.value: tagname,
-      Activityconstants.tagid.value: tagid,
+      Tagconstants.activityid.value: activityid,
+      Tagconstants.tagname.value: tagname,
+      Tagconstants.tagid.value: tagid,
     };
   }
 
   factory Tag.fromDocument(DocumentSnapshot doc) {
-    String activityid = doc.get(Activityconstants.activityid.value);
-    String tagname = doc.get(Activityconstants.tagname.value);
-    String tagid = doc.get(Activityconstants.tagid.value);
+    String activityid = doc.get(Tagconstants.activityid.value);
+    String tagname = doc.get(Tagconstants.tagname.value);
+    String tagid = doc.get(Tagconstants.tagid.value);
     return Tag(
       activityid: activityid,
       tagname: tagname,
@@ -93,38 +93,33 @@ class Topic {
   final String tagid;
   final String topicname;
   final String topicid;
-  final String questionid;
 
   const Topic({
     required this.activityid,
     required this.tagid,
     required this.topicname,
     required this.topicid,
-    required this.questionid,
   });
 
   Map<String, dynamic> toJson() {
     return {
-      Activityconstants.activityid.value: activityid,
-      Activityconstants.tagid.value: tagid,
-      Activityconstants.topicname.value: topicname,
-      Activityconstants.topicid.value: topicid,
-      Activityconstants.questionid.value: questionid,
+      Topicconstants.activityid.value: activityid,
+      Topicconstants.tagid.value: tagid,
+      Topicconstants.topicname.value: topicname,
+      Topicconstants.topicid.value: topicid,
     };
   }
 
   factory Topic.fromDocument(DocumentSnapshot doc) {
-    String activityid = doc.get(Activityconstants.activityid.value);
-    String tagid = doc.get(Activityconstants.tagid.value);
-    String topicname = doc.get(Activityconstants.topicname.value);
-    String topicid = doc.get(Activityconstants.topicid.value);
-    String questionid = doc.get(Activityconstants.questionid.value);
+    String activityid = doc.get(Topicconstants.activityid.value);
+    String tagid = doc.get(Topicconstants.tagid.value);
+    String topicname = doc.get(Topicconstants.topicname.value);
+    String topicid = doc.get(Topicconstants.topicid.value);
     return Topic(
       activityid: activityid,
       tagid: tagid,
       topicname: topicname,
       topicid: topicid,
-      questionid: questionid,
     );
   }
 }
@@ -149,22 +144,22 @@ class Question {
 
   Map<String, dynamic> toJson() {
     return {
-      Activityconstants.activityid.value: activityid,
-      Activityconstants.tagid.value: tagid,
-      Activityconstants.topicid.value: topicid,
-      Activityconstants.questionid.value: questionid,
-      Activityconstants.questionname.value: questionname,
-      Activityconstants.choices.value: choices
+      Questionconstants.activityid.value: activityid,
+      Questionconstants.tagid.value: tagid,
+      Questionconstants.topicid.value: topicid,
+      Questionconstants.questionid.value: questionid,
+      Questionconstants.questionname.value: questionname,
+      Questionconstants.choices.value: choices
     };
   }
 
   factory Question.fromDocument(DocumentSnapshot doc) {
-    String activityid = doc.get(Activityconstants.activityid.value);
-    String tagid = doc.get(Activityconstants.tagid.value);
-    String topicid = doc.get(Activityconstants.topicid.value);
-    String questionid = doc.get(Activityconstants.questionid.value);
-    String questionname = doc.get(Activityconstants.questionname.value);
-    List<dynamic> choices = doc.get(Activityconstants.choices.value);
+    String activityid = doc.get(Questionconstants.activityid.value);
+    String tagid = doc.get(Questionconstants.tagid.value);
+    String topicid = doc.get(Questionconstants.topicid.value);
+    String questionid = doc.get(Questionconstants.questionid.value);
+    String questionname = doc.get(Questionconstants.questionname.value);
+    List<dynamic> choices = doc.get(Questionconstants.choices.value);
     return Question(
       activityid: activityid,
       tagid: tagid,

@@ -6,17 +6,7 @@ enum Activityconstants {
   startdate,
   enddate,
   activitryphoto,
-  managers,
-
-  tagname,
-  tagid,
-
-  topicname,
-  topicid,
-
-  questionid,
-  questionname,
-  choices;
+  managers;
 
   String get value {
     switch (this) {
@@ -36,19 +26,74 @@ enum Activityconstants {
         return "activitryphoto";
       case Activityconstants.managers:
         return "managers";
-      case Activityconstants.tagname:
-        return "tagname";
-      case Activityconstants.tagid:
+      default:
+        throw Exception("Not found value for FirestoreConstants");
+    }
+  }
+}
+
+enum Tagconstants{
+  activityid,
+  tagid,
+  tagname;
+
+  String get value {
+    switch (this) {
+      case Tagconstants.activityid:
+        return "activityid";
+      case Tagconstants.tagid:
         return "tagid";
-      case Activityconstants.topicname:
-        return "topicname";
-      case Activityconstants.topicid:
+      case Tagconstants.tagname:
+        return "tagname";
+      default:
+        throw Exception("Not found value for FirestoreConstants");
+    }
+  }
+}
+
+enum Topicconstants{
+  activityid,
+  tagid,
+  topicname,
+  topicid;
+
+  String get value {
+    switch (this) {
+      case Topicconstants.activityid:
+        return "activityid";
+      case Topicconstants.tagid:
+        return "tagid";
+      case Topicconstants.topicid:
         return "topicid";
-      case Activityconstants.questionid:
+      case Topicconstants.topicname:
+        return "topicname";
+      default:
+        throw Exception("Not found value for FirestoreConstants");
+    }
+  }
+}
+
+enum Questionconstants{
+  activityid,
+  tagid,
+  topicid,
+  questionid,
+  questionname,
+  choices;
+
+  String get value {
+    switch (this) {
+      case Questionconstants.activityid:
+        return "activityid";
+      case Questionconstants.tagid:
+        return "tagid";
+      case Questionconstants.topicid:
+        return "topicid";
+      case Questionconstants.questionid:
         return "questionid";
-      case Activityconstants.questionname:
+      case Questionconstants.questionname:
         return "questionname";
-      case Activityconstants.choices:
+      case Questionconstants.choices:
         return "choices";
       default:
         throw Exception("Not found value for FirestoreConstants");

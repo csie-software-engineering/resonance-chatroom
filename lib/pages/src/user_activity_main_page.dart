@@ -21,10 +21,8 @@ class _UserActivityMainPageState extends State<UserActivityMainPage> {
         elevation: 0,
         leading: const BackButton(),
         // leadingWidth: 20,
-        title: Center(
-          child: Align(
-            alignment: Alignment(0, 0), // <-- 這裡設定text的對齊方式
-            child: ClipRRect(
+        centerTitle: true,
+        title: ClipRRect(
               borderRadius: const BorderRadius.all(Radius.circular(16)),
               child: Container(
                 padding:
@@ -35,8 +33,6 @@ class _UserActivityMainPageState extends State<UserActivityMainPage> {
                 ),
               ),
             ),
-          ),
-        ),
       ),
       body: Column(
         children: [

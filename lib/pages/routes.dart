@@ -24,7 +24,7 @@ enum Routes {
 
 Map<String, Widget Function(BuildContext)> routes = {
   Routes.initPage.value: (_) => const InitPage(title: '',),
-  Routes.hostActivitySetPage.value: (_) => const HostActivitySetPage(title: '',),
+  Routes.hostActivitySetPage.value: (_) => HostActivitySetPage(),
   Routes.chatPage.value: (_) => ChatPage(arguments: ChatPageArguments(
     "peerAvatar",
     "Robot",

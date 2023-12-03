@@ -1,7 +1,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 import 'dart:convert';
+import 'package:resonance_chatroom/models/models.dart';
+import 'package:resonance_chatroom/providers/providers.dart';
 
 // 定義一個類別來儲存活動的所有內容
 class Event {
@@ -41,6 +44,7 @@ class HostActivitySetPage extends StatefulWidget {
 }
 
 class _HostActivitySetPageState extends State<HostActivitySetPage> {
+  late final SetActivityProvider setActivityProvider = context.read<SetActivityProvider>();
   TextEditingController _nameController = TextEditingController();
   TextEditingController _infoController = TextEditingController();
   final List<DateTime> _selectedDates = [DateTime.now(), DateTime.now()];
@@ -251,7 +255,18 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
                   ),
                   SizedBox(width: 16.0),
                   ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
+                      Activity activitydata = Activity(
+                          activitryphoto: _selectedImage.toString(),
+                          activityid: "id",
+                          activityinfo: _infoController.text,
+                          activityname: _nameController.text,
+                          startdate: _selectedDates[0].toString(),
+                          enddate: _selectedDates[1].toString(),
+                          ownerid: "ownerid",
+                          managers: []
+                      );
+                      await setActivityProvider.SetNewActivity(activitydata, "ownerid");
                       // 跳至送出頁面的邏輯
                       // 傳遞createEvent()方法的回傳值給送出頁面
                     },

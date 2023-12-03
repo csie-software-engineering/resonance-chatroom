@@ -197,6 +197,37 @@ class SetActivityProvider {
     }
   }
 
+  ///取得所有標籤資訊
+  Future<List<Tag>?> GetAllTags(
+      String activityid,
+      String UserId)
+  async{
+    if (!await IsManager(activityid, UserId)) {
+      log("you are not manager.");
+      return null;
+    }
+    var tagquery = firebaseFirestore
+        .collection(FirestoreConstants.activityCollectionPath.value)
+        .doc(activityid)
+        .collection(FirestoreConstants.tagCollectionPath.value)
+        .where('activityid', isEqualTo: activityid);
+
+
+    if ((await tagquery.count().get()).count > 0){
+      var tagdocs = (await tagquery.get()).docs;
+      List<Tag> taglist = [];
+      for(var tagdoc in tagdocs){
+        var tagdata = await tagdoc.reference.get();
+        taglist.add(Tag.fromDocument(tagdata));
+      }
+      return taglist;
+    }
+    else{
+      log('There are no tags in this activity.');
+      return null;
+    }
+  }
+
   ///編輯標籤
   Future<void> EditTag(
       String activityid,

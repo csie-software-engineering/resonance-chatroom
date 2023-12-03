@@ -94,7 +94,7 @@ class _ChatPageState extends State<ChatPage> {
     //         (Route<dynamic> route) => false,
     //   );
     // }
-    currentUserId = "Daniel";
+    currentUserId = "Jason";
     String peerId = widget.arguments.peerId;
 
     groupMembers.add(currentUserId);
@@ -164,7 +164,6 @@ class _ChatPageState extends State<ChatPage> {
                 // Sticker
                 : Container(
                     margin: EdgeInsets.only(
-                        // bottom: isLastMessageRight(index) ? 20 : 10, right: 10)
                         bottom: 10,
                         right: 10),
                     child: Image.asset(
@@ -179,84 +178,84 @@ class _ChatPageState extends State<ChatPage> {
       } else {
         // Left (peer message)
         return Container(
-          margin: EdgeInsets.only(bottom: 10),
+          // margin: EdgeInsets.only(bottom: 10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Row(
                 children: <Widget>[
-                  isLastMessageLeft(index)
-                      ? Material(
-                          borderRadius: const BorderRadius.all(
-                            Radius.circular(18),
+                  Material(
+                    borderRadius: const BorderRadius.all(
+                      Radius.circular(18),
+                    ),
+                    clipBehavior: Clip.hardEdge,
+                    child: Image.network(
+                      widget.arguments.peerAvatar, // 會是一個 url 載入使用者的頭貼
+                      loadingBuilder: (BuildContext context, Widget child,
+                          ImageChunkEvent? loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Center(
+                          child: CircularProgressIndicator(
+                            color: Theme.of(context).colorScheme.primary,
+                            value: loadingProgress.expectedTotalBytes != null
+                                ? loadingProgress.cumulativeBytesLoaded /
+                                    loadingProgress.expectedTotalBytes!
+                                : null,
                           ),
-                          clipBehavior: Clip.hardEdge,
-                          child: Image.network(
-                            widget.arguments.peerAvatar, // 會是一個 url 載入使用者的頭貼
-                            loadingBuilder: (BuildContext context, Widget child,
-                                ImageChunkEvent? loadingProgress) {
-                              if (loadingProgress == null) return child;
-                              return Center(
-                                child: CircularProgressIndicator(
-                                  color: Theme.of(context).colorScheme.primary,
-                                  value: loadingProgress.expectedTotalBytes !=
-                                          null
-                                      ? loadingProgress.cumulativeBytesLoaded /
-                                          loadingProgress.expectedTotalBytes!
-                                      : null,
-                                ),
-                              );
-                            },
-                            errorBuilder: (context, object, stackTrace) {
-                              return Icon(
-                                Icons.account_circle,
-                                size: 35,
-                                color: Theme.of(context).colorScheme.onPrimary,
-                              );
-                            },
-                            width: 35,
-                            height: 35,
-                            fit: BoxFit.cover,
-                          ),
-                        )
-                      : Container(width: 35),
+                        );
+                      },
+                      errorBuilder: (context, object, stackTrace) { // 當圖片無法加載就會顯示預設圖片
+                        return Icon(
+                          Icons.account_circle,
+                          size: 35,
+                          color: Theme.of(context).colorScheme.onPrimary,
+                        );
+                      },
+                      width: 35,
+                      height: 35,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+
                   messageChat.type == MessageType.text
                       ? Container(
                           padding: const EdgeInsets.fromLTRB(15, 10, 15, 10),
                           constraints: const BoxConstraints(maxWidth: 200),
                           decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.onPrimary,
-                              borderRadius: BorderRadius.circular(8)),
-                          margin: EdgeInsets.only(left: 10),
+                              color: Theme.of(context).colorScheme.secondary,
+                              borderRadius: BorderRadius.circular(12)),
+                          margin: EdgeInsets.only(bottom: 10, left: 10),
                           child: Text(
                             messageChat.content,
-                            style: const TextStyle(color: Colors.white),
+                            style: TextStyle(
+                                color: Theme.of(context).colorScheme.onPrimary),
                           ),
                         )
                       : Container(
                           margin: EdgeInsets.only(
-                              bottom: isLastMessageRight(index) ? 20 : 10,
+                              // bottom: isLastMessageRight(index) ? 20 : 10,
+                              bottom: 10,
                               right: 10),
                           child: const Icon(Icons.not_accessible)),
                 ],
               ),
 
               // Time
-              isLastMessageLeft(index)
-                  ? Container(
-                      margin:
-                          const EdgeInsets.only(left: 50, top: 5, bottom: 5),
-                      child: Text(
-                        // DateFormat('dd MMM kk:mm')
-                        //     .format(DateTime.fromMillisecondsSinceEpoch(int.parse(messageChat.timestamp))),
-                        "Date",
-                        style: TextStyle(
-                            color: Theme.of(context).colorScheme.onPrimary,
-                            fontSize: 12,
-                            fontStyle: FontStyle.italic),
-                      ),
-                    )
-                  : SizedBox.shrink()
+              // isLastMessageLeft(index)
+              //     ? Container(
+              //         margin:
+              //             const EdgeInsets.only(left: 50, top: 5, bottom: 5),
+              //         child: Text(
+              //           // DateFormat('dd MMM kk:mm')
+              //           //     .format(DateTime.fromMillisecondsSinceEpoch(int.parse(messageChat.timestamp))),
+              //           "Date",
+              //           style: TextStyle(
+              //               color: Theme.of(context).colorScheme.onPrimary,
+              //               fontSize: 12,
+              //               fontStyle: FontStyle.italic),
+              //         ),
+              //       )
+              //     : SizedBox.shrink()
             ],
           ),
         );

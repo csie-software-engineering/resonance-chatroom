@@ -17,7 +17,7 @@ class _UserActivityMainPageState extends State<UserActivityMainPage> {
   late double _buttonPositionTop;
   late double _buttonPositionLeft;
 
-  late Timer _timer;
+  Timer? _timer;
   int timeShowUp = 0;
 
   late String AppBarTitle = "三峽科技人";
@@ -77,6 +77,12 @@ class _UserActivityMainPageState extends State<UserActivityMainPage> {
   }
 
   @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     _initBottomPosition(
         MediaQuery.of(context).size.height, MediaQuery.of(context).size.width);
@@ -122,7 +128,7 @@ class _UserActivityMainPageState extends State<UserActivityMainPage> {
                       startMatching = false;
                       buttonColor = Theme.of(context).colorScheme.secondary;
                       timeShowUp = 0;
-                      _timer.cancel();
+                      _timer?.cancel();
                     }
                   });
                 },

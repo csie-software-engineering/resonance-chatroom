@@ -11,18 +11,59 @@ class UserActivityMainPage extends StatefulWidget {
 class _UserActivityMainPageState extends State<UserActivityMainPage> {
   FloatingActionButtonLocation buttonPosition =
       FloatingActionButtonLocation.centerFloat;
+
   Color buttonColor = Colors.yellow;
-  bool startMatching = false;
+  bool _startMatching = false;
 
   late double _buttonPositionTop;
   late double _buttonPositionLeft;
 
+  double _height = 0;
   Timer? _timer;
   int timeShowUp = 0;
 
-  late String AppBarTitle = "三峽科技人";
+  late String appBarTitle = "三峽科技人 CTW";
 
   bool bottomInitial = false;
+
+  Widget? _subTitle() {
+    if (!_startMatching) {
+      return AnimatedContainer(
+        duration: Duration(milliseconds: 500),
+        color: Theme.of(context).colorScheme.surface,
+        child: AnimatedOpacity(
+          opacity: 0,
+          duration: Duration(milliseconds: 1000),
+          child: Center(
+            child: Text(_formatTime()),
+          ),
+        ),
+      );
+    } else {
+      return AnimatedContainer(
+        curve: Curves.easeIn,
+        duration: Duration(milliseconds: 500),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.secondary,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              spreadRadius: 0,
+              blurRadius: 2,
+              offset: Offset(0, 5), // 阴影位置，可以调整阴影的方向
+            ),
+          ],
+        ),
+        child: AnimatedOpacity(
+          opacity: 1,
+          duration: Duration(milliseconds: 1000),
+          child: Center(
+            child: Text(_formatTime()),
+          ),
+        ),
+      );
+    }
+  }
 
   void _snapToEdges() {
     // 可以根據需要調整邊界的距離
@@ -88,25 +129,65 @@ class _UserActivityMainPageState extends State<UserActivityMainPage> {
         MediaQuery.of(context).size.height, MediaQuery.of(context).size.width);
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: startMatching ? Theme.of(context).colorScheme.secondary : Theme.of(context).colorScheme.surface,
-        elevation: 2,
-        leading: const BackButton(),
-        // leadingWidth: 20,
-        centerTitle: true,
-        title: ClipRRect(
-          borderRadius: const BorderRadius.all(Radius.circular(16)),
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 20.0),
-            color: Theme.of(context).colorScheme.background,
-            child: startMatching ? Text(_formatTime()) : Text("三峽科技人 CTW"),
-          ),
-        ),
-      ),
-      body: ListView(
+      body: Column(
         children: [
-          ActivityMainContent(title: "人工智畫大爆炸"),
-          ActivityDiscreption(title: "日程"),
+          Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  spreadRadius: 2,
+                  blurRadius: 4,
+                  offset: Offset(0, 2), // 阴影位置，可以调整阴影的方向
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                const BackButton(),
+                Expanded(
+                  child: AnimatedContainer(
+                    duration: Duration(milliseconds: 500),
+                    height: kToolbarHeight,
+                    child: Center(
+                      child: ClipRRect(
+                        borderRadius: const BorderRadius.all(Radius.circular(16)),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 2, horizontal: 20.0),
+                          color: Theme.of(context).colorScheme.background,
+                          child: Text(
+                              appBarTitle,
+                            style: TextStyle(fontSize: 20)
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 50),
+              ],
+            ),
+          ),
+          AnimatedContainer(
+            duration: Duration(milliseconds: 1000),
+            curve: Curves.easeOutQuint,
+            height: _height,
+            width: MediaQuery.of(context).size.width,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+            ),
+            child: _subTitle(),
+          ),
+          Expanded(
+            child: ListView(
+              children: [
+                ActivityMainContent(title: "人工智畫大爆炸"),
+                ActivityDiscreption(title: "日程"),
+              ],
+            ),
+          ),
         ],
       ),
       floatingActionButton: Stack(
@@ -115,30 +196,6 @@ class _UserActivityMainPageState extends State<UserActivityMainPage> {
             top: _buttonPositionTop,
             left: _buttonPositionLeft,
             child: Draggable(
-              child: FloatingActionButton(
-                backgroundColor: buttonColor,
-                onPressed: () {
-                  setState(() {
-                    if (!startMatching) {
-                      startMatching = true;
-                      buttonColor = Theme.of(context).colorScheme.primary;
-                      _timer =
-                          Timer.periodic(Duration(seconds: 1), _onTimerTick);
-                    } else {
-                      startMatching = false;
-                      buttonColor = Theme.of(context).colorScheme.secondary;
-                      timeShowUp = 0;
-                      _timer?.cancel();
-                    }
-                  });
-                },
-                child: Text(
-                  "配對",
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onPrimary,
-                  ),
-                ),
-              ),
               onDraggableCanceled: (velocity, offset) {
                 // 當手指釋放時，計算最近的邊，自動貼到邊上
                 setState(() {
@@ -151,6 +208,32 @@ class _UserActivityMainPageState extends State<UserActivityMainPage> {
               feedback: FloatingActionButton(
                 onPressed: () {},
                 child: Icon(Icons.add),
+              ),
+              child: FloatingActionButton(
+                backgroundColor: buttonColor,
+                onPressed: () {
+                  setState(() {
+                    if (!_startMatching) {
+                      _startMatching = true;
+                      _height = 20;
+                      buttonColor = Theme.of(context).colorScheme.primary;
+                      _timer =
+                          Timer.periodic(Duration(seconds: 1), _onTimerTick);
+                    } else {
+                      _startMatching = false;
+                      _height = 0;
+                      buttonColor = Theme.of(context).colorScheme.secondary;
+                      timeShowUp = 0;
+                      _timer?.cancel();
+                    }
+                  });
+                },
+                child: Text(
+                  "配對",
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onPrimary,
+                  ),
+                ),
               ),
             ),
           ),

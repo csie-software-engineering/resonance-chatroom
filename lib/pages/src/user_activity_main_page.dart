@@ -22,7 +22,7 @@ class _UserActivityMainPageState extends State<UserActivityMainPage> {
   Timer? _timer;
   int timeShowUp = 0;
 
-  late String appBarTitle = "三峽科技人 CTW";
+  late String appBarTitle = "人工智慧大爆炸";
 
   bool bottomInitial = false;
 
@@ -147,20 +147,19 @@ class _UserActivityMainPageState extends State<UserActivityMainPage> {
               children: [
                 const BackButton(),
                 Expanded(
-                  child: AnimatedContainer(
-                    duration: Duration(milliseconds: 500),
+                  child: Container(
                     height: kToolbarHeight,
                     child: Center(
                       child: ClipRRect(
-                        borderRadius: const BorderRadius.all(Radius.circular(16)),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(16)),
                         child: Container(
                           padding: const EdgeInsets.symmetric(
                               vertical: 2, horizontal: 20.0),
                           color: Theme.of(context).colorScheme.background,
-                          child: Text(
-                              appBarTitle,
-                            style: TextStyle(fontSize: 20)
-                          ),
+                          child: Text(appBarTitle,
+                              style: TextStyle(
+                                  fontSize: 20, fontWeight: FontWeight.w700)),
                         ),
                       ),
                     ),
@@ -183,8 +182,11 @@ class _UserActivityMainPageState extends State<UserActivityMainPage> {
           Expanded(
             child: ListView(
               children: [
-                ActivityMainContent(title: "人工智畫大爆炸"),
-                ActivityDiscreption(title: "日程"),
+                ActivityMainContent(
+                    date: "",
+                    imageUrl:
+                        "https://s.yimg.com/ny/api/res/1.2/_MfVJS26UE1K4xTw7n7t3Q--/YXBwaWQ9aGlnaGxhbmRlcjt3PTY0MDtoPTQyOA--/https://media.zenfs.com/en/news_direct/b33229057cf5c4428dbe4101c9a621fc"),
+                ActivityDiscreption(),
               ],
             ),
           ),
@@ -246,51 +248,48 @@ class _UserActivityMainPageState extends State<UserActivityMainPage> {
 }
 
 class ActivityMainContent extends StatelessWidget {
-  const ActivityMainContent({super.key, required this.title});
+  const ActivityMainContent(
+      {super.key, required this.date, required this.imageUrl});
 
-  final String title;
+  final String imageUrl;
+  final String date;
 
   @override
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(10.0),
-        child: Card(
-          clipBehavior: Clip.hardEdge,
-          elevation: 10,
-          shadowColor: Theme.of(context).colorScheme.primary,
-          child: Column(
-            mainAxisSize: MainAxisSize.max,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.fromLTRB(10, 10, 0, 5),
-                child: Text(
-                  title,
-                  style: TextStyle(
-                    color: Color(0xFF095344),
-                    fontSize: 30,
-                    fontWeight: FontWeight.w900,
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Container(
+                padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 5.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      StartDateCard(date: "日期資料"),
+                      Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Icon(Icons.arrow_forward),
+                      ),
+                      EndDateCard(date: "日期資料"),
+                    ],
                   ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(10, 5, 0, 10),
-                child: Text(
-                  "1/10 ~ 1/12",
-                  style: TextStyle(
-                    color: Color(0xFF095344),
-                    fontSize: 15,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ),
-              Container(
+                )),
+            Card(
+              clipBehavior: Clip.hardEdge,
+              elevation: 10,
+              shadowColor: Theme.of(context).colorScheme.primary,
+              child: Container(
                 child: Image.network(
-                    "https://s.yimg.com/ny/api/res/1.2/_MfVJS26UE1K4xTw7n7t3Q--/YXBwaWQ9aGlnaGxhbmRlcjt3PTY0MDtoPTQyOA--/https://media.zenfs.com/en/news_direct/b33229057cf5c4428dbe4101c9a621fc"),
+                  imageUrl,
+                ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -298,9 +297,7 @@ class ActivityMainContent extends StatelessWidget {
 }
 
 class ActivityDiscreption extends StatelessWidget {
-  const ActivityDiscreption({super.key, required this.title});
-
-  final String title;
+  const ActivityDiscreption({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -327,6 +324,108 @@ class ActivityDiscreption extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class StartDateCard extends StatelessWidget {
+  const StartDateCard({super.key, required this.date});
+
+  final String date;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(15), bottomLeft: Radius.circular(15)),
+        color: Color(0xFF8EA373),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.3),
+            spreadRadius: 1,
+            blurRadius: 3,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        // crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            "AUG",
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.secondary,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Text("31",
+              style: TextStyle(
+                fontSize: 30,
+                // fontWeight: FontWeight.w600
+                color: Theme.of(context).colorScheme.secondary,
+              )),
+          const SizedBox(width: 10),
+          Text(
+            "THU",
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.secondary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class EndDateCard extends StatelessWidget {
+  const EndDateCard({super.key, required this.date});
+
+  final String date;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.only(
+            topRight: Radius.circular(15), bottomRight: Radius.circular(15)),
+        color: Color(0xFF8EA373),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.3),
+            spreadRadius: 1,
+            blurRadius: 3,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        // crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            "SEP",
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.secondary,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Text("2",
+              style: TextStyle(
+                fontSize: 30,
+                // fontWeight: FontWeight.w600
+                color: Theme.of(context).colorScheme.secondary,
+              )),
+          const SizedBox(width: 10),
+          Text(
+            "SAT",
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.secondary,
+            ),
+          ),
+        ],
       ),
     );
   }

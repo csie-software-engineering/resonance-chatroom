@@ -22,18 +22,21 @@ class _UserActivityMainPageState extends State<UserActivityMainPage> {
   Timer? _timer;
   int timeShowUp = 0;
 
-  late String appBarTitle = "人工智慧大爆炸";
+  // 到時候會從 firebase 那邊抓資料
+  late final String _appBarTitle = "人工智慧大爆炸";
+  late final String _description = _test;
+  late final String _imageUrl = _fakeUrl;
 
   bool bottomInitial = false;
 
   Widget? _subTitle() {
     if (!_startMatching) {
       return AnimatedContainer(
-        duration: Duration(milliseconds: 500),
+        duration: const Duration(milliseconds: 500),
         color: Theme.of(context).colorScheme.surface,
         child: AnimatedOpacity(
           opacity: 0,
-          duration: Duration(milliseconds: 1000),
+          duration: const Duration(milliseconds: 1000),
           child: Center(
             child: Text(_formatTime()),
           ),
@@ -42,7 +45,7 @@ class _UserActivityMainPageState extends State<UserActivityMainPage> {
     } else {
       return AnimatedContainer(
         curve: Curves.easeIn,
-        duration: Duration(milliseconds: 500),
+        duration: const Duration(milliseconds: 500),
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.secondary,
           boxShadow: [
@@ -50,13 +53,13 @@ class _UserActivityMainPageState extends State<UserActivityMainPage> {
               color: Colors.black.withOpacity(0.1),
               spreadRadius: 0,
               blurRadius: 2,
-              offset: Offset(0, 5), // 阴影位置，可以调整阴影的方向
+              offset: const Offset(0, 5), // 阴影位置，可以调整阴影的方向
             ),
           ],
         ),
         child: AnimatedOpacity(
           opacity: 1,
-          duration: Duration(milliseconds: 1000),
+          duration: const Duration(milliseconds: 1000),
           child: Center(
             child: Text(_formatTime()),
           ),
@@ -157,8 +160,8 @@ class _UserActivityMainPageState extends State<UserActivityMainPage> {
                           padding: const EdgeInsets.symmetric(
                               vertical: 2, horizontal: 20.0),
                           color: Theme.of(context).colorScheme.background,
-                          child: Text(appBarTitle,
-                              style: TextStyle(
+                          child: Text(_appBarTitle,
+                              style: const TextStyle(
                                   fontSize: 20, fontWeight: FontWeight.w700)),
                         ),
                       ),
@@ -183,10 +186,12 @@ class _UserActivityMainPageState extends State<UserActivityMainPage> {
             child: ListView(
               children: [
                 ActivityMainContent(
-                    date: "",
-                    imageUrl:
-                        "https://s.yimg.com/ny/api/res/1.2/_MfVJS26UE1K4xTw7n7t3Q--/YXBwaWQ9aGlnaGxhbmRlcjt3PTY0MDtoPTQyOA--/https://media.zenfs.com/en/news_direct/b33229057cf5c4428dbe4101c9a621fc"),
-                ActivityDiscreption(),
+                  imageUrl: _imageUrl,
+                  date: '',
+                ),
+                ActivityDescription(
+                  description: _description,
+                ),
               ],
             ),
           ),
@@ -209,7 +214,7 @@ class _UserActivityMainPageState extends State<UserActivityMainPage> {
               childWhenDragging: Container(),
               feedback: FloatingActionButton(
                 onPressed: () {},
-                child: Icon(Icons.add),
+                child: const Icon(Icons.add),
               ),
               child: FloatingActionButton(
                 backgroundColor: buttonColor,
@@ -219,8 +224,8 @@ class _UserActivityMainPageState extends State<UserActivityMainPage> {
                       _startMatching = true;
                       _height = 20;
                       buttonColor = Theme.of(context).colorScheme.primary;
-                      _timer =
-                          Timer.periodic(Duration(seconds: 1), _onTimerTick);
+                      _timer = Timer.periodic(
+                          const Duration(seconds: 1), _onTimerTick);
                     } else {
                       _startMatching = false;
                       _height = 0;
@@ -296,8 +301,10 @@ class ActivityMainContent extends StatelessWidget {
   }
 }
 
-class ActivityDiscreption extends StatelessWidget {
-  const ActivityDiscreption({super.key});
+class ActivityDescription extends StatelessWidget {
+  const ActivityDescription({super.key, required this.description});
+
+  final String description;
 
   @override
   Widget build(BuildContext context) {
@@ -314,7 +321,7 @@ class ActivityDiscreption extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.all(15.0),
                 child: Text(
-                  test,
+                  description,
                   style: TextStyle(
                     fontSize: 20,
                     height: 1.8,
@@ -339,15 +346,15 @@ class StartDateCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.only(
+        borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(15), bottomLeft: Radius.circular(15)),
-        color: Color(0xFF8EA373),
+        color: const Color(0xFF8EA373),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.3),
             spreadRadius: 1,
             blurRadius: 3,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -390,15 +397,15 @@ class EndDateCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.only(
+        borderRadius: const BorderRadius.only(
             topRight: Radius.circular(15), bottomRight: Radius.circular(15)),
-        color: Color(0xFF8EA373),
+        color: const Color(0xFF8EA373),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.3),
             spreadRadius: 1,
             blurRadius: 3,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -412,7 +419,7 @@ class EndDateCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 10),
-          Text("2",
+          Text("02",
               style: TextStyle(
                 fontSize: 30,
                 // fontWeight: FontWeight.w600
@@ -450,10 +457,10 @@ class CardExample extends StatelessWidget {
               mainAxisSize: MainAxisSize.max,
               children: <Widget>[
                 ListTile(
-                  leading: Icon(Icons.album),
+                  leading: const Icon(Icons.album),
                   title: Text(
                     title,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 30,
                       fontWeight: FontWeight.w900,
                     ),
@@ -485,7 +492,7 @@ class CardExample extends StatelessWidget {
   }
 }
 
-String test =
+String _test =
     """近年來，社會變遷迅速，文化交流日益頻繁，為了促進不同文化之間的對話與理解，我們特別舉辦了一場名為「兩日文化革命」的活動。這個活動將在兩天內展開，帶領參與者探索世界各地的文化風情，促進跨文化的交流合作。
 
 第一天的活動將以講座、工作坊和文化展覽為主，邀請了一系列來自不同文化背景的專家學者，分享他們在文學、藝術、音樂等領域的經驗和見解。透過這些專業的分享，參與者將能夠深入了解各種文化的核心價值和特色，擴展他們的文化視野。
@@ -493,3 +500,6 @@ String test =
 而第二天的活動將更加實踐，我們將進行一場文化體驗之旅。這包括品嚐不同國家的美食、參與傳統手工藝製作、學習民族舞蹈等活動。這將是一個身歷其境的機會，讓參與者親身感受到不同文化的豐富多彩之處。
 
 這場「兩日文化革命」的活動旨在打破文化的藩籬，讓參與者能夠更深入地理解和尊重不同文化，並在交流中找到共通之處。透過這樣的活動，我們期望能夠在社區中建立起更加開放、包容的文化氛圍，促進多元文化的共融發展。無論你是對外交往的專業人士，還是對不同文化充滿好奇心的普通人，都歡迎加入我們，一同參與這場跨足文化的盛宴。""";
+
+String _fakeUrl =
+    "https://s.yimg.com/ny/api/res/1.2/_MfVJS26UE1K4xTw7n7t3Q--/YXBwaWQ9aGlnaGxhbmRlcjt3PTY0MDtoPTQyOA--/https://media.zenfs.com/en/news_direct/b33229057cf5c4428dbe4101c9a621fc";

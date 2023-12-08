@@ -106,7 +106,7 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
       _buttonPositionLeft = width - 100;
       bottomInitial = true;
     }
-    if(!_enable) {
+    if (!_enable) {
       top1 = top2 = top3 = _buttonPositionTop + 10;
       left1 = left2 = left3 = _buttonPositionLeft + 10;
       _enable = true;
@@ -141,8 +141,8 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
 
   @override
   Widget build(BuildContext context) {
-
-    _initBottomPosition(MediaQuery.of(context).size.height, MediaQuery.of(context).size.width);
+    _initBottomPosition(
+        MediaQuery.of(context).size.height, MediaQuery.of(context).size.width);
 
     return Scaffold(
       body: Column(
@@ -215,129 +215,159 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
           // height: 250.0,
           // width: 250.0,
           child: Stack(
-            children: [
-              _enable ? AnimatedPositioned(
-                duration: toggle
-                    ? Duration(milliseconds: 275)
-                    : Duration(milliseconds: 875),
-                top: top1,
-                left: left1,
-                curve: toggle ? Curves.easeIn : Curves.elasticOut,
-                child: AnimatedContainer(
+        children: [
+          _enable
+              ? AnimatedPositioned(
                   duration: toggle
                       ? Duration(milliseconds: 275)
                       : Duration(milliseconds: 875),
+                  top: top1,
+                  left: left1,
                   curve: toggle ? Curves.easeIn : Curves.elasticOut,
-                  height: size1,
-                  width: size1,
-                  decoration: BoxDecoration(
-                    color: Colors.black87,
-                    borderRadius: BorderRadius.circular(40.0),
-                  ),
-                  child: Icon(Icons.message, color: Colors.white),
-                ),
-              ) : SizedBox(),
-              _enable ? AnimatedPositioned(
-                top: top2,
-                left: left2,
-                duration: toggle
-                    ? Duration(milliseconds: 275)
-                    : Duration(milliseconds: 875),
-                curve: toggle ? Curves.easeIn : Curves.elasticOut,
-                child: AnimatedContainer(
-                  duration: toggle
-                      ? Duration(milliseconds: 275)
-                      : Duration(milliseconds: 875),
-                  curve: toggle ? Curves.easeIn : Curves.elasticOut,
-                  height: size2,
-                  width: size2,
-                  decoration: BoxDecoration(
-                    color: Colors.black87,
-                    borderRadius: BorderRadius.circular(40.0),
-                  ),
-                  child: Icon(Icons.phone, color: Colors.white),
-                ),
-              ) : SizedBox(),
-              _enable ? AnimatedPositioned(
-                top: top3,
-                left: left3,
-                duration: toggle
-                    ? Duration(milliseconds: 275)
-                    : Duration(milliseconds: 875),
-                curve: toggle ? Curves.easeIn : Curves.elasticOut,
-                child: AnimatedContainer(
-                  duration: toggle
-                      ? Duration(milliseconds: 275)
-                      : Duration(milliseconds: 875),
-                  curve: toggle ? Curves.easeIn : Curves.elasticOut,
-                  height: size3,
-                  width: size3,
-                  decoration: BoxDecoration(
-                    color: Colors.black87,
-                    borderRadius: BorderRadius.circular(40.0),
-                  ),
-                  child: Icon(Icons.abc, color: Colors.white),
-                ),
-              ) : SizedBox(),
-              _enable ? Positioned(
-                top: _buttonPositionTop,
-                left: _buttonPositionLeft,
-                child: Transform.rotate(
-                  angle: _animation.value * 3.14159 * (3 / 4),
                   child: AnimatedContainer(
-                      duration: Duration(milliseconds: 375),
-                      curve: Curves.easeOut,
-                      height: toggle ? 70.0 : 60.0,
-                      width: toggle ? 70.0 : 60.0,
-                      decoration: BoxDecoration(
-                        color: Colors.yellow[600],
-                        borderRadius: BorderRadius.circular(60.0),
-                      ),
-                      child: Material(
-                          color: Colors.transparent,
-                          child: IconButton(
-                            splashColor: Colors.black54,
-                            onPressed: () {
-                              setState(() {
-                                if (toggle) {
-                                  toggle = !toggle;
-                                  _controller.forward();
-                                  Future.delayed(Duration(milliseconds: 10),
-                                      () {
-                                    top1;
-                                    left1 = left1 - 100;
-                                    size1 = 50;
-                                  });
-                                  Future.delayed(
-                                      Duration(milliseconds: 100), () {
-                                    top2 = top2 - 70;
-                                    left2 = left2 - 70;
-                                    size2 = 50;
-                                  });
-                                  Future.delayed(
-                                      Duration(milliseconds: 200), () {
-                                    left3;
-                                    top3 = top3 - 100;
-                                    size3 = 50;
-                                  });
-                                } else {
-                                  toggle = !toggle;
-                                  _controller.reverse();
-                                  top1 = top2 = top3 = _buttonPositionTop + 10;
-                                  left1 = left2 = left3 = _buttonPositionLeft + 10;
-                                  size1 = size2 = size3 = 20.0;
-                                }
-                              });
-                            },
-                            icon: const Icon(
-                              Icons.add,
-                              size: 30,
-                            ),
-                          ))),
-                ),
-              ) : SizedBox(),
-            ],
-          )),
+                    duration: toggle
+                        ? Duration(milliseconds: 275)
+                        : Duration(milliseconds: 875),
+                    curve: toggle ? Curves.easeIn : Curves.elasticOut,
+                    height: size1,
+                    width: size1,
+                    decoration: BoxDecoration(
+                      color: Colors.black87,
+                      borderRadius: BorderRadius.circular(40.0),
+                    ),
+                    child: Icon(Icons.message, color: Colors.white),
+                  ),
+                )
+              : SizedBox(),
+          _enable
+              ? AnimatedPositioned(
+                  top: top2,
+                  left: left2,
+                  duration: toggle
+                      ? Duration(milliseconds: 275)
+                      : Duration(milliseconds: 875),
+                  curve: toggle ? Curves.easeIn : Curves.elasticOut,
+                  child: AnimatedContainer(
+                    duration: toggle
+                        ? Duration(milliseconds: 275)
+                        : Duration(milliseconds: 875),
+                    curve: toggle ? Curves.easeIn : Curves.elasticOut,
+                    height: size2,
+                    width: size2,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.secondary,
+                      borderRadius: BorderRadius.circular(40.0),
+                    ),
+                    child: IconButton(
+                      icon: Text("配對"),
+                      onPressed: () {
+                        setState(() {
+                          if (!_startMatching) {
+                            _startMatching = true;
+                            _height = 20;
+                            buttonColor = Theme.of(context).colorScheme.primary;
+                            _timer = Timer.periodic(
+                                const Duration(seconds: 1), _onTimerTick);
+                          } else {
+                            _startMatching = false;
+                            _height = 0;
+                            buttonColor =
+                                Theme.of(context).colorScheme.secondary;
+                            timeShowUp = 0;
+                            _timer?.cancel();
+                          }
+                        });
+                      },
+                    ),
+                  ),
+                )
+              : SizedBox(),
+          _enable
+              ? AnimatedPositioned(
+                  top: top3,
+                  left: left3,
+                  duration: toggle
+                      ? Duration(milliseconds: 275)
+                      : Duration(milliseconds: 875),
+                  curve: toggle ? Curves.easeIn : Curves.elasticOut,
+                  child: AnimatedContainer(
+                    duration: toggle
+                        ? Duration(milliseconds: 275)
+                        : Duration(milliseconds: 875),
+                    curve: toggle ? Curves.easeIn : Curves.elasticOut,
+                    height: size3,
+                    width: size3,
+                    decoration: BoxDecoration(
+                      color: Colors.black87,
+                      borderRadius: BorderRadius.circular(40.0),
+                    ),
+                    child: Icon(Icons.abc, color: Colors.white),
+                  ),
+                )
+              : SizedBox(),
+          _enable
+              ? Positioned(
+                  top: _buttonPositionTop,
+                  left: _buttonPositionLeft,
+                  child: Transform.rotate(
+                    angle: _animation.value * 3.14159 * (3 / 4),
+                    child: AnimatedContainer(
+                        duration: Duration(milliseconds: 375),
+                        curve: Curves.easeOut,
+                        height: toggle ? 70.0 : 60.0,
+                        width: toggle ? 70.0 : 60.0,
+                        decoration: BoxDecoration(
+                          color: Colors.yellow[600],
+                          borderRadius: BorderRadius.circular(60.0),
+                        ),
+                        child: Material(
+                            color: Colors.transparent,
+                            child: IconButton(
+                              splashColor: Colors.black54,
+                              onPressed: () {
+                                setState(() {
+                                  if (toggle) {
+                                    toggle = !toggle;
+                                    _controller.forward();
+                                    Future.delayed(Duration(milliseconds: 10),
+                                        () {
+                                      top1;
+                                      left1 = left1 - 100;
+                                      size1 = 50;
+                                    });
+                                    Future.delayed(Duration(milliseconds: 100),
+                                        () {
+                                      top2 = top2 - 70;
+                                      left2 = left2 - 70;
+                                      size2 = 50;
+                                    });
+                                    Future.delayed(Duration(milliseconds: 200),
+                                        () {
+                                      left3;
+                                      top3 = top3 - 100;
+                                      size3 = 50;
+                                    });
+                                  } else {
+                                    toggle = !toggle;
+                                    _controller.reverse();
+                                    top1 =
+                                        top2 = top3 = _buttonPositionTop + 10;
+                                    left1 = left2 =
+                                        left3 = _buttonPositionLeft + 10;
+                                    size1 = size2 = size3 = 20.0;
+                                  }
+                                });
+                              },
+                              icon: const Icon(
+                                Icons.add,
+                                size: 30,
+                              ),
+                            ))),
+                  ),
+                )
+              : SizedBox(),
+        ],
+      )),
       // floatingActionButton: Stack(
       //   children: [
       //     Positioned(

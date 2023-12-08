@@ -1,8 +1,10 @@
+import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import 'dart:convert';
 import 'package:resonance_chatroom/models/models.dart';
 import 'package:resonance_chatroom/providers/providers.dart';
 
@@ -50,7 +52,8 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
   TextEditingController _infoController = TextEditingController();
   final List<DateTime> _selectedDates = [DateTime.now(), DateTime.now()];
   File? _selectedImage;
-  File? _checkselectedImage;
+  Uint8List? _checkselectedImage;
+
   Future<void> _pickImage() async {
     final image = await ImagePicker().pickImage(source: ImageSource.gallery);
     setState(() {
@@ -238,8 +241,8 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
                         // 將Column放在SingleChildScrollView中
                         child: Column(
                           children: [
-// 使用Image.file來顯示圖片
-                Image.file(_checkselectedImage!),
+                            // 使用Image.file來顯示圖片
+                            Image.memory(_checkselectedImage!),
                           ],
                         ),
                       ),
@@ -251,9 +254,10 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
                   ElevatedButton(
                     onPressed: () async {
                       final data = await setActivityProvider.Getactivity(
-                              "0dfefefc-75bf-442d-87ec-a18eb841b61d",
-                              "ownerid");
-_checkselectedImage?.writeAsBytesSync(base64Decode(data!.activitryphoto));
+                          "8a815b73-8fde-4564-8c11-e3d738f547d8", "ownerid");
+                      setState(() {
+                        _checkselectedImage = base64Decode(data!.activitryphoto);
+                      });
                       // 跳至預覽頁面的邏輯
                       // 傳遞createEvent()方法的回傳值給預覽頁面
                     },

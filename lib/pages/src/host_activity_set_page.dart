@@ -17,7 +17,11 @@ class Event {
 
   String? image; // 活動圖片的base64字串
 
-  Event(this.name, DateTime start, DateTime end, this.info, File? image) {
+  // 新增一個Tag的陣列
+  List<Tag> tags; // 活動的標籤
+
+  Event(this.name, DateTime start, DateTime end, this.info, File? image,
+      this.tags) {
     // 改為File? image
     // 將DateTime物件轉換為millisecondsSinceEpoch
     startTime = start.millisecondsSinceEpoch;
@@ -32,12 +36,21 @@ class Event {
   // 將Event物件轉換為字串
   @override
   String toString() {
-    return 'Event(name: $name, startTime: $startTime, endTime: $endTime, info: $info, image: $image)';
+    return 'Event(name: $name, startTime: $startTime, endTime: $endTime, info: $info, image: $image, tags: $tags)';
   }
 }
 
-class Tag{
-  
+class Tag {
+  String tagdata;
+  List<Topic> topics;
+  Tag(this.tagdata, this.topics) {}
+}
+
+class Topic {
+  String topicdata;
+  String questiondata;
+  List<String> choices;
+  Topic(this.topicdata, this.questiondata, this.choices) {}
 }
 
 class HostActivitySetPage extends StatefulWidget {
@@ -58,6 +71,11 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
   File? _selectedImage;
   Uint8List? _checkselectedImage;
 
+  List<Tag> tags = []; // 活動標籤的List
+  final List<Widget> fields = [];
+  EdgeInsets columnPadding = EdgeInsets.all(20); // 定義Column的間距
+  double fieldHeight = 50; // 定義欄位的高度
+  double buttonWidth = 100; // 定義按鈕的寬度
   Future<void> _pickImage() async {
     final image = await ImagePicker().pickImage(source: ImageSource.gallery);
     setState(() {
@@ -139,6 +157,7 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
       _selectedDates[1], // 活動結束時間
       _infoController.text,
       _selectedImage,
+      tags,
     );
   }
 
@@ -253,32 +272,41 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
               ),
 
               const SizedBox(height: 20),
-              TextFormField(
-                decoration: const InputDecoration(
-                  label: Text('Started field'),
+              Padding(
+                padding: columnPadding, // 使用Padding來設定Column的間距
+                child: TextFormField(
+                  decoration: const InputDecoration(
+                    label: Text('標籤名稱'),
+                  ),
                 ),
               ),
-              const SizedBox(width: 20),
-              Expanded(
-                child: MaterialButton(
-                  color: Theme.of(context).colorScheme.secondary,
-                  child: const Text(
-                    "Add field",
-                    style: TextStyle(color: Colors.white),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center, // 將按鈕置中
+                children: [
+                  Container(
+                    width: buttonWidth, // 使用Container來設定按鈕的寬度
+                    child: MaterialButton(
+                      color: Theme.of(context).colorScheme.secondary,
+                      child: const Text(
+                        "Add tag",
+                        style: TextStyle(
+                          color: Colors.white),
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          fields.add(NewTextField(
+                            name: 'name_${fields.length}',
+                            onDelete: () {
+                              setState(() {
+                                fields.removeAt(fields.length - 1);
+                              });
+                            },
+                          ));
+                        });
+                      },
+                    ),
                   ),
-                  onPressed: () {
-                    setState(() {
-                      fields.add(NewTextField(
-                        name: 'name_${fields.length}',
-                        onDelete: () {
-                          setState(() {
-                            fields.removeAt(fields.length - 1);
-                          });
-                        },
-                      ));
-                    });
-                  },
-                ),
+                ],
               ),
 
               Row(
@@ -289,12 +317,10 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
                   SizedBox(
                     height: height * 0.05,
                   ),
-                  Expanded(
-                    // 使用Expanded Widget來包裹TextFormField
-                    flex: 2, // 指定flex因數為2
+                  Container(
+                    height: fieldHeight, // 使用Container來設定欄位的高度
                     child: TextFormField(
                       decoration: const InputDecoration(labelText: "活動標籤"),
-                      controller: _tagController,
                     ),
                   ),
                 ],
@@ -340,6 +366,38 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class NewTextField extends StatelessWidget {
+  const NewTextField({
+    super.key,
+    required this.name,
+    this.onDelete,
+  });
+  final String name;
+  final VoidCallback? onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextFormField(
+              decoration: const InputDecoration(
+                label: Text('New field'),
+              ),
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete_forever),
+            onPressed: onDelete,
+          ),
+        ],
       ),
     );
   }

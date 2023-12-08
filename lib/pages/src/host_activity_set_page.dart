@@ -236,8 +236,11 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
                         // 將Column放在SingleChildScrollView中
                         child: Column(
                           children: [
-                            // 使用Image.file來顯示圖片
-                            Image.file(_selectedImage!),
+                    final data = await setActivityProvider.Getactivity("0dfefefc-75bf-442d-87ec-a18eb841b61d"
+                    , "ownerid"),
+                  _selectedImage = base64Decode(data!.activitryphoto),
+                // 使用Image.file來顯示圖片
+                Image.file(_selectedImage!),
                             Text('圖片路徑: ${_selectedImage!.path}'),
                           ],
                         ),
@@ -248,7 +251,8 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
               Row(
                 children: [
                   ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
+
                       // 跳至預覽頁面的邏輯
                       // 傳遞createEvent()方法的回傳值給預覽頁面
                     },
@@ -258,7 +262,7 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
                   ElevatedButton(
                     onPressed: () async {
                       Activity activitydata = Activity(
-                          activitryphoto: _selectedImage.toString(),
+                          activitryphoto: base64Encode(_selectedImage!.readAsBytesSync()),
                           activityid: "id",
                           activityinfo: _infoController.text,
                           activityname: _nameController.text,

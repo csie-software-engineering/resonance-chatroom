@@ -8,7 +8,11 @@ class UserActivityMainPage extends StatefulWidget {
   State<UserActivityMainPage> createState() => _UserActivityMainPageState();
 }
 
-class _UserActivityMainPageState extends State<UserActivityMainPage> {
+class _UserActivityMainPageState extends State<UserActivityMainPage>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation _animation;
+
   FloatingActionButtonLocation buttonPosition =
       FloatingActionButtonLocation.centerFloat;
 
@@ -26,6 +30,20 @@ class _UserActivityMainPageState extends State<UserActivityMainPage> {
   late final String _appBarTitle = "人工智慧大爆炸";
   late final String _description = _test;
   late final String _imageUrl = _fakeUrl;
+
+  bool toggle = false;
+  late double top1;
+  late double left1;
+  late double top2;
+  late double left2;
+  late double top3;
+  late double left3;
+
+  bool _enable = false;
+
+  double size1 = 20;
+  double size2 = 20;
+  double size3 = 20;
 
   bool bottomInitial = false;
 
@@ -68,31 +86,6 @@ class _UserActivityMainPageState extends State<UserActivityMainPage> {
     }
   }
 
-  void _snapToEdges() {
-    // 可以根據需要調整邊界的距離
-    double threshold = 20.0;
-
-    // 獲取屏幕的尺寸
-    double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height;
-
-    // 計算最近的邊
-    double bottomEdge = screenHeight - _buttonPositionTop;
-    double leftEdge = _buttonPositionLeft;
-    double rightEdge = screenWidth - _buttonPositionLeft;
-
-    // 根據距離最近的邊自動調整按鈕位置
-    double minVerticalDistance = bottomEdge;
-    double minHorizontalDistance = leftEdge < rightEdge ? leftEdge : rightEdge;
-
-    if (minVerticalDistance < minHorizontalDistance) {
-      _buttonPositionTop = screenHeight - threshold - 50;
-    } else {
-      _buttonPositionLeft =
-          leftEdge < rightEdge ? 0 + threshold : screenWidth - threshold - 50;
-    }
-  }
-
   void _onTimerTick(Timer timer) {
     setState(() {
       // 每1秒更新一次計數器
@@ -113,11 +106,29 @@ class _UserActivityMainPageState extends State<UserActivityMainPage> {
       _buttonPositionLeft = width - 100;
       bottomInitial = true;
     }
+    top1 = top2 = top3 = _buttonPositionTop + 10;
+    left1 = left2 = left3 = _buttonPositionLeft + 10;
+    _enable = true;
+    setState(() {});
   }
 
   @override
   void initState() {
     super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 350),
+      reverseDuration: Duration(milliseconds: 275),
+    );
+
+    _animation = CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeOut,
+        reverseCurve: Curves.easeIn);
+
+    _controller.addListener(() {
+      setState(() {});
+    });
   }
 
   @override
@@ -128,8 +139,8 @@ class _UserActivityMainPageState extends State<UserActivityMainPage> {
 
   @override
   Widget build(BuildContext context) {
-    _initBottomPosition(
-        MediaQuery.of(context).size.height, MediaQuery.of(context).size.width);
+
+    _initBottomPosition(MediaQuery.of(context).size.height, MediaQuery.of(context).size.width);
 
     return Scaffold(
       body: Column(
@@ -192,60 +203,188 @@ class _UserActivityMainPageState extends State<UserActivityMainPage> {
                 ActivityDescription(
                   description: _description,
                 ),
+                const SizedBox(height: 80),
               ],
             ),
           ),
         ],
       ),
-      floatingActionButton: Stack(
-        children: [
-          Positioned(
-            top: _buttonPositionTop,
-            left: _buttonPositionLeft,
-            child: Draggable(
-              onDraggableCanceled: (velocity, offset) {
-                // 當手指釋放時，計算最近的邊，自動貼到邊上
-                setState(() {
-                  _buttonPositionTop = offset.dy;
-                  _buttonPositionLeft = offset.dx;
-                  _snapToEdges();
-                });
-              },
-              childWhenDragging: Container(),
-              feedback: FloatingActionButton(
-                onPressed: () {},
-                child: const Icon(Icons.add),
-              ),
-              child: FloatingActionButton(
-                backgroundColor: buttonColor,
-                onPressed: () {
-                  setState(() {
-                    if (!_startMatching) {
-                      _startMatching = true;
-                      _height = 20;
-                      buttonColor = Theme.of(context).colorScheme.primary;
-                      _timer = Timer.periodic(
-                          const Duration(seconds: 1), _onTimerTick);
-                    } else {
-                      _startMatching = false;
-                      _height = 0;
-                      buttonColor = Theme.of(context).colorScheme.secondary;
-                      timeShowUp = 0;
-                      _timer?.cancel();
-                    }
-                  });
-                },
-                child: Text(
-                  "配對",
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onPrimary,
+      floatingActionButton: Container(
+          // height: 250.0,
+          // width: 250.0,
+          child: Stack(
+            children: [
+              AnimatedPositioned(
+                duration: toggle
+                    ? Duration(milliseconds: 275)
+                    : Duration(milliseconds: 875),
+                top: top1,
+                left: left1,
+                curve: toggle ? Curves.easeIn : Curves.elasticOut,
+                child: AnimatedContainer(
+                  duration: toggle
+                      ? Duration(milliseconds: 275)
+                      : Duration(milliseconds: 875),
+                  curve: toggle ? Curves.easeIn : Curves.elasticOut,
+                  height: size1,
+                  width: size1,
+                  decoration: BoxDecoration(
+                    color: Colors.black87,
+                    borderRadius: BorderRadius.circular(40.0),
                   ),
+                  child: Icon(Icons.message, color: Colors.white),
                 ),
               ),
-            ),
-          ),
-        ],
-      ),
+              AnimatedPositioned(
+                top: top2,
+                left: left2,
+                duration: toggle
+                    ? Duration(milliseconds: 275)
+                    : Duration(milliseconds: 875),
+                curve: toggle ? Curves.easeIn : Curves.elasticOut,
+                child: AnimatedContainer(
+                  duration: toggle
+                      ? Duration(milliseconds: 275)
+                      : Duration(milliseconds: 875),
+                  curve: toggle ? Curves.easeIn : Curves.elasticOut,
+                  height: size2,
+                  width: size2,
+                  decoration: BoxDecoration(
+                    color: Colors.black87,
+                    borderRadius: BorderRadius.circular(40.0),
+                  ),
+                  child: Icon(Icons.phone, color: Colors.white),
+                ),
+              ),
+              AnimatedPositioned(
+                top: top3,
+                left: left3,
+                duration: toggle
+                    ? Duration(milliseconds: 275)
+                    : Duration(milliseconds: 875),
+                curve: toggle ? Curves.easeIn : Curves.elasticOut,
+                child: AnimatedContainer(
+                  duration: toggle
+                      ? Duration(milliseconds: 275)
+                      : Duration(milliseconds: 875),
+                  curve: toggle ? Curves.easeIn : Curves.elasticOut,
+                  height: size3,
+                  width: size3,
+                  decoration: BoxDecoration(
+                    color: Colors.black87,
+                    borderRadius: BorderRadius.circular(40.0),
+                  ),
+                  child: Icon(Icons.abc, color: Colors.white),
+                ),
+              ),
+              _enable ? Positioned(
+                top: _buttonPositionTop,
+                left: _buttonPositionLeft,
+                child: Transform.rotate(
+                  angle: _animation.value * 3.14159 * (3 / 4),
+                  child: AnimatedContainer(
+                      duration: Duration(milliseconds: 375),
+                      curve: Curves.easeOut,
+                      height: toggle ? 70.0 : 60.0,
+                      width: toggle ? 70.0 : 60.0,
+                      decoration: BoxDecoration(
+                        color: Colors.yellow[600],
+                        borderRadius: BorderRadius.circular(60.0),
+                      ),
+                      child: Material(
+                          color: Colors.transparent,
+                          child: IconButton(
+                            splashColor: Colors.black54,
+                            onPressed: () {
+                              setState(() {
+                                if (toggle) {
+                                  toggle = !toggle;
+                                  _controller.forward();
+                                  Future.delayed(Duration(milliseconds: 10),
+                                      () {
+                                    top1;
+                                    left1 = left1 - 100;
+                                    size1 = 50;
+                                  });
+                                  Future.delayed(
+                                      Duration(milliseconds: 100), () {
+                                    top2 = top2 - 70;
+                                    left2 = left2 - 70;
+                                    size2 = 50;
+                                  });
+                                  Future.delayed(
+                                      Duration(milliseconds: 200), () {
+                                    left3;
+                                    top3 = top3 - 100;
+                                    size3 = 50;
+                                  });
+                                } else {
+                                  toggle = !toggle;
+                                  _controller.reverse();
+                                  top1 = top2 = top3 = _buttonPositionTop + 10;
+                                  left1 = left2 = left3 = _buttonPositionLeft + 10;
+                                  size1 = size2 = size3 = 20.0;
+                                }
+                              });
+                            },
+                            icon: const Icon(
+                              Icons.add,
+                              size: 30,
+                            ),
+                          ))),
+                ),
+              ) : SizedBox(),
+            ],
+          )),
+      // floatingActionButton: Stack(
+      //   children: [
+      //     Positioned(
+      //       top: _buttonPositionTop,
+      //       left: _buttonPositionLeft,
+      //       child: Draggable(
+      //         onDraggableCanceled: (velocity, offset) {
+      //           // 當手指釋放時，計算最近的邊，自動貼到邊上
+      //           setState(() {
+      //             _buttonPositionTop = offset.dy;
+      //             _buttonPositionLeft = offset.dx;
+      //             _snapToEdges();
+      //           });
+      //         },
+      //         childWhenDragging: Container(),
+      //         feedback: FloatingActionButton(
+      //           onPressed: () {},
+      //           child: const Icon(Icons.add),
+      //         ),
+      //         child: FloatingActionButton(
+      //           backgroundColor: buttonColor,
+      //           onPressed: () {
+      //             setState(() {
+      //               if (!_startMatching) {
+      //                 _startMatching = true;
+      //                 _height = 20;
+      //                 buttonColor = Theme.of(context).colorScheme.primary;
+      //                 _timer = Timer.periodic(
+      //                     const Duration(seconds: 1), _onTimerTick);
+      //               } else {
+      //                 _startMatching = false;
+      //                 _height = 0;
+      //                 buttonColor = Theme.of(context).colorScheme.secondary;
+      //                 timeShowUp = 0;
+      //                 _timer?.cancel();
+      //               }
+      //             });
+      //           },
+      //           child: Text(
+      //             "配對",
+      //             style: TextStyle(
+      //               color: Theme.of(context).colorScheme.onPrimary,
+      //             ),
+      //           ),
+      //         ),
+      //       ),
+      //     ),
+      //   ],
+      // ),
       backgroundColor: Theme.of(context).colorScheme.background,
       floatingActionButtonLocation: buttonPosition,
     );

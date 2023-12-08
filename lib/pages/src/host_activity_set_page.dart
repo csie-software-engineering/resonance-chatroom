@@ -31,6 +31,10 @@ class Event {
   }
 }
 
+class Tag{
+  
+}
+
 class HostActivitySetPage extends StatefulWidget {
   @override
   _HostActivitySetPageState createState() => _HostActivitySetPageState();
@@ -235,6 +239,53 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
                       ),
               ),
 
+              const SizedBox(height: 20),
+              TextFormField(
+                decoration: const InputDecoration(
+                  label: Text('Started field'),
+                ),
+              ),
+              const SizedBox(width: 20),
+              Expanded(
+                child: MaterialButton(
+                  color: Theme.of(context).colorScheme.secondary,
+                  child: const Text(
+                    "Add field",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      fields.add(NewTextField(
+                        name: 'name_${fields.length}',
+                        onDelete: () {
+                          setState(() {
+                            fields.removeAt(fields.length - 1);
+                          });
+                        },
+                      ));
+                    });
+                  },
+                ),
+              ),
+
+              Row(
+                mainAxisAlignment:
+                    MainAxisAlignment.spaceEvenly, // 調整子元件的水平對齊方式
+                crossAxisAlignment: CrossAxisAlignment.center, // 調整子元件的垂直對齊方式
+                children: [
+                  SizedBox(
+                    height: height * 0.05,
+                  ),
+                  Expanded(
+                    // 使用Expanded Widget來包裹TextFormField
+                    flex: 2, // 指定flex因數為2
+                    child: TextFormField(
+                      decoration: const InputDecoration(labelText: "活動標籤"),
+                      controller: _tagController,
+                    ),
+                  ),
+                ],
+              ),
               SizedBox(height: 16.0),
               Row(
                 children: [

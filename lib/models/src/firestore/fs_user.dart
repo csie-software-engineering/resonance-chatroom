@@ -6,22 +6,22 @@ import '../user.dart';
 class FSUser {
   final String id;
   final String displayName;
-  final String photoUrl;
+  final String photo;
   final String email;
   final bool isEnabled;
 
   const FSUser({
     required this.id,
     required this.displayName,
-    required this.photoUrl,
+    required this.photo,
     required this.email,
-    this.isEnabled = true,
+    required this.isEnabled,
   });
 
   Map<String, dynamic> toJson() => {
         FSUserConstants.id.value: id,
         FSUserConstants.displayName.value: displayName,
-        FSUserConstants.photoUrl.value: photoUrl,
+        FSUserConstants.photoUrl.value: photo,
         FSUserConstants.email.value: email,
         FSUserConstants.isEnabled.value: isEnabled,
       };
@@ -30,7 +30,7 @@ class FSUser {
       FSUser(
         id: doc.get(FSUserConstants.id.value),
         displayName: doc.get(FSUserConstants.displayName.value),
-        photoUrl: doc.get(FSUserConstants.photoUrl.value),
+        photo: doc.get(FSUserConstants.photoUrl.value),
         email: doc.get(FSUserConstants.email.value),
         isEnabled: doc.get(FSUserConstants.isEnabled.value),
       );
@@ -40,7 +40,7 @@ extension FSUserExtension on FSUser {
   User toUser() => User(
         id: id,
         displayName: displayName,
-        photoUrl: photoUrl,
+        photo: photo,
         email: email,
         socialMedia: [],
         activities: [],

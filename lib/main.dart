@@ -35,8 +35,7 @@ class MyApp extends StatelessWidget {
         providers: [
           Provider<UserProvider>(
             create: (_) => UserProvider(
-              pref: pref,
-              firebaseFirestore: firebaseFirestore,
+              db: firebaseFirestore,
             ),
           ),
           Provider<ChatProvider>(

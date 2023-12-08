@@ -1,94 +1,96 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-
-import '../../constants/constants.dart';
-
-class UserTag {
-  final String id;
-  final String displayName;
-
-  const UserTag({
-    required this.id,
-    required this.displayName,
-  });
-
-  Map<String, dynamic> toJson() => {
-        UserTagConstants.id.value: id,
-        UserTagConstants.displayName.value: displayName,
-      };
-
-  factory UserTag.fromJson(Map<String, dynamic> json) => UserTag(
-        id: json[UserTagConstants.id.value],
-        displayName: json[UserTagConstants.displayName.value],
-      );
-
-  factory UserTag.fromDocument(DocumentSnapshot<Map<String, dynamic>> doc) =>
-      UserTag.fromJson(doc.data()!);
-}
-
-class UserActivity {
-  final String id;
-  final String displayName;
-  final List<UserTag> tags;
-
-  const UserActivity({
-    required this.id,
-    required this.displayName,
-    required this.tags,
-  });
-
-  Map<String, dynamic> toJson() => {
-        UserActivityConstants.id.value: id,
-        UserActivityConstants.displayName.value: displayName,
-        UserActivityConstants.tags.value: tags.map((e) => e.toJson()).toList(),
-      };
-
-  factory UserActivity.fromJson(Map<String, dynamic> json) => UserActivity(
-        id: json[UserActivityConstants.id.value],
-        displayName: json[UserActivityConstants.displayName.value],
-        tags: json[UserActivityConstants.tags.value]
-            .map<UserTag>((e) => UserTag.fromJson(e))
-            .toList(),
-      );
-
-  factory UserActivity.fromDocument(
-          DocumentSnapshot<Map<String, dynamic>> doc) =>
-      UserActivity.fromJson(doc.data()!);
-}
+import 'package:resonance_chatroom/models/src/firestore/fs_user.dart';
 
 class User {
   final String id;
-  final String displayName;
-  final String photoUrl;
-  final String email;
+  String? displayName;
+  String? email;
+  String? photoUrl;
+  bool isEnabled;
+  final List<UserSocialMedia> socialMedia;
   final List<UserActivity> activities;
 
-  const User({
+  User({
     required this.id,
-    required this.displayName,
-    required this.photoUrl,
-    required this.email,
-    required this.activities,
+    this.displayName,
+    this.email,
+    this.photoUrl,
+    this.isEnabled = true,
+    this.socialMedia = const [],
+    this.activities = const [],
   });
+}
 
-  Map<String, dynamic> toJson() => {
-        UserConstants.id.value: id,
-        UserConstants.displayName.value: displayName,
-        UserConstants.photoUrl.value: photoUrl,
-        UserConstants.email.value: email,
-        UserConstants.activities.value:
-            activities.map((e) => e.toJson()).toList(),
-      };
+extension UserExtension on User {
+  FSUser toFSUser() {
+    assert(displayName != null, "User displayName 不能為 null");
+    assert(email != null, "User email 不能為 null");
+    return FSUser(
+      id: id,
+      displayName: displayName!,
+      email: email!,
+      photoUrl: photoUrl ?? "",
+      isEnabled: isEnabled,
+    );
+  }
+}
 
-  factory User.fromJson(Map<String, dynamic> json) => User(
-        id: json[UserConstants.id.value],
-        displayName: json[UserConstants.displayName.value],
-        photoUrl: json[UserConstants.photoUrl.value],
-        email: json[UserConstants.email.value],
-        activities: json[UserConstants.activities.value]
-            .map<UserActivity>((e) => UserActivity.fromJson(e))
-            .toList(),
+class UserSocialMedia {
+  String displayName;
+  String linkUrl;
+
+  UserSocialMedia({
+    required this.displayName,
+    required this.linkUrl,
+  });
+}
+
+extension UserSocialMediaExtension on UserSocialMedia {
+  FSUserSocialMedia toFSUserSocialMedia() => FSUserSocialMedia(
+        displayName: displayName,
+        linkUrl: linkUrl,
       );
+}
 
-  factory User.fromDocument(DocumentSnapshot<Map<String, dynamic>> doc) =>
-      User.fromJson(doc.data()!);
+class UserActivity {
+  String? id;
+  String? displayName;
+  List<UserTag> tags;
+
+  UserActivity({
+    this.id,
+    this.displayName,
+    this.tags = const [],
+  });
+}
+
+extension UserActivityExtension on UserActivity {
+  FSUserActivity toFSUserActivity() {
+    assert(id != null, "UserActivity id 不能為 null");
+    assert(displayName != null, "UserActivity displayName 不能為 null");
+    return FSUserActivity(
+      id: id!,
+      displayName: displayName!,
+    );
+  }
+}
+
+class UserTag {
+  String? id;
+  String? displayName;
+
+  UserTag({
+    this.id,
+    this.displayName,
+  });
+}
+
+extension UserTagExtension on UserTag {
+  FSUserTag toFSUserTag() {
+    assert(id != null, "UserTag id 不能為 null");
+    assert(displayName != null, "UserTag displayName 不能為 null");
+    return FSUserTag(
+      id: id!,
+      displayName: displayName!,
+    );
+  }
 }

@@ -1,5 +1,4 @@
 enum FirestoreConstants {
-  userCollectionPath,
   activityCollectionPath,
   roomCollectionPath,
   messageCollectionPath,
@@ -13,8 +12,6 @@ enum FirestoreConstants {
 
   String get value {
     switch (this) {
-      case FirestoreConstants.userCollectionPath:
-        return "users";
       case FirestoreConstants.activityCollectionPath:
         return "activities";
       case FirestoreConstants.roomCollectionPath:

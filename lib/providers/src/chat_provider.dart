@@ -58,7 +58,9 @@ class ChatProvider {
   }
 
   /// 配對成功或進入等待
-  Future<Room?> pairOrWait(
+  ///
+  /// 回傳 對方ID 表示配對成功，回傳 null 表示進入等待
+  Future<String?> pairOrWait(
     String activityId,
     String userId,
     List<String> tags,
@@ -80,14 +82,14 @@ class ChatProvider {
         final waitingUserData = await transaction.get(waitingUserRef);
         final waitingUser = ChatQueueNode.fromDocument(waitingUserData);
 
-        var room = await _createOrEnableRoom(
+        await _createOrEnableRoom(
           activityId,
           [userId, waitingUser.userId],
           _findMutualTag(tags, waitingUser.tags)!,
           transaction,
         );
         transaction.delete(waitingUserRef);
-        return room;
+        return waitingUser.userId;
       } else {
         final queueNodeRef = activityRef
             .collection(FirestoreConstants.chatQueueNodeCollectionPath.value)
@@ -220,7 +222,8 @@ class ChatProvider {
     MessageType type,
   ) async {
     final room = await getRoom(activityId, [fromId, toId]);
-    assert(room != null && room.isEnable, '房間不存在或已關閉');
+    assert(room != null, '房間不存在');
+    assert(room!.isEnable, '房間已關閉');
 
     final curTime = DateTime.now().millisecondsSinceEpoch.toString();
     final roomId = _getRoomId([fromId, toId]);

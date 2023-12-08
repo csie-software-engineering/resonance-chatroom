@@ -10,7 +10,7 @@ class Input extends StatefulWidget {
   const Input({
     super.key,
     this.onAttachmentPressed,
-    required this.onSendPressed,
+    required this.onSendPressed, required this.callback,
   });
 
   final void Function(String, MessageType) onSendPressed; // 暫時先用 string 塞著
@@ -21,6 +21,8 @@ class Input extends StatefulWidget {
   /// something is uploading so you need to set this manually.
 
   // final bool? isAttachmentUploading;
+
+  final Function() callback;
 
   /// See [AttachmentButton.onPressed].
   final VoidCallback? onAttachmentPressed;
@@ -134,7 +136,9 @@ class _InputState extends State<Input> {
                   color: Theme.of(context).colorScheme.primary,
                   icon: const Icon(Icons.next_plan),
                   tooltip: "換話題",
-                  onPressed: () {},
+                  onPressed: () {
+                    widget.callback();
+                  },
                   iconSize: 30,
                   splashRadius: 1,
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),

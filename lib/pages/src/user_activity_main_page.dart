@@ -31,7 +31,7 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
   late final String _description = _test;
   late final String _imageUrl = _fakeUrl;
 
-  bool toggle = false;
+  bool toggle = true;
   late double top1;
   late double left1;
   late double top2;
@@ -106,10 +106,12 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
       _buttonPositionLeft = width - 100;
       bottomInitial = true;
     }
-    top1 = top2 = top3 = _buttonPositionTop + 10;
-    left1 = left2 = left3 = _buttonPositionLeft + 10;
-    _enable = true;
-    setState(() {});
+    if(!_enable) {
+      top1 = top2 = top3 = _buttonPositionTop + 10;
+      left1 = left2 = left3 = _buttonPositionLeft + 10;
+      _enable = true;
+      setState(() {});
+    }
   }
 
   @override
@@ -214,7 +216,7 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
           // width: 250.0,
           child: Stack(
             children: [
-              AnimatedPositioned(
+              _enable ? AnimatedPositioned(
                 duration: toggle
                     ? Duration(milliseconds: 275)
                     : Duration(milliseconds: 875),
@@ -234,8 +236,8 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
                   ),
                   child: Icon(Icons.message, color: Colors.white),
                 ),
-              ),
-              AnimatedPositioned(
+              ) : SizedBox(),
+              _enable ? AnimatedPositioned(
                 top: top2,
                 left: left2,
                 duration: toggle
@@ -255,8 +257,8 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
                   ),
                   child: Icon(Icons.phone, color: Colors.white),
                 ),
-              ),
-              AnimatedPositioned(
+              ) : SizedBox(),
+              _enable ? AnimatedPositioned(
                 top: top3,
                 left: left3,
                 duration: toggle
@@ -276,7 +278,7 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
                   ),
                   child: Icon(Icons.abc, color: Colors.white),
                 ),
-              ),
+              ) : SizedBox(),
               _enable ? Positioned(
                 top: _buttonPositionTop,
                 left: _buttonPositionLeft,

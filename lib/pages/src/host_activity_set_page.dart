@@ -157,6 +157,7 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
                     // 使用Expanded Widget來包裹TextFormField
                     flex: 2, // 指定flex因數為2
                     child: TextFormField(
+                      controller: _nameController,
                       decoration: const InputDecoration(labelText: "活動名稱"),
                     ),
                   ),

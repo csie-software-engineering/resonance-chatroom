@@ -56,6 +56,13 @@ class MyApp extends StatelessWidget {
           theme: ThemeData(
             colorScheme: ColorScheme.fromSeed(
               seedColor: Colors.blue,
+              background: const Color(0xffFFFCE3),
+              primary: const Color(0xffA7D073),
+              onPrimary: const Color(0xff1d1c21),
+              secondary: const Color(0xffFFE500),
+              inversePrimary: const Color(0xFF8EA373),
+              surface: const Color(
+                  0xffD9EBD0), // secondary: const Color(0xff1d1c21),
               brightness: MediaQuery.platformBrightnessOf(context),
             ),
           ),

@@ -42,6 +42,7 @@ class AuthProviders extends ChangeNotifier {
     userCredential = await firebaseAuth.signInWithCredential(credential);
 
   }
+
   signInWithFacebook() async {
     final LoginResult loginResult = await FacebookAuth.instance.login(
         permissions: ['email', 'public_profile', 'user_birthday']

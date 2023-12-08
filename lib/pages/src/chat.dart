@@ -165,7 +165,7 @@ class _ChatPageState extends State<ChatPage> {
     //         (Route<dynamic> route) => false,
     //   );
     // }
-    currentUserId = "Jason";
+    currentUserId = "15";
     String peerId = widget.arguments.peerId;
 
     groupMembers.add(currentUserId);

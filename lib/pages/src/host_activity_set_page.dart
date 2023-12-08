@@ -73,9 +73,6 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
 
   List<Tag> tags = []; // 活動標籤的List
   final List<Widget> fields = [];
-  EdgeInsets columnPadding = EdgeInsets.all(20); // 定義Column的間距
-  double fieldHeight = 50; // 定義欄位的高度
-  double buttonWidth = 100; // 定義按鈕的寬度
   Future<void> _pickImage() async {
     final image = await ImagePicker().pickImage(source: ImageSource.gallery);
     setState(() {
@@ -250,7 +247,6 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
                   ),
                 ],
               ),
-
               SizedBox(height: 16.0),
               Container(
                 height: null, // 將高度改為null
@@ -270,27 +266,28 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
                         ),
                       ),
               ),
-
               const SizedBox(height: 20),
               Padding(
-                padding: columnPadding, // 使用Padding來設定Column的間距
+                padding: const EdgeInsets.all(8.0),
                 child: TextFormField(
                   decoration: const InputDecoration(
                     label: Text('標籤名稱'),
                   ),
                 ),
               ),
+              const SizedBox(width: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center, // 將按鈕置中
                 children: [
                   Container(
-                    width: buttonWidth, // 使用Container來設定按鈕的寬度
+                    width: 100, // 使用Container來設定按鈕的寬度
                     child: MaterialButton(
                       color: Theme.of(context).colorScheme.secondary,
                       child: const Text(
                         "Add tag",
                         style: TextStyle(
-                          color: Colors.white),
+                          color: Colors.white,
+                        ),
                       ),
                       onPressed: () {
                         setState(() {
@@ -308,7 +305,7 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
                   ),
                 ],
               ),
-
+/*
               Row(
                 mainAxisAlignment:
                     MainAxisAlignment.spaceEvenly, // 調整子元件的水平對齊方式
@@ -317,14 +314,15 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
                   SizedBox(
                     height: height * 0.05,
                   ),
-                  Container(
-                    height: fieldHeight, // 使用Container來設定欄位的高度
+                  Expanded(
+                    // 使用Expanded Widget來包裹TextFormField
+                    flex: 2, // 指定flex因數為2
                     child: TextFormField(
                       decoration: const InputDecoration(labelText: "活動標籤"),
                     ),
                   ),
                 ],
-              ),
+              ),*/
               SizedBox(height: 16.0),
               Row(
                 children: [

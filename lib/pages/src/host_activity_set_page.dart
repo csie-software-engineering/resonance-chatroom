@@ -9,9 +9,7 @@ class Event {
   late int startTime; // 活動起始時間
   late int endTime; // 活動結束時間
   String info; // 活動資訊
-
   String? image; // 活動圖片的base64字串
-
   // 新增一個Tag的陣列
   List<Tag> tags; // 活動的標籤
 
@@ -36,16 +34,22 @@ class Event {
 }
 
 class Tag {
-  String tagdata;
-  List<Topic> topics;
-  Tag(this.tagdata, this.topics) {}
+  late String tagdata;
+  late List<Topic> topics;
+  Tag.construct(this.tagdata) {}
 }
 
 class Topic {
-  String topicdata;
-  String questiondata;
-  List<String> choices;
-  Topic(this.topicdata, this.questiondata, this.choices) {}
+  late String topicdata;
+  late String questiondata;
+  late List<String> choices;
+  Topic(this.topicdata, this.questiondata, this.choices);
+  // 使用一個無參數的建構式，並指派預設值給屬性
+  Topic.empty() {
+    topicdata = "";
+    questiondata = "";
+    choices = [];
+  }
 }
 
 class HostActivitySetPage extends StatefulWidget {
@@ -169,6 +173,7 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
                     // 使用Expanded Widget來包裹TextFormField
                     flex: 2, // 指定flex因數為2
                     child: TextFormField(
+                      controller: _nameController,
                       decoration: const InputDecoration(labelText: "活動名稱"),
                     ),
                   ),
@@ -238,7 +243,7 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
                 height: null, // 將高度改為null
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.grey),
-                  borderRadius: BorderRadius.circular(4.0),
+                  borderRadius: BorderRadius.circular(8.0),
                 ),
                 child: _selectedImage == null
                     ? Center(child: Text('沒有選擇圖片'))
@@ -248,7 +253,7 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
                           children: [
                             // 使用Image.file來顯示圖片
                             Image.file(_selectedImage!),
-                            Text('圖片路徑: ${_selectedImage!.path}'),
+                            //Text('圖片路徑: ${_selectedImage!.path}'),
                           ],
                         ),
                       ),
@@ -302,6 +307,7 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
                       onPressed: () {
                         // 跳至送出頁面的邏輯
                         // 傳遞createEvent()方法的回傳值給送出頁面
+
                       },
                       child: Text('送出'),
                     ),
@@ -317,12 +323,14 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
 }
 
 class NewTagField extends StatelessWidget {
-  const NewTagField({
+  NewTagField({
     super.key,
     this.onDelete,
   });
   final VoidCallback? onDelete;
 
+  final TextEditingController _controller =
+      TextEditingController(); // 定義一個TextEditingController
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -331,6 +339,7 @@ class NewTagField extends StatelessWidget {
         children: [
           Expanded(
             child: TextFormField(
+              controller: _controller, // 使用TextEditingController來控制欄位的輸入值
               decoration: const InputDecoration(
                 label: Text('新標籤'),
               ),

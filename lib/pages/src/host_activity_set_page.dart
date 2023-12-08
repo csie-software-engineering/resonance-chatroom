@@ -59,7 +59,7 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
   final List<DateTime> _selectedDates = [DateTime.now(), DateTime.now()];
   File? _selectedImage;
   List<Tag> tags = []; // 活動標籤的List
-  final List<Widget> fields = [];
+  List<Widget> fields = [];
   Future<void> _pickImage() async {
     final image = await ImagePicker().pickImage(source: ImageSource.gallery);
     setState(() {
@@ -253,33 +253,22 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
                         ),
                       ),
               ),
-              const SizedBox(height: 20),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextFormField(
-                  decoration: const InputDecoration(
-                    label: Text('標籤名稱'),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 20),
+
+              SizedBox(height: 16.0),
               Row(
-                mainAxisAlignment: MainAxisAlignment.center, // 將按鈕置中
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  Text('活動標籤'),
+                  SizedBox(width: 16.0),
                   Container(
-                    width: 100, // 使用Container來設定按鈕的寬度
-                    child: MaterialButton(
-                      color: Theme.of(context).colorScheme.secondary,
+                    width: 280, // 使用Container來設定按鈕的寬度
+                    child: ElevatedButton(
                       child: const Text(
-                        "Add tag",
-                        style: TextStyle(
-                          color: Colors.white,
-                        ),
+                        "新增標籤",
                       ),
                       onPressed: () {
                         setState(() {
-                          fields.add(NewTextField(
-                            name: 'name_${fields.length}',
+                          fields.add(NewTagField(
                             onDelete: () {
                               setState(() {
                                 fields.removeAt(fields.length - 1);
@@ -292,41 +281,30 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
                   ),
                 ],
               ),
-/*
-              Row(
-                mainAxisAlignment:
-                    MainAxisAlignment.spaceEvenly, // 調整子元件的水平對齊方式
-                crossAxisAlignment: CrossAxisAlignment.center, // 調整子元件的垂直對齊方式
-                children: [
-                  SizedBox(
-                    height: height * 0.05,
-                  ),
-                  Expanded(
-                    // 使用Expanded Widget來包裹TextFormField
-                    flex: 2, // 指定flex因數為2
-                    child: TextFormField(
-                      decoration: const InputDecoration(labelText: "活動標籤"),
-                    ),
-                  ),
-                ],
-              ),*/
+              ...fields,
               SizedBox(height: 16.0),
               Row(
                 children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      // 跳至預覽頁面的邏輯
-                      // 傳遞createEvent()方法的回傳值給預覽頁面
-                    },
-                    child: Text('預覽'),
+                  Container(
+                    width: 100, // 使用Container來設定按鈕的寬度
+                    child: ElevatedButton(
+                      onPressed: () {
+                        // 跳至預覽頁面的邏輯
+                        // 傳遞createEvent()方法的回傳值給預覽頁面
+                      },
+                      child: Text('預覽'),
+                    ),
                   ),
                   SizedBox(width: 16.0),
-                  ElevatedButton(
-                    onPressed: () {
-                      // 跳至送出頁面的邏輯
-                      // 傳遞createEvent()方法的回傳值給送出頁面
-                    },
-                    child: Text('送出'),
+                  Container(
+                    width: 100, // 使用Container來設定按鈕的寬度
+                    child: ElevatedButton(
+                      onPressed: () {
+                        // 跳至送出頁面的邏輯
+                        // 傳遞createEvent()方法的回傳值給送出頁面
+                      },
+                      child: Text('送出'),
+                    ),
                   ),
                 ],
               ),
@@ -338,13 +316,11 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
   }
 }
 
-class NewTextField extends StatelessWidget {
-  const NewTextField({
+class NewTagField extends StatelessWidget {
+  const NewTagField({
     super.key,
-    required this.name,
     this.onDelete,
   });
-  final String name;
   final VoidCallback? onDelete;
 
   @override
@@ -356,7 +332,7 @@ class NewTextField extends StatelessWidget {
           Expanded(
             child: TextFormField(
               decoration: const InputDecoration(
-                label: Text('New field'),
+                label: Text('新標籤'),
               ),
             ),
           ),

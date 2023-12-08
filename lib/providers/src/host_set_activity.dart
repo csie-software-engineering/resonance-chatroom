@@ -4,7 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:resonance_chatroom/constants/constants.dart';
 import 'package:resonance_chatroom/models/models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_guid/flutter_guid.dart';
+
+import '../../utils/src/uuid.dart';
 
 class SetActivityProvider {
   final SharedPreferences pref;
@@ -20,7 +21,7 @@ class SetActivityProvider {
       Activity activitydata,
       String UserId)
   async {
-    String activityid = Guid.newGuid.toString();
+    String activityid = generateUuid();
     DocumentReference documentReference = firebaseFirestore
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityid);
@@ -159,7 +160,7 @@ class SetActivityProvider {
       log("you are not manager.");
       return;
     }
-    String tagid = Guid.newGuid.toString();
+    String tagid = generateUuid();
     DocumentReference documentReference = firebaseFirestore
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityid)
@@ -306,7 +307,7 @@ class SetActivityProvider {
       return;
     }
 
-    String topicid = Guid.newGuid.toString();
+    String topicid = generateUuid();
     DocumentReference topicdoc = firebaseFirestore
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityid)
@@ -387,7 +388,7 @@ class SetActivityProvider {
       }
     }
 
-    String questionid = Guid.newGuid.toString();
+    String questionid = generateUuid();
 
     DocumentReference questiondoc = firebaseFirestore
         .collection(FirestoreConstants.activityCollectionPath.value)

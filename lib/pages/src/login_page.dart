@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:resonance_chatroom/pages/pages.dart';
 import '../../providers/providers.dart';
 import 'package:provider/provider.dart';
 
@@ -63,4 +62,3 @@ class LoginPage extends StatelessWidget{
     );
   }
 }
-

@@ -66,7 +66,7 @@ class MyApp extends StatelessWidget {
               brightness: MediaQuery.platformBrightnessOf(context),
             ),
           ),
-          initialRoute: Routes.initPage.value,
+          initialRoute: Routes.loginPage.value,
           routes: routes,
           debugShowCheckedModeBanner: false,
         ),

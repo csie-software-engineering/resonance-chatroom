@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'src/chat.dart';
+import 'src/user_activity_main_page.dart';
 import 'src/host_activity_set_page.dart';
 import 'src/init.dart';
 import 'src/login_page.dart';

@@ -1,5 +1,11 @@
 import 'dart:async';
+// import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../../models/src/user.dart';
+import '../../providers/providers.dart';
+import '../routes.dart';
 
 class UserActivityMainPage extends StatefulWidget {
   const UserActivityMainPage({super.key});
@@ -12,6 +18,10 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation _animation;
+
+  late final ChatProvider chatProvider = context.read<ChatProvider>();
+  // late final AuthProviders authProvider = context.read<AuthProviders>();
+  late final UserProvider userProvider = context.read<UserProvider>();
 
   FloatingActionButtonLocation buttonPosition =
       FloatingActionButtonLocation.centerFloat;
@@ -260,7 +270,7 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
                     ),
                     child: IconButton(
                       icon: Text("配對"),
-                      onPressed: () {
+                      onPressed: () async {
                         setState(() {
                           if (!_startMatching) {
                             _startMatching = true;
@@ -268,6 +278,7 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
                             buttonColor = Theme.of(context).colorScheme.primary;
                             _timer = Timer.periodic(
                                 const Duration(seconds: 1), _onTimerTick);
+
                           } else {
                             _startMatching = false;
                             _height = 0;
@@ -276,6 +287,62 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
                             timeShowUp = 0;
                             _timer?.cancel();
                           }
+                        });
+
+                        var tags1 = <UserTag>[];
+                        tags1.add(UserTag(id: "123", displayName: "apple"));
+                        tags1.add(UserTag(id: "456", displayName: "banana"));
+                        var tags2 = <UserTag>[];
+                        tags2.add(UserTag(id: "456", displayName: "banana"));
+                        await userProvider.addUser(
+                          User(
+                              id: "14",
+                              displayName: "Daniel",
+                              email: "daniel@gmail.com",
+                            ),
+                        );
+                        var act = UserActivity(
+                            id: "asdfghjkl",
+                            displayName: "qwertyuiop",
+                            tags: tags1
+                        );
+                        await userProvider.addUserActivity("14", act, addTag: true);
+
+                        await userProvider.addUser(
+                            User(
+                              id: "15",
+                              displayName: "Jason",
+                              email: "jason@gmail.com",
+                            )
+                        );
+                        await userProvider.addUserActivity("15", act);
+                        for(var tag in tags2){
+                          await userProvider.addUserTag("15", "asdfghjkl", tag);
+                        }
+
+                        var Daniel = await userProvider.getUser("14", loadActivity: true);
+                        var jason = await userProvider.getUser("15", loadActivity: true);
+
+                        var da = await userProvider.getUserActivity("14", "asdfghjkl", loadTag: true);
+                        var ja = await userProvider.getUserActivity("15", "asdfghjkl", loadTag: true);
+
+                        var re1 = await chatProvider.pairOrWait("asdfghjkl", "14", da!.tags.map((e) {
+                          return e.id;
+                        }).toList());
+
+                        debugPrint(re1 ?? "no");
+
+                        var re2 = await chatProvider.pairOrWait("asdfghjkl", "15", ja!.tags.map((e) {
+                          return e.id;
+                        }).toList());
+
+                        debugPrint(re2 ?? "no");
+
+                        _startMatching = false;
+                        _timer?.cancel();
+
+                        setState(() {
+                          Navigator.of(context).pushNamed(Routes.chatPage.value);
                         });
                       },
                     ),

@@ -44,11 +44,13 @@ class HostActivitySetPage extends StatefulWidget {
 }
 
 class _HostActivitySetPageState extends State<HostActivitySetPage> {
-  late final SetActivityProvider setActivityProvider = context.read<SetActivityProvider>();
+  late final SetActivityProvider setActivityProvider =
+      context.read<SetActivityProvider>();
   TextEditingController _nameController = TextEditingController();
   TextEditingController _infoController = TextEditingController();
   final List<DateTime> _selectedDates = [DateTime.now(), DateTime.now()];
   File? _selectedImage;
+  File? _checkselectedImage;
   Future<void> _pickImage() async {
     final image = await ImagePicker().pickImage(source: ImageSource.gallery);
     setState(() {
@@ -230,18 +232,14 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
                   border: Border.all(color: Colors.grey),
                   borderRadius: BorderRadius.circular(4.0),
                 ),
-                child: _selectedImage == null
+                child: _checkselectedImage == null
                     ? Center(child: Text('沒有選擇圖片'))
                     : SingleChildScrollView(
                         // 將Column放在SingleChildScrollView中
                         child: Column(
                           children: [
-                    final data = await setActivityProvider.Getactivity("0dfefefc-75bf-442d-87ec-a18eb841b61d"
-                    , "ownerid"),
-                  _selectedImage = base64Decode(data!.activitryphoto),
-                // 使用Image.file來顯示圖片
-                Image.file(_selectedImage!),
-                            Text('圖片路徑: ${_selectedImage!.path}'),
+// 使用Image.file來顯示圖片
+                Image.file(_checkselectedImage!),
                           ],
                         ),
                       ),
@@ -252,7 +250,10 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
                 children: [
                   ElevatedButton(
                     onPressed: () async {
-
+                      final data = await setActivityProvider.Getactivity(
+                              "0dfefefc-75bf-442d-87ec-a18eb841b61d",
+                              "ownerid");
+_checkselectedImage?.writeAsBytesSync(base64Decode(data!.activitryphoto));
                       // 跳至預覽頁面的邏輯
                       // 傳遞createEvent()方法的回傳值給預覽頁面
                     },
@@ -262,16 +263,17 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
                   ElevatedButton(
                     onPressed: () async {
                       Activity activitydata = Activity(
-                          activitryphoto: base64Encode(_selectedImage!.readAsBytesSync()),
+                          activitryphoto:
+                              base64Encode(_selectedImage!.readAsBytesSync()),
                           activityid: "id",
                           activityinfo: _infoController.text,
                           activityname: _nameController.text,
                           startdate: _selectedDates[0].toString(),
                           enddate: _selectedDates[1].toString(),
                           ownerid: "ownerid",
-                          managers: []
-                      );
-                      await setActivityProvider.SetNewActivity(activitydata, "ownerid");
+                          managers: []);
+                      await setActivityProvider.SetNewActivity(
+                          activitydata, "ownerid");
                       // 跳至送出頁面的邏輯
                       // 傳遞createEvent()方法的回傳值給送出頁面
                     },

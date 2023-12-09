@@ -40,8 +40,8 @@ extension FSUserExtension on FSUser {
   User toUser() => User(
         id: id,
         displayName: displayName,
-        photo: photo,
-        email: email,
+        photo: photo.isEmpty ? null : photo,
+        email: email.isEmpty ? null : email,
         socialMedia: [],
         activities: [],
       );
@@ -79,16 +79,16 @@ extension FSUserSocialMediaExtension on FSUserSocialMedia {
 
 class FSUserActivity {
   final String id;
-  final String displayName;
+  final List<String> tags;
 
   const FSUserActivity({
     required this.id,
-    required this.displayName,
+    required this.tags,
   });
 
   Map<String, dynamic> toJson() => {
         FSUserActivityConstants.id.value: id,
-        FSUserActivityConstants.displayName.value: displayName,
+        FSUserActivityConstants.tags.value: tags,
       };
 
   factory FSUserActivity.fromDocument(
@@ -96,42 +96,13 @@ class FSUserActivity {
   ) =>
       FSUserActivity(
         id: doc.get(FSUserActivityConstants.id.value),
-        displayName: doc.get(FSUserActivityConstants.displayName.value),
+        tags: doc.get(FSUserActivityConstants.tags.value),
       );
 }
 
 extension FSUserActivityExtension on FSUserActivity {
   UserActivity toUserActivity() => UserActivity(
         id: id,
-        displayName: displayName,
-        tags: [],
-      );
-}
-
-class FSUserTag {
-  final String id;
-  final String displayName;
-
-  const FSUserTag({
-    required this.id,
-    required this.displayName,
-  });
-
-  Map<String, dynamic> toJson() => {
-        FSUserTagConstants.id.value: id,
-        FSUserTagConstants.displayName.value: displayName,
-      };
-
-  factory FSUserTag.fromDocument(DocumentSnapshot<Map<String, dynamic>> doc) =>
-      FSUserTag(
-        id: doc.get(FSUserTagConstants.id.value),
-        displayName: doc.get(FSUserTagConstants.displayName.value),
-      );
-}
-
-extension FSUserTagExtension on FSUserTag {
-  UserTag toUserTag() => UserTag(
-        id: id,
-        displayName: displayName,
+        tags: tags,
       );
 }

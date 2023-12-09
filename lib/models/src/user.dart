@@ -49,17 +49,17 @@ extension UserSocialMediaExtension on UserSocialMedia {
 
 class UserActivity {
   final String id;
-  List<String> tags;
+  List<String> tagIds;
 
   UserActivity({
     required this.id,
-    this.tags = const [],
+    this.tagIds = const [],
   });
 }
 
 extension UserActivityExtension on UserActivity {
   FSUserActivity toFSUserActivity() => FSUserActivity(
         id: id,
-        tags: tags,
+        tagIds: tagIds,
       );
 }

@@ -60,13 +60,13 @@ enum FSUserSocialMediaConstants {
 
 enum FSUserActivityConstants {
   id,
-  tags;
+  tagIds;
 
   String get value {
     switch (this) {
       case FSUserActivityConstants.id:
         return "id";
-      case FSUserActivityConstants.tags:
+      case FSUserActivityConstants.tagIds:
         return "tags";
       default:
         throw Exception("Not found value for FSUserActivityConstants");

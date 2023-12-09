@@ -79,16 +79,16 @@ extension FSUserSocialMediaExtension on FSUserSocialMedia {
 
 class FSUserActivity {
   final String id;
-  final List<String> tags;
+  final List<String> tagIds;
 
   const FSUserActivity({
     required this.id,
-    required this.tags,
+    required this.tagIds,
   });
 
   Map<String, dynamic> toJson() => {
         FSUserActivityConstants.id.value: id,
-        FSUserActivityConstants.tags.value: tags,
+        FSUserActivityConstants.tagIds.value: tagIds,
       };
 
   factory FSUserActivity.fromDocument(
@@ -96,13 +96,13 @@ class FSUserActivity {
   ) =>
       FSUserActivity(
         id: doc.get(FSUserActivityConstants.id.value),
-        tags: doc.get(FSUserActivityConstants.tags.value),
+        tagIds: List<String>.from(doc.get(FSUserActivityConstants.tagIds.value)),
       );
 }
 
 extension FSUserActivityExtension on FSUserActivity {
   UserActivity toUserActivity() => UserActivity(
         id: id,
-        tags: tags,
+        tagIds: tagIds,
       );
 }

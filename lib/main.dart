@@ -11,7 +11,7 @@ import 'constants/constants.dart';
 import 'providers/providers.dart';
 import 'pages/routes.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,

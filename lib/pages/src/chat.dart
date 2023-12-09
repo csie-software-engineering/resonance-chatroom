@@ -220,8 +220,8 @@ class _ChatPageState extends State<ChatPage> {
                     constraints: const BoxConstraints(maxWidth: 200),
                     // width: messageChat.content.length,
                     decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary,
-                        borderRadius: BorderRadius.circular(12)),
+                        color: Theme.of(context).colorScheme.inversePrimary,
+                        borderRadius: BorderRadius.circular(20)),
                     margin: const EdgeInsets.only(
                         // bottom: isLastMessageRight(index) ? 20 : 10, right: 10),
                         bottom: 10,
@@ -229,7 +229,7 @@ class _ChatPageState extends State<ChatPage> {
                     child: Text(
                       messageChat.content,
                       style: TextStyle(
-                        color: Theme.of(context).colorScheme.onPrimary,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ))
                 // Sticker
@@ -292,7 +292,7 @@ class _ChatPageState extends State<ChatPage> {
                           constraints: const BoxConstraints(maxWidth: 200),
                           decoration: BoxDecoration(
                               color: Theme.of(context).colorScheme.secondary,
-                              borderRadius: BorderRadius.circular(12)),
+                              borderRadius: BorderRadius.circular(20)),
                           margin: EdgeInsets.only(bottom: 10, left: 10),
                           child: Text(
                             messageChat.content,
@@ -324,7 +324,7 @@ class _ChatPageState extends State<ChatPage> {
         children: [
           Container(
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
+              color: Theme.of(context).colorScheme.secondaryContainer,
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.2),
@@ -351,11 +351,13 @@ class _ChatPageState extends State<ChatPage> {
                             const BorderRadius.all(Radius.circular(16)),
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                              vertical: 2, horizontal: 20.0),
-                          color: Theme.of(context).colorScheme.background,
+                              vertical: 5, horizontal: 20.0),
+                          color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
                           child: Text("Tag",
-                              style: const TextStyle(
-                                  fontSize: 20, fontWeight: FontWeight.w700)),
+                              style: TextStyle(
+                                  fontSize: 20, fontWeight: FontWeight.w700,
+                              color: Theme.of(context).colorScheme.onTertiaryContainer,
+                              )),
                         ),
                       ),
                     ),

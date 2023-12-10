@@ -40,8 +40,8 @@ class MyApp extends StatelessWidget {
           ),
           Provider<ChatProvider>(
             create: (_) => ChatProvider(
+              db: firebaseFirestore,
               pref: pref,
-              firebaseFirestore: firebaseFirestore,
             ),
           ),
           ChangeNotifierProvider<AuthProviders>(

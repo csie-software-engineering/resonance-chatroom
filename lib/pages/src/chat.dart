@@ -411,7 +411,7 @@ class _ChatPageState extends State<ChatPage> {
                                         stream: chatProvider.getChatStream(
                                             widget.arguments.activityId,
                                             groupMembers,
-                                            _limit),
+                                            limit: _limit),
                                         builder: (BuildContext context,
                                             AsyncSnapshot<QuerySnapshot>
                                                 snapshot) {

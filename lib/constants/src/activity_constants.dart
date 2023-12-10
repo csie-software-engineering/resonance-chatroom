@@ -79,7 +79,9 @@ enum Questionconstants{
   topicid,
   questionid,
   questionname,
-  choices;
+  choices,
+  choice,
+  userlist;
 
   String get value {
     switch (this) {
@@ -95,6 +97,10 @@ enum Questionconstants{
         return "questionname";
       case Questionconstants.choices:
         return "choices";
+      case Questionconstants.choice:
+        return "choice";
+      case Questionconstants.userlist:
+        return "userlist";
       default:
         throw Exception("Not found value for FirestoreConstants");
     }

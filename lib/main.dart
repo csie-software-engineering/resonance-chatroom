@@ -30,6 +30,12 @@ class MyApp extends StatelessWidget {
               firebaseFirestore: firebaseFirestore
             ),
           ),
+          Provider<QuestionProvider>(
+            create: (_) => QuestionProvider(
+                pref: pref,
+                firebaseFirestore: firebaseFirestore
+            ),
+          ),
         ],
         child: MaterialApp(
           title: AppConstants.appTitle,

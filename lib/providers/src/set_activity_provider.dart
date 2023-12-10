@@ -400,6 +400,15 @@ class SetActivityProvider {
     await questiondoc.update({
       Questionconstants.questionid.value: questionid
     });
+    for (var i = 0; i < questiondata.choices.length; i++){
+      Review review = Review(
+          choice: questiondata.choices[i],
+          userlist: []);
+      var reviewdoc = questiondoc
+          .collection(FirestoreConstants.reviewCollectionPath.value)
+          .doc(questiondata.choices[i]);
+      await reviewdoc.set(review.toJson());
+    }
   }
 
   ///編輯問卷題目

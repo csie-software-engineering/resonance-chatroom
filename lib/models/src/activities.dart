@@ -139,7 +139,7 @@ class Question {
     required this.topicid,
     required this.questionid,
     required this.questionname,
-    required this.choices
+    required this.choices,
   });
 
   Map<String, dynamic> toJson() {
@@ -149,7 +149,7 @@ class Question {
       Questionconstants.topicid.value: topicid,
       Questionconstants.questionid.value: questionid,
       Questionconstants.questionname.value: questionname,
-      Questionconstants.choices.value: choices
+      Questionconstants.choices.value: choices,
     };
   }
 
@@ -166,7 +166,33 @@ class Question {
       topicid: topicid,
       questionid: questionid,
       questionname: questionname,
-        choices: choices.cast<String>()
+      choices: choices.cast<String>(),
+    );
+  }
+}
+
+class Review{
+  final String choice;
+  final List<String> userlist;
+
+  const Review({
+    required this.choice,
+    required this.userlist
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      Questionconstants.choice.value: choice,
+      Questionconstants.userlist.value: userlist
+    };
+  }
+
+  factory Review.fromDocument(DocumentSnapshot doc) {
+    String choice = doc.get(Questionconstants.choice.value);
+    List<dynamic> userlist = doc.get(Questionconstants.userlist.value);
+    return Review(
+        choice: choice,
+        userlist: userlist.cast<String>()
     );
   }
 }

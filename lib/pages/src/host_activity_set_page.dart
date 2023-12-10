@@ -167,7 +167,7 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
     final double height = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
-        title: Text('活動頁面'),
+        title: Text('活動設定頁面'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

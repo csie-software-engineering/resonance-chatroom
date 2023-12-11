@@ -20,13 +20,12 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
   late Animation _animation;
 
   late final ChatProvider chatProvider = context.read<ChatProvider>();
-  // late final AuthProviders authProvider = context.read<AuthProviders>();
+  late final AuthProviders authProvider = context.read<AuthProviders>();
   late final UserProvider userProvider = context.read<UserProvider>();
 
   FloatingActionButtonLocation buttonPosition =
       FloatingActionButtonLocation.centerFloat;
 
-  Color buttonColor = Colors.yellow;
   bool _startMatching = false;
 
   late double _buttonPositionTop;
@@ -89,7 +88,12 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
           opacity: 1,
           duration: const Duration(milliseconds: 1000),
           child: Center(
-            child: Text(_formatTime()),
+            child: Text(
+              _formatTime(),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onInverseSurface,
+              ),
+            ),
           ),
         ),
       );
@@ -159,7 +163,7 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
         children: [
           Container(
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
+              color: Theme.of(context).colorScheme.secondaryContainer,
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.2),
@@ -182,10 +186,17 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
                         child: Container(
                           padding: const EdgeInsets.symmetric(
                               vertical: 2, horizontal: 20.0),
-                          color: Theme.of(context).colorScheme.background,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .primary
+                              .withOpacity(0.8),
                           child: Text(_appBarTitle,
-                              style: const TextStyle(
-                                  fontSize: 20, fontWeight: FontWeight.w700)),
+                              style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w700,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onInverseSurface)),
                         ),
                       ),
                     ),
@@ -242,10 +253,11 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
                     height: size1,
                     width: size1,
                     decoration: BoxDecoration(
-                      color: Colors.black87,
+                      color: Theme.of(context).colorScheme.primary.withRed(200),
                       borderRadius: BorderRadius.circular(40.0),
                     ),
-                    child: Icon(Icons.message, color: Colors.white),
+                    child: Icon(Icons.message,
+                        color: Theme.of(context).colorScheme.onInverseSurface),
                   ),
                 )
               : SizedBox(),
@@ -265,85 +277,80 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
                     height: size2,
                     width: size2,
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.secondary,
+                      color: Theme.of(context).colorScheme.primary.withRed(200),
                       borderRadius: BorderRadius.circular(40.0),
                     ),
                     child: IconButton(
-                      icon: Text("配對"),
+                      icon: _startMatching
+                          ? Text("取消",
+                              style: TextStyle(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onInverseSurface,
+                              ))
+                          : Text("配對",
+                              style: TextStyle(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onInverseSurface,
+                              )),
                       onPressed: () async {
-                        setState(() {
-                          if (!_startMatching) {
-                            _startMatching = true;
-                            _height = 20;
-                            buttonColor = Theme.of(context).colorScheme.primary;
-                            _timer = Timer.periodic(
-                                const Duration(seconds: 1), _onTimerTick);
-
-                          } else {
+                        if (_startMatching) {
+                          setState(() {
                             _startMatching = false;
                             _height = 0;
-                            buttonColor =
-                                Theme.of(context).colorScheme.secondary;
                             timeShowUp = 0;
                             _timer?.cancel();
-                          }
-                        });
+                          });
+                        } else {
+                          setState(() {
+                            _startMatching = true;
+                            _height = 20;
+                            _timer = Timer.periodic(
+                                const Duration(seconds: 1), _onTimerTick);
+                          });
 
-                        var tags1 = <UserTag>[];
-                        tags1.add(UserTag(id: "123", displayName: "apple"));
-                        tags1.add(UserTag(id: "456", displayName: "banana"));
-                        var tags2 = <UserTag>[];
-                        tags2.add(UserTag(id: "456", displayName: "banana"));
-                        await userProvider.addUser(
-                          User(
-                              id: "14",
-                              displayName: "Daniel",
-                              email: "daniel@gmail.com",
-                            ),
-                        );
-                        var act = UserActivity(
-                            id: "asdfghjkl",
-                            displayName: "qwertyuiop",
-                            tags: tags1
-                        );
-                        await userProvider.addUserActivity("14", act, addTag: true);
+                          String id = authProvider.getUserId() as String;
 
-                        await userProvider.addUser(
-                            User(
-                              id: "15",
-                              displayName: "Jason",
-                              email: "jason@gmail.com",
-                            )
-                        );
-                        await userProvider.addUserActivity("15", act);
-                        for(var tag in tags2){
-                          await userProvider.addUserTag("15", "asdfghjkl", tag);
+                          debugPrint("getUserId2: ${id}");
+
+                          var tags1 = <UserTag>[];
+                          tags1.add(UserTag(id: "123", displayName: "apple"));
+                          tags1.add(UserTag(id: "456", displayName: "banana"));
+
+                          var act = UserActivity(
+                              id: "asdfghjkl",
+                              displayName: "qwertyuiop",
+                              tags: tags1);
+
+                          await userProvider.addUser(User(
+                            id: id,
+                            displayName: "Daniel",
+                            email: "daniel@gmail.com",
+                          ));
+
+                          await userProvider.addUserActivity(id, act,
+                              addTag: true);
+
+                          var da = await userProvider
+                              .getUserActivity(id, "asdfghjkl", loadTag: true);
+                          // var ja = await userProvider.getUserActivity("15", "asdfghjkl", loadTag: true);
+
+                          var re1 = await chatProvider.pairOrWait(
+                              "asdfghjkl",
+                              id,
+                              da!.tags.map((e) {
+                                return e.id;
+                              }).toList());
+
+                          setState(() {
+                            _height = 0;
+                            Navigator.of(context)
+                                .pushNamed(Routes.chatPage.value, arguments: {
+                              "a": 1,
+                            });
+                          });
                         }
-
-                        var Daniel = await userProvider.getUser("14", loadActivity: true);
-                        var jason = await userProvider.getUser("15", loadActivity: true);
-
-                        var da = await userProvider.getUserActivity("14", "asdfghjkl", loadTag: true);
-                        var ja = await userProvider.getUserActivity("15", "asdfghjkl", loadTag: true);
-
-                        var re1 = await chatProvider.pairOrWait("asdfghjkl", "14", da!.tags.map((e) {
-                          return e.id;
-                        }).toList());
-
-                        debugPrint(re1 ?? "no");
-
-                        var re2 = await chatProvider.pairOrWait("asdfghjkl", "15", ja!.tags.map((e) {
-                          return e.id;
-                        }).toList());
-
-                        debugPrint(re2 ?? "no");
-
-                        _startMatching = false;
-                        _timer?.cancel();
-
-                        setState(() {
-                          Navigator.of(context).pushNamed(Routes.chatPage.value);
-                        });
                       },
                     ),
                   ),
@@ -365,10 +372,131 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
                     height: size3,
                     width: size3,
                     decoration: BoxDecoration(
-                      color: Colors.black87,
+                      color: Theme.of(context).colorScheme.primary.withRed(200),
                       borderRadius: BorderRadius.circular(40.0),
                     ),
-                    child: Icon(Icons.abc, color: Colors.white),
+                    child: IconButton(
+                      icon: Text("標籤",
+                          style: TextStyle(
+                            color:
+                                Theme.of(context).colorScheme.onInverseSurface,
+                          )),
+                      onPressed: () {
+                        var height = context.size!.height * 0.5;
+                        var width = context.size!.width * 0.55;
+                        showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Text('匹配設定'),
+                                content: Container(
+                                  width: width,
+                                  constraints: BoxConstraints(
+                                    maxHeight: height,
+                                  ),
+                                  child: Stack(
+                                    alignment: AlignmentDirectional.topStart,
+                                    children: [
+                                      Positioned(
+                                        top: 0,
+                                        child: Container(
+                                          width: width,
+                                          child: Row(
+                                            children: [
+                                              Container(
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 12,
+                                                      vertical: 3),
+                                                  decoration: BoxDecoration(
+                                                      borderRadius:
+                                                          const BorderRadius
+                                                              .only(
+                                                              topLeft: Radius
+                                                                  .circular(10),
+                                                              bottomLeft: Radius
+                                                                  .circular(
+                                                                      10)),
+                                                      color: Theme.of(context)
+                                                          .colorScheme
+                                                          .inversePrimary),
+                                                  child: Text(
+                                                    "暱稱",
+                                                    style: TextStyle(
+                                                      color: Theme.of(context)
+                                                          .colorScheme
+                                                          .onSurface,
+                                                    ),
+                                                  )),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                      Positioned(
+                                        top: 50,
+                                        child: Container(
+                                          width: width,
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 12, vertical: 3),
+                                          decoration: BoxDecoration(
+                                            border: Border.all(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .primary,
+                                              width: 2.0,
+                                              style: BorderStyle.solid,
+                                            ),
+                                            borderRadius:
+                                                BorderRadius.circular(18),
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .inversePrimary,
+                                          ),
+                                          child: Column(
+                                            children: [
+                                              Text("標籤",
+                                                  textAlign: TextAlign.center,
+                                                  style: TextStyle(
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .onSurface,
+                                                  )),
+                                              SingleChildScrollView(
+                                                child: Column(
+                                                  children: [
+                                                    Text(
+                                                        'Your expandable content goes here'),
+                                                    Text(
+                                                        'Your expandable content goes here'),
+                                                    Text(
+                                                        'Your expandable content goes here'),Text(
+                                                        'Your expandable content goes here'),Text(
+                                                        'Your expandable content goes here'),Text(
+                                                        'Your expandable content goes here'),Text(
+                                                        'Your expandable content goes here'),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      // 關閉對話框
+                                      // Navigator.of(context).pop();
+                                    },
+                                    child: Text('確定'),
+                                  ),
+                                ],
+                              );
+                            });
+                      },
+                    ),
                   ),
                 )
               : SizedBox(),
@@ -384,12 +512,15 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
                         height: toggle ? 70.0 : 60.0,
                         width: toggle ? 70.0 : 60.0,
                         decoration: BoxDecoration(
-                          color: Colors.yellow[600],
+                          color: Theme.of(context).colorScheme.primary,
                           borderRadius: BorderRadius.circular(60.0),
                         ),
                         child: Material(
                             color: Colors.transparent,
                             child: IconButton(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onInverseSurface,
                               splashColor: Colors.black54,
                               onPressed: () {
                                 setState(() {
@@ -435,55 +566,6 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
               : SizedBox(),
         ],
       )),
-      // floatingActionButton: Stack(
-      //   children: [
-      //     Positioned(
-      //       top: _buttonPositionTop,
-      //       left: _buttonPositionLeft,
-      //       child: Draggable(
-      //         onDraggableCanceled: (velocity, offset) {
-      //           // 當手指釋放時，計算最近的邊，自動貼到邊上
-      //           setState(() {
-      //             _buttonPositionTop = offset.dy;
-      //             _buttonPositionLeft = offset.dx;
-      //             _snapToEdges();
-      //           });
-      //         },
-      //         childWhenDragging: Container(),
-      //         feedback: FloatingActionButton(
-      //           onPressed: () {},
-      //           child: const Icon(Icons.add),
-      //         ),
-      //         child: FloatingActionButton(
-      //           backgroundColor: buttonColor,
-      //           onPressed: () {
-      //             setState(() {
-      //               if (!_startMatching) {
-      //                 _startMatching = true;
-      //                 _height = 20;
-      //                 buttonColor = Theme.of(context).colorScheme.primary;
-      //                 _timer = Timer.periodic(
-      //                     const Duration(seconds: 1), _onTimerTick);
-      //               } else {
-      //                 _startMatching = false;
-      //                 _height = 0;
-      //                 buttonColor = Theme.of(context).colorScheme.secondary;
-      //                 timeShowUp = 0;
-      //                 _timer?.cancel();
-      //               }
-      //             });
-      //           },
-      //           child: Text(
-      //             "配對",
-      //             style: TextStyle(
-      //               color: Theme.of(context).colorScheme.onPrimary,
-      //             ),
-      //           ),
-      //         ),
-      //       ),
-      //     ),
-      //   ],
-      // ),
       backgroundColor: Theme.of(context).colorScheme.background,
       floatingActionButtonLocation: buttonPosition,
     );
@@ -552,7 +634,8 @@ class ActivityDescription extends StatelessWidget {
         child: Card(
           color: Theme.of(context).colorScheme.surface,
           clipBehavior: Clip.hardEdge,
-          elevation: 2,
+          elevation: 10,
+          shadowColor: Theme.of(context).colorScheme.primary,
           child: Column(
             mainAxisSize: MainAxisSize.max,
             children: <Widget>[
@@ -589,7 +672,7 @@ class StartDateCard extends StatelessWidget {
         color: const Color(0xFF8EA373),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
             spreadRadius: 1,
             blurRadius: 3,
             offset: const Offset(0, 2),
@@ -602,7 +685,7 @@ class StartDateCard extends StatelessWidget {
           Text(
             "AUG",
             style: TextStyle(
-              color: Theme.of(context).colorScheme.secondary,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const SizedBox(width: 10),
@@ -610,13 +693,13 @@ class StartDateCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: 30,
                 // fontWeight: FontWeight.w600
-                color: Theme.of(context).colorScheme.secondary,
+                color: Theme.of(context).colorScheme.onSurface,
               )),
           const SizedBox(width: 10),
           Text(
             "THU",
             style: TextStyle(
-              color: Theme.of(context).colorScheme.secondary,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
         ],
@@ -640,7 +723,7 @@ class EndDateCard extends StatelessWidget {
         color: const Color(0xFF8EA373),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
             spreadRadius: 1,
             blurRadius: 3,
             offset: const Offset(0, 2),
@@ -653,7 +736,7 @@ class EndDateCard extends StatelessWidget {
           Text(
             "SEP",
             style: TextStyle(
-              color: Theme.of(context).colorScheme.secondary,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const SizedBox(width: 10),
@@ -661,13 +744,13 @@ class EndDateCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: 30,
                 // fontWeight: FontWeight.w600
-                color: Theme.of(context).colorScheme.secondary,
+                color: Theme.of(context).colorScheme.onSurface,
               )),
           const SizedBox(width: 10),
           Text(
             "SAT",
             style: TextStyle(
-              color: Theme.of(context).colorScheme.secondary,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
         ],

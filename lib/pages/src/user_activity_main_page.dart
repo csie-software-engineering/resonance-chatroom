@@ -1,11 +1,14 @@
 import 'dart:async';
+
 // import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/src/user.dart';
 import '../../providers/providers.dart';
 import '../routes.dart';
+import '../../widgets/src/activity_card/activity_card.dart';
 
 class UserActivityMainPage extends StatefulWidget {
   const UserActivityMainPage({super.key});
@@ -173,36 +176,41 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
                 ),
               ],
             ),
-            child: Row(
+            child: Column(
               children: [
-                const BackButton(),
-                Expanded(
-                  child: Container(
-                    height: kToolbarHeight,
-                    child: Center(
-                      child: ClipRRect(
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(16)),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 2, horizontal: 20.0),
-                          color: Theme.of(context)
-                              .colorScheme
-                              .primary
-                              .withOpacity(0.8),
-                          child: Text(_appBarTitle,
-                              style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w700,
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onInverseSurface)),
+                SizedBox(height: MediaQuery.of(context).padding.top),
+                Row(
+                  children: [
+                    const BackButton(),
+                    Expanded(
+                      child: Container(
+                        height: kToolbarHeight,
+                        child: Center(
+                          child: ClipRRect(
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(16)),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 2, horizontal: 20.0),
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .primary
+                                  .withOpacity(0.8),
+                              child: Text(_appBarTitle,
+                                  style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w700,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onInverseSurface)),
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
+                    const SizedBox(width: 50),
+                  ],
                 ),
-                const SizedBox(width: 50),
               ],
             ),
           ),
@@ -383,116 +391,113 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
                           )),
                       onPressed: () {
                         var height = context.size!.height * 0.5;
-                        var width = context.size!.width * 0.55;
+                        var width = context.size!.width * 0.8;
                         showDialog(
                             context: context,
                             builder: (BuildContext context) {
-                              return AlertDialog(
-                                title: Text('匹配設定'),
-                                content: Container(
-                                  width: width,
-                                  constraints: BoxConstraints(
-                                    maxHeight: height,
-                                  ),
-                                  child: Stack(
-                                    alignment: AlignmentDirectional.topStart,
+                              return WillPopScope(
+                                onWillPop: () async {
+                                  // Prevent closing the dialog when the keyboard is open
+                                  return MediaQuery.of(context).viewInsets.bottom == 0.0;
+                                },
+                                child: AlertDialog(
+                                  insetPadding: EdgeInsets.all(16.0),
+                                  actionsPadding: EdgeInsets.only(top: 0),
+                                  scrollable: true,
+                                  title: Column(
+                                    // alignment: AlignmentDirectional.topStart,
                                     children: [
-                                      Positioned(
-                                        top: 0,
+                                      Text("匹配設定"),
+                                      SizedBox(height: 20),
+                                      Align(
+                                        alignment: Alignment.center,
                                         child: Container(
-                                          width: width,
-                                          child: Row(
-                                            children: [
-                                              Container(
-                                                  padding: const EdgeInsets
-                                                      .symmetric(
-                                                      horizontal: 12,
-                                                      vertical: 3),
-                                                  decoration: BoxDecoration(
-                                                      borderRadius:
-                                                          const BorderRadius
-                                                              .only(
-                                                              topLeft: Radius
-                                                                  .circular(10),
-                                                              bottomLeft: Radius
-                                                                  .circular(
-                                                                      10)),
-                                                      color: Theme.of(context)
-                                                          .colorScheme
-                                                          .inversePrimary),
-                                                  child: Text(
-                                                    "暱稱",
-                                                    style: TextStyle(
-                                                      color: Theme.of(context)
-                                                          .colorScheme
-                                                          .onSurface,
-                                                    ),
-                                                  )),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                      Positioned(
-                                        top: 50,
-                                        child: Container(
-                                          width: width,
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 12, vertical: 3),
+                                          padding: EdgeInsets.all(14),
+                                          height: 70,
                                           decoration: BoxDecoration(
-                                            border: Border.all(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .primary,
-                                              width: 2.0,
-                                              style: BorderStyle.solid,
-                                            ),
-                                            borderRadius:
-                                                BorderRadius.circular(18),
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .inversePrimary,
+                                            color: Theme.of(context).colorScheme.inversePrimary.withOpacity(0.3),
+                                            borderRadius: BorderRadius.circular(12),
                                           ),
-                                          child: Column(
+                                          child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.start,
                                             children: [
-                                              Text("標籤",
-                                                  textAlign: TextAlign.center,
-                                                  style: TextStyle(
-                                                    color: Theme.of(context)
-                                                        .colorScheme
-                                                        .onSurface,
-                                                  )),
-                                              SingleChildScrollView(
-                                                child: Column(
-                                                  children: [
-                                                    Text(
-                                                        'Your expandable content goes here'),
-                                                    Text(
-                                                        'Your expandable content goes here'),
-                                                    Text(
-                                                        'Your expandable content goes here'),Text(
-                                                        'Your expandable content goes here'),Text(
-                                                        'Your expandable content goes here'),Text(
-                                                        'Your expandable content goes here'),Text(
-                                                        'Your expandable content goes here'),
-                                                  ],
+                                              Padding(
+                                                padding: const EdgeInsets.only(right: 10),
+                                                child: Container(
+                                                  padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                                  decoration: BoxDecoration(
+                                                    color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                                                    borderRadius: BorderRadius.circular(10),
+                                                  ),
+                                                  child: Text(
+                                                      "暱稱",
+                                                    style: TextStyle(
+                                                      fontSize: 16,
+                                                    ),
+                                                  ),
                                                 ),
                                               ),
+                                              Container(
+                                                  width: width * 0.5,
+                                                  child: TextField(
+                                                    decoration: InputDecoration(
+                                                      isCollapsed: true,
+                                                      hintText: "冰機靈"
+                                                    ),
+                                                    maxLines: 1,
+                                                  )),
                                             ],
                                           ),
                                         ),
                                       ),
                                     ],
                                   ),
+                                  content: Container(
+                                      padding: EdgeInsets.all(14),
+                                      height: 300,
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context).colorScheme.inversePrimary.withOpacity(0.3),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Align(
+                                            alignment: Alignment.centerLeft,
+                                            child: Container(
+                                              padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                              decoration: BoxDecoration(
+                                                color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                                                borderRadius: BorderRadius.circular(10),
+                                              ),
+                                              child: const Text(
+                                                "標籤",
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                         const SizedBox(height: 10),
+                                          Container(
+                                            height: 230,
+                                            width: width,
+                                            child: Tags(),
+                                          )
+                                        ],
+                                      ),
+                                    ),
+
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        // 關閉對話框
+                                        // Navigator.of(context).pop();
+                                      },
+                                      child: Text('確定'),
+                                    ),
+                                  ],
                                 ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () {
-                                      // 關閉對話框
-                                      // Navigator.of(context).pop();
-                                    },
-                                    child: Text('確定'),
-                                  ),
-                                ],
                               );
                             });
                       },
@@ -572,192 +577,11 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
   }
 }
 
-class ActivityMainContent extends StatelessWidget {
-  const ActivityMainContent(
-      {super.key, required this.date, required this.imageUrl});
 
-  final String imageUrl;
-  final String date;
 
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.max,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Container(
-                padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 5.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      StartDateCard(date: "日期資料"),
-                      Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Icon(Icons.arrow_forward),
-                      ),
-                      EndDateCard(date: "日期資料"),
-                    ],
-                  ),
-                )),
-            Card(
-              clipBehavior: Clip.hardEdge,
-              elevation: 10,
-              shadowColor: Theme.of(context).colorScheme.primary,
-              child: Container(
-                child: Image.network(
-                  imageUrl,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
-class ActivityDescription extends StatelessWidget {
-  const ActivityDescription({super.key, required this.description});
 
-  final String description;
 
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: Card(
-          color: Theme.of(context).colorScheme.surface,
-          clipBehavior: Clip.hardEdge,
-          elevation: 10,
-          shadowColor: Theme.of(context).colorScheme.primary,
-          child: Column(
-            mainAxisSize: MainAxisSize.max,
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.all(15.0),
-                child: Text(
-                  description,
-                  style: TextStyle(
-                    fontSize: 20,
-                    height: 1.8,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class StartDateCard extends StatelessWidget {
-  const StartDateCard({super.key, required this.date});
-
-  final String date;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10),
-      decoration: BoxDecoration(
-        borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(15), bottomLeft: Radius.circular(15)),
-        color: const Color(0xFF8EA373),
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
-            spreadRadius: 1,
-            blurRadius: 3,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        // crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Text(
-            "AUG",
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-          ),
-          const SizedBox(width: 10),
-          Text("31",
-              style: TextStyle(
-                fontSize: 30,
-                // fontWeight: FontWeight.w600
-                color: Theme.of(context).colorScheme.onSurface,
-              )),
-          const SizedBox(width: 10),
-          Text(
-            "THU",
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class EndDateCard extends StatelessWidget {
-  const EndDateCard({super.key, required this.date});
-
-  final String date;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10),
-      decoration: BoxDecoration(
-        borderRadius: const BorderRadius.only(
-            topRight: Radius.circular(15), bottomRight: Radius.circular(15)),
-        color: const Color(0xFF8EA373),
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
-            spreadRadius: 1,
-            blurRadius: 3,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        // crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Text(
-            "SEP",
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-          ),
-          const SizedBox(width: 10),
-          Text("02",
-              style: TextStyle(
-                fontSize: 30,
-                // fontWeight: FontWeight.w600
-                color: Theme.of(context).colorScheme.onSurface,
-              )),
-          const SizedBox(width: 10),
-          Text(
-            "SAT",
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 class CardExample extends StatelessWidget {
   const CardExample({super.key, required this.title});

@@ -1,7 +1,11 @@
+import '../../../models/src/user.dart';
 import 'package:flutter/material.dart';
 
 class Tags extends StatefulWidget {
-  const Tags({super.key});
+  const Tags({super.key, required this.tagList, required this.tagSelectedTmp});
+
+  final List<UserTag> tagList;
+  final List<bool> tagSelectedTmp;
 
   @override
   State<Tags> createState() => _TagsState();
@@ -9,12 +13,15 @@ class Tags extends StatefulWidget {
 
 class _TagsState extends State<Tags> {
 
-  List<bool> itemStates = List.generate(10, (index) => false);
-
   @override
   Widget build(BuildContext context) {
+
+    // widget.tagSelected.forEach((key, value) {
+    //   print('Key: $key, Value: $value');
+    // });
+
     return ListView.builder(
-      itemCount: 10,
+      itemCount: widget.tagList.length,
         itemBuilder: (BuildContext context, int index) {
           return Padding(
             padding: const EdgeInsets.only(top: 8.0, bottom: 8.0, right: 4),
@@ -25,7 +32,7 @@ class _TagsState extends State<Tags> {
                 // color: Colors.white,
                 boxShadow: [
                   BoxShadow(
-                    color: Theme.of(context).colorScheme.inverseSurface.withOpacity(0.4),
+                    color: Theme.of(context).colorScheme.secondary.withOpacity(0.4),
                     blurRadius: 1,
                     spreadRadius: 0,
                     offset: Offset(2, 2)
@@ -33,14 +40,14 @@ class _TagsState extends State<Tags> {
                 ]
               ),
               child: CheckboxListTile(
-                  title: Text("${index.toString()}++++++++++++++++++++++++++++++++++++",
+                  title: Text(widget.tagList[index].displayName,
                   style: TextStyle(
-                    color: Theme.of(context).colorScheme.onInverseSurface
+                    color: Theme.of(context).colorScheme.onSurface
                   )),
-                  value: itemStates[index],
+                  value: widget.tagSelectedTmp[index],
                   onChanged: (bool? newValue){
                     setState(() {
-                      itemStates[index] = newValue ?? false;
+                      widget.tagSelectedTmp[index] = newValue ?? false;
                     });
                   },
               ),

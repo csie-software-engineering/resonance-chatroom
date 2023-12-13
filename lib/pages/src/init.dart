@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:resonance_chatroom/pages/routes.dart';
 
 import '../../models/models.dart';
 import '../../providers/providers.dart';
@@ -32,21 +31,36 @@ class _InitPageState extends State<InitPage> {
   late final InitPageArguments args =
       ModalRoute.of(context)!.settings.arguments as InitPageArguments;
 
+  late Map<String, dynamic> args;
+
   Future<void> _incrementCounter() async {
-    final curUser = await authProvider.currentUser;
-    Activity activity = Activity(
-        activityName: 'activityname',
-        activityInfo: "activityinfo",
-        startDate: "startdate",
-        endDate: "enddate",
-        activityPhoto: "activitryphoto");
-    await setActivityProvider.setNewActivity(activity);
-    debugPrint(curUser.toString());
+
+    String id = authProvider.getUserId() as String;
+
+    var da = await userProvider
+        .getUserActivity(authProvider.getUserId() as String, "asdfghjkl", loadTag: true);
+
+    // var ja = await userProvider.getUserActivity("15", "asdfghjkl", loadTag: true);
+
+    // 這邊的邏輯應該是點選哪一個活動就獲得哪一個 id, displayname
+
+    var targetTags = <UserTag>[];
+    // 假裝
+    targetTags.add(UserTag(id: "111", displayName: "apple"));
+    targetTags.add(UserTag(id: "222", displayName: "banana"));
+    targetTags.add(UserTag(id: "333", displayName: "cinnamon"));
+    targetTags.add(UserTag(id: "444", displayName: "durian"));
+
     setState(() {
       _counter++;
     });
 
 
+  }
+
+  @override
+  void initState() {
+    super.initState();
   }
 
   @override
@@ -60,8 +74,8 @@ class _InitPageState extends State<InitPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+            Text(
+                "displayName: ${args["activities"][0].displayName}"
             ),
             Text(
               '${args.curUser.uid} $_counter',
@@ -72,7 +86,7 @@ class _InitPageState extends State<InitPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: (){
-          Navigator.of(context).pushNamed(Routes.userActivityMainPage.value);
+          _incrementCounter();
         },
         tooltip: 'Increment',
         child: const Icon(Icons.add),

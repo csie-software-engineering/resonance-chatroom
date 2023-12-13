@@ -1,4 +1,5 @@
 import 'dart:async';
+// import 'dart:html';
 
 // import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -26,6 +27,8 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
   late final AuthProviders authProvider = context.read<AuthProviders>();
   late final UserProvider userProvider = context.read<UserProvider>();
 
+  late final Map<String, dynamic> args;
+
   FloatingActionButtonLocation buttonPosition =
       FloatingActionButtonLocation.centerFloat;
 
@@ -43,6 +46,8 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
   late final String _description = _test;
   late final String _imageUrl = _fakeUrl;
 
+  late List<bool> tagSelected;
+
   bool toggle = true;
   late double top1;
   late double left1;
@@ -57,7 +62,7 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
   double size2 = 20;
   double size3 = 20;
 
-  bool bottomInitial = false;
+  bool Initial = false;
 
   Widget? _subTitle() {
     if (!_startMatching) {
@@ -117,11 +122,28 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
     return '$minutes:${remainingSeconds.toString().padLeft(2, '0')}';
   }
 
-  void _initBottomPosition(height, width) {
-    if (!bottomInitial) {
+  /// 初始化
+  /// fetch 使用者標籤，並使用 List<bool> 來記錄使用者之前所勾選的標籤
+  void _initSetTag() {
+      Map<String, bool> map = { for (var item in args["actTags"]) item.id : false };
+      for(var i in args["userActMeta"].tags) {
+        // assert(!tagSelected.containsKey(i.id), "no tag with id:<${i.id}> ( displayName:<${i.displayName}>");
+        map[i.id] = true;
+      }
+      tagSelected = List.generate(args["actTags"].length, (index) => false);
+      int i = 0;
+      map.forEach((key, value) {
+        tagSelected[i++] = value;
+      });
+  }
+
+  void _init(height, width) async {
+    if (!Initial) {
       _buttonPositionTop = height - 70;
       _buttonPositionLeft = width - 100;
-      bottomInitial = true;
+      args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+      _initSetTag();
+      Initial = true;
     }
     if (!_enable) {
       top1 = top2 = top3 = _buttonPositionTop + 10;
@@ -148,6 +170,8 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
     _controller.addListener(() {
       setState(() {});
     });
+
+    // userProvider.
   }
 
   @override
@@ -158,9 +182,8 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
 
   @override
   Widget build(BuildContext context) {
-    _initBottomPosition(
+    _init(
         MediaQuery.of(context).size.height, MediaQuery.of(context).size.width);
-
     return Scaffold(
       body: Column(
         children: [
@@ -322,34 +345,13 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
 
                           debugPrint("getUserId2: ${id}");
 
-                          var tags1 = <UserTag>[];
-                          tags1.add(UserTag(id: "123", displayName: "apple"));
-                          tags1.add(UserTag(id: "456", displayName: "banana"));
+                          // var re1 = await chatProvider.pairOrWait(
+                          //     "asdfghjkl",
+                          //     id,
+                          //     da!.tags.map((e) {
+                          //       return e.id;
+                          //     }).toList());
 
-                          var act = UserActivity(
-                              id: "asdfghjkl",
-                              displayName: "qwertyuiop",
-                              tags: tags1);
-
-                          await userProvider.addUser(User(
-                            id: id,
-                            displayName: "Daniel",
-                            email: "daniel@gmail.com",
-                          ));
-
-                          await userProvider.addUserActivity(id, act,
-                              addTag: true);
-
-                          var da = await userProvider
-                              .getUserActivity(id, "asdfghjkl", loadTag: true);
-                          // var ja = await userProvider.getUserActivity("15", "asdfghjkl", loadTag: true);
-
-                          var re1 = await chatProvider.pairOrWait(
-                              "asdfghjkl",
-                              id,
-                              da!.tags.map((e) {
-                                return e.id;
-                              }).toList());
 
                           setState(() {
                             _height = 0;
@@ -389,115 +391,127 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
                             color:
                                 Theme.of(context).colorScheme.onInverseSurface,
                           )),
-                      onPressed: () {
+                      onPressed: (){
                         var height = context.size!.height * 0.5;
                         var width = context.size!.width * 0.8;
+
                         showDialog(
                             context: context,
                             builder: (BuildContext context) {
-                              return WillPopScope(
-                                onWillPop: () async {
-                                  // Prevent closing the dialog when the keyboard is open
-                                  return MediaQuery.of(context).viewInsets.bottom == 0.0;
-                                },
-                                child: AlertDialog(
-                                  insetPadding: EdgeInsets.all(16.0),
-                                  actionsPadding: EdgeInsets.only(top: 0),
-                                  scrollable: true,
-                                  title: Column(
-                                    // alignment: AlignmentDirectional.topStart,
-                                    children: [
-                                      Text("匹配設定"),
-                                      SizedBox(height: 20),
-                                      Align(
-                                        alignment: Alignment.center,
-                                        child: Container(
-                                          padding: EdgeInsets.all(14),
-                                          height: 70,
-                                          decoration: BoxDecoration(
-                                            color: Theme.of(context).colorScheme.inversePrimary.withOpacity(0.3),
-                                            borderRadius: BorderRadius.circular(12),
-                                          ),
-                                          child: Row(
-                                            mainAxisAlignment: MainAxisAlignment.start,
-                                            children: [
-                                              Padding(
-                                                padding: const EdgeInsets.only(right: 10),
-                                                child: Container(
-                                                  padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                                  decoration: BoxDecoration(
-                                                    color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
-                                                    borderRadius: BorderRadius.circular(10),
-                                                  ),
-                                                  child: Text(
-                                                      "暱稱",
-                                                    style: TextStyle(
-                                                      fontSize: 16,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                              Container(
-                                                  width: width * 0.5,
-                                                  child: TextField(
-                                                    decoration: InputDecoration(
-                                                      isCollapsed: true,
-                                                      hintText: "冰機靈"
-                                                    ),
-                                                    maxLines: 1,
-                                                  )),
-                                            ],
-                                          ),
+                              List<bool> tagTmp = List.generate(args["actTags"].length, (index) => false);
+                              for(int i = 0; i < tagSelected.length; i++) {
+                                  tagTmp[i] = tagSelected[i];
+                              }
+                              return AlertDialog(
+                                insetPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 40.0),
+                                actionsPadding: const EdgeInsets.only(top: 0),
+                                scrollable: true,
+                                title: Column(
+                                  // alignment: AlignmentDirectional.topStart,
+                                  children: [
+                                    Text("匹配設定"),
+                                    SizedBox(height: 20),
+                                    Align(
+                                      alignment: Alignment.center,
+                                      child: Container(
+                                        padding: EdgeInsets.all(14),
+                                        height: 70,
+                                        decoration: BoxDecoration(
+                                          color: Theme.of(context).colorScheme.inversePrimary.withOpacity(0.3),
+                                          borderRadius: BorderRadius.circular(12),
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                  content: Container(
-                                      padding: EdgeInsets.all(14),
-                                      height: 300,
-                                      decoration: BoxDecoration(
-                                        color: Theme.of(context).colorScheme.inversePrimary.withOpacity(0.3),
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Align(
-                                            alignment: Alignment.centerLeft,
-                                            child: Container(
-                                              padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                              decoration: BoxDecoration(
-                                                color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
-                                                borderRadius: BorderRadius.circular(10),
-                                              ),
-                                              child: const Text(
-                                                "標籤",
-                                                style: TextStyle(
-                                                  fontSize: 16,
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.start,
+                                          children: [
+                                            Padding(
+                                              padding: const EdgeInsets.only(right: 10),
+                                              child: Container(
+                                                padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                                decoration: BoxDecoration(
+                                                  color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                                                  borderRadius: BorderRadius.circular(10),
+                                                ),
+                                                child: Text(
+                                                    "暱稱",
+                                                  style: TextStyle(
+                                                    fontSize: 16,
+                                                  ),
                                                 ),
                                               ),
                                             ),
-                                          ),
-                                         const SizedBox(height: 10),
-                                          Container(
-                                            height: 230,
-                                            width: width,
-                                            child: Tags(),
-                                          )
-                                        ],
+                                            Container(
+                                                width: width * 0.5,
+                                                child: TextField(
+                                                  decoration: InputDecoration(
+                                                    isCollapsed: true,
+                                                    hintText: "冰機靈"
+                                                  ),
+                                                  maxLines: 1,
+                                                )),
+                                          ],
+                                        ),
                                       ),
-                                    ),
-
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () {
-                                        // 關閉對話框
-                                        // Navigator.of(context).pop();
-                                      },
-                                      child: Text('確定'),
                                     ),
                                   ],
                                 ),
+                                content: Container(
+                                    padding: EdgeInsets.all(14),
+                                    height: 300,
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context).colorScheme.inversePrimary.withOpacity(0.3),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Align(
+                                          alignment: Alignment.centerLeft,
+                                          child: Container(
+                                            padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                            decoration: BoxDecoration(
+                                              color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                                              borderRadius: BorderRadius.circular(10),
+                                            ),
+                                            child: const Text(
+                                              "標籤",
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                       const SizedBox(height: 10),
+                                        Container(
+                                          height: 230,
+                                          width: width,
+                                          child: Tags(tagList: args["actTags"], tagSelectedTmp: tagTmp),
+                                        )
+                                      ],
+                                    ),
+                                  ),
+
+                                actions: [
+                                  TextButton(
+                                    onPressed: () async {
+                                      tagSelected = tagTmp;
+                                      var newTags = <UserTag>[];
+                                      for(int i = 0; i < tagSelected.length; i++) {
+                                        if(tagSelected[i]) {
+                                          newTags.add(args["actTags"][i]);
+                                          // debugPrint("args:${authProvider.getUserId()}");
+                                        }
+                                      }
+                                      Navigator.of(context).pop();
+                                      await userProvider.removeUserActivity(authProvider.getUserId() as String, args["userActMeta"].id);
+                                      var newUserAct = UserActivity(id: args["userActMeta"].id, displayName: args["userActMeta"].displayName,
+                                      tags: newTags);
+                                      await userProvider.addUserActivity(authProvider.getUserId() as String, newUserAct, addTag: true);
+                                      // await userProvider.updateUserActivity(authProvider.getUserId() as String
+                                      //     , newUserAct, updateTag: true);
+                                    },
+                                    child: Text('確定'),
+                                  ),
+                                ],
                               );
                             });
                       },
@@ -576,8 +590,6 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
     );
   }
 }
-
-
 
 
 

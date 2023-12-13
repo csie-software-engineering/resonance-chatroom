@@ -279,6 +279,7 @@ class _ChatPageState extends State<ChatPage> {
         // Left (peer message)
         return Container(
           // margin: EdgeInsets.only(bottom: 10),
+
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
@@ -289,6 +290,13 @@ class _ChatPageState extends State<ChatPage> {
                       Radius.circular(18),
                     ),
                     clipBehavior: Clip.hardEdge,
+                    child: GestureDetector(
+                      onTap: (){
+                        showModalBottomSheet(
+                          // backgroundColor: Colors.red.withOpacity(0),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.only(topLeft: Radius.circular(30),
+                        topRight: Radius.circular(30)),
                     child: Image.network(
                       peerUser.photoUrl ?? "空照片", // 會是一個 url 載入使用者的頭貼
                       loadingBuilder: (BuildContext context, Widget child,
@@ -302,19 +310,67 @@ class _ChatPageState extends State<ChatPage> {
                                     loadingProgress.expectedTotalBytes!
                                 : null,
                           ),
+                          context: context,
+                          builder: (BuildContext context) {
+                            return Container(
+                              child: Column(
+                                children: <Widget>[
+                                  Stack(
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Container(
+                                            child: Text("頭像"),
+                                          ),
+                                          Container(
+                                            child: Text("匿名"),
+                                          ),
+                                        ],
+                                      ),
+                                      Align(
+                                        alignment: Alignment.centerRight,
+                                        child: Container(
+                                          child: Text("report Buttom"),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Container(
+                                    child: Text("social Media"),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
                         );
                       },
-                      errorBuilder: (context, object, stackTrace) {
-                        // 當圖片無法加載就會顯示預設圖片
-                        return Icon(
-                          Icons.account_circle,
-                          size: 35,
-                          color: Theme.of(context).colorScheme.onSurface,
-                        );
-                      },
-                      width: 35,
-                      height: 35,
-                      fit: BoxFit.cover,
+                      child: Image.network(
+                        widget.arguments.peerAvatar, // 會是一個 url 載入使用者的頭貼
+                        loadingBuilder: (BuildContext context, Widget child,
+                            ImageChunkEvent? loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Center(
+                            child: CircularProgressIndicator(
+                              color: Theme.of(context).colorScheme.primary,
+                              value: loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded /
+                                      loadingProgress.expectedTotalBytes!
+                                  : null,
+                            ),
+                          );
+                        },
+                        errorBuilder: (context, object, stackTrace) {
+                          // 當圖片無法加載就會顯示預設圖片
+                          return Icon(
+                            Icons.account_circle,
+                            size: 35,
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          );
+                        },
+                        width: 35,
+                        height: 35,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
                   messageChat.type == MessageType.text

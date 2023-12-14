@@ -158,6 +158,35 @@ class ChatProvider {
     return room;
   }
 
+  /// 是否在聊天等待隊列中
+  Future<bool> isWaiting(
+    String userId,
+    String activityId,
+  ) async {
+    final queueNodeRef = db
+        .collection(FirestoreConstants.activityCollectionPath.value)
+        .doc(activityId)
+        .collection(FirestoreConstants.chatQueueNodeCollectionPath.value)
+        .doc(userId);
+
+    return (await queueNodeRef.get()).exists;
+  }
+
+  /// 取消等待
+  Future<void> cancelWaiting(
+    String userId,
+    String activityId,
+  ) async {
+    final queueNodeRef = db
+        .collection(FirestoreConstants.activityCollectionPath.value)
+        .doc(activityId)
+        .collection(FirestoreConstants.chatQueueNodeCollectionPath.value)
+        .doc(userId);
+
+    assert((await queueNodeRef.get()).exists, '不在等待隊列中');
+    await queueNodeRef.delete();
+  }
+
   /// 創建或啟用(更新)房間
   Future<Room?> _createOrEnableRoom(
     String activityId,

@@ -17,7 +17,7 @@ class QuestionProvider {
       String activityid,
       String questionid,
       String choice,
-      String UserId)
+      String UserEmail)
   async{
     var reviewcollection = firebaseFirestore
         .collection(FirestoreConstants.activityCollectionPath.value)
@@ -30,13 +30,13 @@ class QuestionProvider {
     for(int i = 0; i < reviewquery.docs.length; i++){
       var reviewdoc = Review.fromDocument(reviewquery.docs[i]);
       for (int j = 0; j < reviewdoc.userlist.length; j++){
-        if (reviewdoc.userlist[j] == UserId){
-          reviewdoc.userlist.remove(UserId);
+        if (reviewdoc.userlist[j] == UserEmail){
+          reviewdoc.userlist.remove(UserEmail);
           break;
         }
       }
       if (reviewdoc.choice == choice) {
-        reviewdoc.userlist.add(UserId);
+        reviewdoc.userlist.add(UserEmail);
       }
       await reviewcollection.doc(reviewdoc.choice).update({
         Questionconstants.userlist.value: reviewdoc.userlist
@@ -47,7 +47,6 @@ class QuestionProvider {
   Future<List<int>>GetReview(
       String activityid,
       String questionid,
-      String UserId
       )async{
     var reviewcollection = firebaseFirestore
         .collection(FirestoreConstants.activityCollectionPath.value)

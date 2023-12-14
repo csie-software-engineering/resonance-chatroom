@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../models/models.dart';
 import '../../constants/constants.dart';
 import '../../providers/providers.dart';
+import '../../utils/src/uuid.dart';
 
 class ChatProvider {
   final FirebaseFirestore db;
@@ -327,7 +328,7 @@ class ChatProvider {
       String type,
       String content
       )async{
-    final roomId = _getRoomId([fromId, toId]);
+    String reportid = generateUuid();
     ReportMessage reportdata = ReportMessage(
       fromId: fromId,
       toId: toId,
@@ -339,7 +340,7 @@ class ChatProvider {
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityid)
         .collection(FirestoreConstants.reportCollectionPath.value)
-        .doc(roomId)
+        .doc(reportid)
         .set(reportdata.toJson());
   }
 }

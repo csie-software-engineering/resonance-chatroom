@@ -18,7 +18,7 @@ enum FireStoreUserConstants {
 }
 
 enum FSUserConstants {
-  id,
+  uid,
   displayName,
   photoUrl,
   email,
@@ -26,7 +26,7 @@ enum FSUserConstants {
 
   String get value {
     switch (this) {
-      case FSUserConstants.id:
+      case FSUserConstants.uid:
         return "id";
       case FSUserConstants.displayName:
         return "displayName";
@@ -59,13 +59,13 @@ enum FSUserSocialMediaConstants {
 }
 
 enum FSUserActivityConstants {
-  id,
+  uid,
   tagIds;
 
   String get value {
     switch (this) {
-      case FSUserActivityConstants.id:
-        return "id";
+      case FSUserActivityConstants.uid:
+        return "uid";
       case FSUserActivityConstants.tagIds:
         return "tags";
       default:

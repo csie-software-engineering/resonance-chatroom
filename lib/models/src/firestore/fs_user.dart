@@ -4,33 +4,33 @@ import '../../../constants/constants.dart';
 import '../user.dart';
 
 class FSUser {
-  final String id;
+  final String uid;
   final String displayName;
-  final String photo;
+  final String photoUrl;
   final String email;
   final bool isEnabled;
 
   const FSUser({
-    required this.id,
+    required this.uid,
     required this.displayName,
-    required this.photo,
+    required this.photoUrl,
     required this.email,
     required this.isEnabled,
   });
 
   Map<String, dynamic> toJson() => {
-        FSUserConstants.id.value: id,
+        FSUserConstants.uid.value: uid,
         FSUserConstants.displayName.value: displayName,
-        FSUserConstants.photoUrl.value: photo,
+        FSUserConstants.photoUrl.value: photoUrl,
         FSUserConstants.email.value: email,
         FSUserConstants.isEnabled.value: isEnabled,
       };
 
   factory FSUser.fromDocument(DocumentSnapshot<Map<String, dynamic>> doc) =>
       FSUser(
-        id: doc.get(FSUserConstants.id.value),
+        uid: doc.get(FSUserConstants.uid.value),
         displayName: doc.get(FSUserConstants.displayName.value),
-        photo: doc.get(FSUserConstants.photoUrl.value),
+        photoUrl: doc.get(FSUserConstants.photoUrl.value),
         email: doc.get(FSUserConstants.email.value),
         isEnabled: doc.get(FSUserConstants.isEnabled.value),
       );
@@ -38,9 +38,9 @@ class FSUser {
 
 extension FSUserExtension on FSUser {
   User toUser() => User(
-        id: id,
+        uid: uid,
         displayName: displayName,
-        photo: photo.isEmpty ? null : photo,
+        photoUrl: photoUrl.isEmpty ? null : photoUrl,
         email: email.isEmpty ? null : email,
         socialMedia: [],
         activities: [],
@@ -78,16 +78,16 @@ extension FSUserSocialMediaExtension on FSUserSocialMedia {
 }
 
 class FSUserActivity {
-  final String id;
+  final String uid;
   final List<String> tagIds;
 
   const FSUserActivity({
-    required this.id,
+    required this.uid,
     required this.tagIds,
   });
 
   Map<String, dynamic> toJson() => {
-        FSUserActivityConstants.id.value: id,
+        FSUserActivityConstants.uid.value: uid,
         FSUserActivityConstants.tagIds.value: tagIds,
       };
 
@@ -95,14 +95,14 @@ class FSUserActivity {
     DocumentSnapshot<Map<String, dynamic>> doc,
   ) =>
       FSUserActivity(
-        id: doc.get(FSUserActivityConstants.id.value),
+        uid: doc.get(FSUserActivityConstants.uid.value),
         tagIds: List<String>.from(doc.get(FSUserActivityConstants.tagIds.value)),
       );
 }
 
 extension FSUserActivityExtension on FSUserActivity {
   UserActivity toUserActivity() => UserActivity(
-        id: id,
+        uid: uid,
         tagIds: tagIds,
       );
 }

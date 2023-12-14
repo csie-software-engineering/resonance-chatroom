@@ -22,7 +22,7 @@ class UserProvider {
   }) async {
     final userRef = db
         .collection(FireStoreUserConstants.userCollectionPath.value)
-        .doc(user.id);
+        .doc(user.uid);
 
     final fsUser = user.toFSUser();
 
@@ -32,7 +32,7 @@ class UserProvider {
       if (addSocial) {
         for (final socialMedia in user.socialMedia) {
           await addUserSocialMedia(
-            user.id,
+            user.uid,
             socialMedia,
             transaction: transaction,
           );
@@ -41,13 +41,13 @@ class UserProvider {
 
       if (addActivity) {
         for (final activity in user.activities) {
-          await addUserActivity(user.id, activity, transaction: transaction);
+          await addUserActivity(user.uid, activity, transaction: transaction);
         }
       }
     });
 
     return await getUser(
-      user.id,
+      user.uid,
       loadSocial: addSocial,
       loadActivity: addActivity,
     );
@@ -91,14 +91,14 @@ class UserProvider {
 
     final activityRef = userRef
         .collection(FireStoreUserConstants.userActivityCollectionPath.value)
-        .doc(activity.id);
+        .doc(activity.uid);
 
     final fsUserActivity = activity.toFSUserActivity();
     transaction != null
         ? transaction.set(activityRef, fsUserActivity.toJson())
         : await activityRef.set(fsUserActivity.toJson());
 
-    return await getUserActivity(userId, activity.id);
+    return await getUserActivity(userId, activity.uid);
   }
 
   /// 刪除(停用)使用者資料
@@ -165,7 +165,7 @@ class UserProvider {
   }) async {
     final userRef = db
         .collection(FireStoreUserConstants.userCollectionPath.value)
-        .doc(user.id);
+        .doc(user.uid);
 
     final userData = await userRef.get();
     assert(userData.exists, "使用者不存在");
@@ -178,7 +178,7 @@ class UserProvider {
       if (updateSocial) {
         for (final socialMedia in user.socialMedia) {
           await updateUserSocialMedia(
-            user.id,
+            user.uid,
             socialMedia,
             transaction: transaction,
           );
@@ -187,13 +187,13 @@ class UserProvider {
 
       if (updateActivity) {
         for (final activity in user.activities) {
-          await updateUserActivity(user.id, activity, transaction: transaction);
+          await updateUserActivity(user.uid, activity, transaction: transaction);
         }
       }
     });
 
     return await getUser(
-      user.id,
+      user.uid,
       loadSocial: updateSocial,
       loadActivity: updateActivity,
     );
@@ -244,7 +244,7 @@ class UserProvider {
 
     final activityRef = userRef
         .collection(FireStoreUserConstants.userActivityCollectionPath.value)
-        .doc(activity.id);
+        .doc(activity.uid);
 
     assert((await activityRef.get()).exists, "使用者未參加該活動");
 
@@ -253,7 +253,7 @@ class UserProvider {
         ? transaction.update(activityRef, fsUserActivity.toJson())
         : await activityRef.update(fsUserActivity.toJson());
 
-    return await getUserActivity(userId, activity.id);
+    return await getUserActivity(userId, activity.uid);
   }
 
   /// 修改使用者活動標籤資料

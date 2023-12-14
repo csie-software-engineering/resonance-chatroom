@@ -1,19 +1,19 @@
 import 'package:resonance_chatroom/models/src/firestore/fs_user.dart';
 
 class User {
-  final String id;
+  final String uid;
   String displayName;
   String? email;
-  String? photo;
+  String? photoUrl;
   final bool isEnabled;
   final List<UserSocialMedia> socialMedia;
   final List<UserActivity> activities;
 
   User({
-    required this.id,
+    required this.uid,
     required this.displayName,
     this.email,
-    this.photo,
+    this.photoUrl,
     this.isEnabled = true,
     this.socialMedia = const [],
     this.activities = const [],
@@ -22,10 +22,10 @@ class User {
 
 extension UserExtension on User {
   FSUser toFSUser() => FSUser(
-        id: id,
+        uid: uid,
         displayName: displayName,
         email: email ?? "",
-        photo: photo ?? "",
+        photoUrl: photoUrl ?? "",
         isEnabled: isEnabled,
       );
 }
@@ -48,18 +48,18 @@ extension UserSocialMediaExtension on UserSocialMedia {
 }
 
 class UserActivity {
-  final String id;
+  final String uid;
   List<String> tagIds;
 
   UserActivity({
-    required this.id,
+    required this.uid,
     this.tagIds = const [],
   });
 }
 
 extension UserActivityExtension on UserActivity {
   FSUserActivity toFSUserActivity() => FSUserActivity(
-        id: id,
+        uid: uid,
         tagIds: tagIds,
       );
 }

@@ -23,5 +23,5 @@ Map<String, Widget Function(BuildContext)> routes = {
         ),
         title: 'Robot_2',
       ),
-  Routes.hostActivityPage.value: (_) =>  HostActivityPage(),
+  Routes.hostActivityTagPage.value: (_) =>  HostActivityTagPage(),
 };

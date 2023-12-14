@@ -9,7 +9,6 @@ class HostActivityTagPage extends StatefulWidget {
 
 class _HostActivityTagPageState extends State<HostActivityTagPage> {
   List<Widget> fields = [];
-  String tag = "test";
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -49,8 +48,6 @@ class _HostActivityTagPageState extends State<HostActivityTagPage> {
                 ],
               ),
               ...fields,
-              SizedBox(height: 16.0),
-              Text(tag),
             ],
           ),
         ),
@@ -127,6 +124,7 @@ class _NewTagFieldState extends State<NewTagField> {
                 ? () {
                     setState(() {
                       isEditing = false; // 如果isEditing為true，表示取消編輯
+                      _controller.text = tag; // 將oldText的值賦值回TextEditingController
                     });
                   }
                 : () {

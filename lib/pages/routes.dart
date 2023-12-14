@@ -25,4 +25,5 @@ Map<String, Widget Function(BuildContext)> routes = {
       ),
   Routes.hostActivityTagPage.value: (_) =>  HostActivityTagPage(),
   Routes.hostActivityTopicPage.value: (_) =>  HostActivityTopicPage(),
+  Routes.hostActivityQuestionPage.value: (_) =>  HostActivityQuestionPage(),
 };

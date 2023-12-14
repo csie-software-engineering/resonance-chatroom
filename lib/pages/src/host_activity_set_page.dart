@@ -76,7 +76,6 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
   Uint8List? _checkselectedImage;
 
   List<Tag> tags = []; // 活動標籤的List
-  List<Widget> fields = [];
   Future<void> _pickImage() async {
     final image = await ImagePicker().pickImage(source: ImageSource.gallery);
     setState(() {
@@ -271,34 +270,7 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
                       ),
               ),
 
-              SizedBox(height: 16.0),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('活動標籤'),
-                  SizedBox(width: 16.0),
-                  Container(
-                    width: 280, // 使用Container來設定按鈕的寬度
-                    child: ElevatedButton(
-                      child: const Text(
-                        "新增標籤",
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          fields.add(NewTagField(
-                            onDelete: () {
-                              setState(() {
-                                fields.removeAt(fields.length - 1);
-                              });
-                            },
-                          ));
-                        });
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              ...fields,
+              
               SizedBox(height: 16.0),
               Row(
                 children: [
@@ -340,39 +312,6 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class NewTagField extends StatelessWidget {
-  NewTagField({
-    super.key,
-    this.onDelete,
-  });
-  final VoidCallback? onDelete;
-
-  final TextEditingController _controller =
-      TextEditingController(); // 定義一個TextEditingController
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextFormField(
-              controller: _controller, // 使用TextEditingController來控制欄位的輸入值
-              decoration: const InputDecoration(
-                label: Text('新標籤'),
-              ),
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.delete_forever),
-            onPressed: onDelete,
-          ),
-        ],
       ),
     );
   }

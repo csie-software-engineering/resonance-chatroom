@@ -9,7 +9,6 @@ class HostActivityTopicPage extends StatefulWidget {
 
 class _HostActivityTopicPageState extends State<HostActivityTopicPage> {
   List<Widget> fields = [];
-  String topic = "test";
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -49,8 +48,6 @@ class _HostActivityTopicPageState extends State<HostActivityTopicPage> {
                 ],
               ),
               ...fields,
-              SizedBox(height: 16.0),
-              Text(topic),
             ],
           ),
         ),
@@ -98,6 +95,7 @@ class _NewTopicFieldState extends State<NewTopicField> {
               onPressed: () {
                 // 跳至預覽頁面的邏輯
                 // 傳遞createEvent()方法的回傳值給預覽頁面
+                Navigator.of(context).pushNamed(Routes.hostActivityQuestionPage.value);
               },
             ),
           ),

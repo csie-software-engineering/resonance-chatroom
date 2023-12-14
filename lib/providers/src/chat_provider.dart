@@ -320,5 +320,26 @@ class ChatProvider {
     final roomData = await roomQuery.get();
     final rooms = roomData.docs.map((e) => Room.fromDocument(e)).toList();
     return rooms;
+  Future<void> Report(
+      String activityid,
+      String fromId,
+      String toId,
+      String type,
+      String content
+      )async{
+    final roomId = _getRoomId([fromId, toId]);
+    ReportMessage reportdata = ReportMessage(
+      fromId: fromId,
+      toId: toId,
+      activityid: activityid,
+      type: type,
+      content: content
+    );
+    await firebaseFirestore
+        .collection(FirestoreConstants.activityCollectionPath.value)
+        .doc(activityid)
+        .collection(FirestoreConstants.reportCollectionPath.value)
+        .doc(roomId)
+        .set(reportdata.toJson());
   }
 }

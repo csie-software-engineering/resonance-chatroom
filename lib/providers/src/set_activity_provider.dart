@@ -88,7 +88,9 @@ class SetActivityProvider {
 
     var activitydata = Activity.fromDocument(await documentReference.get());
     if (activitydata.ownerid == UserId) {
-      await documentReference.delete();
+      await documentReference.update({
+        Activityconstants.IsEnabled.value: false
+      });
     }
     else
       log("You are not owner. Can't not delete.");

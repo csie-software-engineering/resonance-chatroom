@@ -6,6 +6,7 @@ enum Activityconstants {
   startdate,
   enddate,
   activitryphoto,
+  IsEnabled,
   managers;
 
   String get value {
@@ -24,10 +25,12 @@ enum Activityconstants {
         return "enddate";
       case Activityconstants.activitryphoto:
         return "activitryphoto";
+      case Activityconstants.IsEnabled:
+        return "IsEnabled";
       case Activityconstants.managers:
         return "managers";
       default:
-        throw Exception("Not found value for FirestoreConstants");
+        throw Exception("Not found value for Activityconstants");
     }
   }
 }
@@ -46,7 +49,7 @@ enum Tagconstants{
       case Tagconstants.tagname:
         return "tagname";
       default:
-        throw Exception("Not found value for FirestoreConstants");
+        throw Exception("Not found value for Tagconstants");
     }
   }
 }
@@ -68,7 +71,7 @@ enum Topicconstants{
       case Topicconstants.topicname:
         return "topicname";
       default:
-        throw Exception("Not found value for FirestoreConstants");
+        throw Exception("Not found value for Topicconstants");
     }
   }
 }
@@ -102,7 +105,7 @@ enum Questionconstants{
       case Questionconstants.userlist:
         return "userlist";
       default:
-        throw Exception("Not found value for FirestoreConstants");
+        throw Exception("Not found value for Questionconstants");
     }
   }
 }

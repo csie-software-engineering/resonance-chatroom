@@ -8,6 +8,7 @@ class Activity {
   final String activityinfo;
   final String startdate;
   final String enddate;
+  final bool IsEnabled;
   final String activitryphoto;
   final List<String> managers;
 
@@ -18,6 +19,7 @@ class Activity {
     required this.activityinfo,
     required this.startdate,
     required this.enddate,
+    required this.IsEnabled,
     required this.activitryphoto,
     required this.managers
   });
@@ -30,6 +32,7 @@ class Activity {
       Activityconstants.activityinfo.value: activityinfo,
       Activityconstants.startdate.value: startdate,
       Activityconstants.enddate.value: enddate,
+      Activityconstants.IsEnabled.value: IsEnabled,
       Activityconstants.activitryphoto.value: activitryphoto,
       Activityconstants.managers.value: managers
     };
@@ -42,6 +45,7 @@ class Activity {
     String activityinfo = doc.get(Activityconstants.activityinfo.value);
     String startdate = doc.get(Activityconstants.startdate.value);
     String enddate = doc.get(Activityconstants.enddate.value);
+    bool IsEnabled = doc.get(Activityconstants.IsEnabled.value);
     String activitryphoto = doc.get(Activityconstants.activitryphoto.value);
     List<dynamic> managers = doc.get(Activityconstants.managers.value);
     return Activity(
@@ -51,6 +55,7 @@ class Activity {
       activityinfo: activityinfo,
       startdate: startdate,
       enddate: enddate,
+      IsEnabled: IsEnabled,
       activitryphoto: activitryphoto,
       managers: managers.cast<String>()
     );

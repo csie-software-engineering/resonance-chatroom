@@ -36,6 +36,9 @@ class _InitPageState extends State<InitPage> {
     debugPrint(curUser.toString());
     setState(() {
       _counter++;
+      await setActivityProvider.DeleteActivity("20231214-1925-8500-9785-21d5e8c0c78e"
+          , "ownerid");
+      // Navigator.of(context).pushNamed(Routes.hostActivitySetPage.value);
     });
   }
 

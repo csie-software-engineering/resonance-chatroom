@@ -275,6 +275,7 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
                           startdate: _selectedDates[0].toString(),
                           enddate: _selectedDates[1].toString(),
                           ownerid: "ownerid",
+                          IsEnabled: true,
                           managers: []);
                       await setActivityProvider.SetNewActivity(
                           activitydata, "ownerid");

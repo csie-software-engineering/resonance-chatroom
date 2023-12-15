@@ -15,6 +15,7 @@ class ChatPage extends StatefulWidget {
   final ChatPageArguments arguments;
 
   // get inputOptions => null;
+  static const routeName = '/chat';
 
   @override
   State<ChatPage> createState() => _ChatPageState();
@@ -411,7 +412,7 @@ class _ChatPageState extends State<ChatPage> {
                                         stream: chatProvider.getChatStream(
                                             widget.arguments.activityId,
                                             groupMembers,
-                                            _limit),
+                                            limit: _limit),
                                         builder: (BuildContext context,
                                             AsyncSnapshot<QuerySnapshot>
                                                 snapshot) {

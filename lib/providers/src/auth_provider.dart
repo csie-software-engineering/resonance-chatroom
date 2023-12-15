@@ -1,63 +1,85 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
+import '../../providers/src/user_provider.dart';
+import "../../models/src/user.dart" as rc_user;
 
-class AuthProviders extends ChangeNotifier {
+class AuthProvider {
   final FirebaseAuth firebaseAuth;
-  final SharedPreferences pref;
-  late UserCredential userCredential;
 
-  AuthProviders({
-    required this.firebaseAuth,
-    required this.pref,
-  });
+  static final AuthProvider _instance = AuthProvider._internal(
+    FirebaseAuth.instance,
+  );
 
-  String? getUserId() {
-    return userCredential.user?.uid;
+  AuthProvider._internal(this.firebaseAuth);
+  factory AuthProvider() => _instance;
+
+  /// 取得目前登入的使用者
+  Future<rc_user.User> get currentUser async {
+    assert(getFBAUser != null, "User is null");
+    return await UserProvider().getUser(getFBAUser!.uid);
   }
 
-  signInWithAnonymous() async {
-    try {
-      userCredential = await firebaseAuth.signInAnonymously();
-    } on FirebaseAuthException catch (e) {
-      switch (e.code) {
-        case "operation-not-allowed":
-          print("Anonymous auth hasn't been enabled for this project.");
-          break;
-        default:
-          print("Unknown error.");
-      }
-    }
+  /// 取得 Firebase Auth 使用者
+  User? get getFBAUser => firebaseAuth.currentUser;
+
+  /// 使用匿名登入
+  Future<rc_user.User> signInWithAnonymous() async {
+    await firebaseAuth.signInAnonymously();
+    return await _createOrGetUser(firebaseAuth.currentUser);
   }
-  signInWithGoogle() async {
+
+  /// 使用 Google 登入
+  Future<rc_user.User> signInWithGoogle() async {
     GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
     GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
     AuthCredential credential = GoogleAuthProvider.credential(
       accessToken: googleAuth?.accessToken,
       idToken: googleAuth?.idToken,
     );
-    userCredential = await firebaseAuth.signInWithCredential(credential);
-
+    await firebaseAuth.signInWithCredential(credential);
+    return await _createOrGetUser(firebaseAuth.currentUser);
   }
 
-  signInWithFacebook() async {
-    final LoginResult loginResult = await FacebookAuth.instance.login(
-        permissions: ['email', 'public_profile', 'user_birthday']
-    );
+  /// 使用 Facebook 登入
+  Future<rc_user.User> signInWithFacebook() async {
+    final LoginResult loginResult = await FacebookAuth.instance
+        .login(permissions: ['email', 'public_profile', 'user_birthday']);
 
-    final OAuthCredential facebookAuthCredential = FacebookAuthProvider.credential(loginResult.accessToken!.token);
+    final OAuthCredential facebookAuthCredential =
+        FacebookAuthProvider.credential(loginResult.accessToken!.token);
 
-    final userData = await FacebookAuth.instance.getUserData();
-    userCredential = await firebaseAuth.signInWithCredential(facebookAuthCredential);
-
-
+    await firebaseAuth.signInWithCredential(facebookAuthCredential);
+    return await _createOrGetUser(firebaseAuth.currentUser);
   }
-  logout() async {
-    await FacebookAuth.instance.logOut();
-    final GoogleSignIn googleSign = GoogleSignIn();
-    await googleSign.signOut();
+
+  /// 登出
+  Future<void> logout() async {
+    await firebaseAuth.signOut();
+
+    if (await GoogleSignIn().isSignedIn()) {
+      await GoogleSignIn().signOut();
+    }
+
+    if (await FacebookAuth.instance.accessToken != null) {
+      await FacebookAuth.instance.logOut();
+    }
+  }
+
+  /// 創建或取得使用者
+  Future<rc_user.User> _createOrGetUser(User? user) async {
+    assert(user != null, "User is null");
+
+    return await UserProvider().getUser(user!.uid).catchError((_) async {
+      return await UserProvider().addUser(
+        rc_user.User(
+          uid: user.uid,
+          displayName: user.displayName ?? "Guest",
+          email: user.email,
+          photoUrl: user.photoURL,
+        ),
+      );
+    });
   }
 }

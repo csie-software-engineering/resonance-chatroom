@@ -34,6 +34,10 @@ class FSUser {
         email: doc.get(FSUserConstants.email.value),
         isEnabled: doc.get(FSUserConstants.isEnabled.value),
       );
+
+  @override
+  String toString() =>
+      'FSUser(uid: $uid, displayName: $displayName, photoUrl: $photoUrl, email: $email, isEnabled: $isEnabled)';
 }
 
 extension FSUserExtension on FSUser {
@@ -68,6 +72,10 @@ class FSUserSocialMedia {
         displayName: doc.get(FSUserSocialMediaConstants.displayName.value),
         linkUrl: doc.get(FSUserSocialMediaConstants.linkUrl.value),
       );
+
+  @override
+  String toString() =>
+      'FSUserSocialMedia(displayName: $displayName, linkUrl: $linkUrl)';
 }
 
 extension FSUserSocialMediaExtension on FSUserSocialMedia {
@@ -98,6 +106,9 @@ class FSUserActivity {
         uid: doc.get(FSUserActivityConstants.uid.value),
         tagIds: List<String>.from(doc.get(FSUserActivityConstants.tagIds.value)),
       );
+
+  @override
+  String toString() => 'FSUserActivity(uid: $uid, tagIds: $tagIds)';
 }
 
 extension FSUserActivityExtension on FSUserActivity {

@@ -1,29 +1,27 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../models/models.dart';
 import '../../constants/constants.dart';
+import '../../providers/providers.dart';
 
 class ChatProvider {
-  final SharedPreferences pref;
-  final FirebaseFirestore firebaseFirestore;
+  final FirebaseFirestore db;
 
-  ChatProvider({
-    required this.firebaseFirestore,
-    required this.pref,
-  });
+  static final ChatProvider _instance = ChatProvider._internal(
+    FirebaseFirestore.instance,
+  );
 
-  String? getPref(String key) {
-    return pref.getString(key);
-  }
+  ChatProvider._internal(this.db);
+  factory ChatProvider() => _instance;
+
 
   /// 取得聊天訊息串流
   Stream<QuerySnapshot> getChatStream(
     String activityId,
-    List<String> userIds, [
+    List<String> userIds, {
     int limit = 20,
-  ]) =>
-      firebaseFirestore
+  }) =>
+      db
           .collection(FirestoreConstants.activityCollectionPath.value)
           .doc(activityId)
           .collection(FirestoreConstants.roomCollectionPath.value)
@@ -44,38 +42,79 @@ class ChatProvider {
 
   /// 取得共同標籤
   static String? _findMutualTag(
-    List<String> tags1,
-    List<String> tags2, [
+    List<String> tagIds1,
+    List<String> tagIds2, {
     bool random = true,
-  ]) {
-    if (random) tags1.shuffle();
-    for (final tag in tags1) {
-      if (tags2.contains(tag)) {
-        return tag;
+  }) {
+    if (random) tagIds1.shuffle();
+    for (final tagId in tagIds1) {
+      if (tagIds2.contains(tagId)) {
+        return tagId;
       }
     }
     return null;
   }
 
+  /// 獲取聊天對象 ID，若沒有聊天對象則進行配對
+  ///
+  /// 會先查看是否有啟用的聊天室，若有則直接進入，若沒有則進入等待配對
+  Future<String?> getChatToUserId(
+    String userId,
+    String activityId,
+  ) async {
+    final enableRoomUserId =
+        await _getChatToUserIdInEnableRoom(userId, activityId);
+    if (enableRoomUserId != null) return enableRoomUserId;
+
+    return await _pairOrWait(userId, activityId);
+  }
+
+  /// 從啟用的聊天室中獲取聊天對象 ID
+  ///
+  /// 回傳 對方ID (回傳 null 表示沒有啟用的聊天室)
+  Future<String?> _getChatToUserIdInEnableRoom(
+    String userId,
+    String activityId,
+  ) async {
+    final roomQuery = db
+        .collection(FirestoreConstants.activityCollectionPath.value)
+        .doc(activityId)
+        .collection(FirestoreConstants.roomCollectionPath.value)
+        .where(RoomConstants.users.value, arrayContains: userId)
+        .where(RoomConstants.isEnable.value, isEqualTo: true)
+        .limit(1);
+
+    final roomData = await roomQuery.get();
+    if (roomData.docs.isEmpty) return null;
+
+    final room = Room.fromDocument(roomData.docs.first);
+    return room.users.firstWhere((e) => e.id != userId).id;
+  }
+
   /// 配對成功或進入等待
   ///
-  /// 回傳 對方ID 表示配對成功，回傳 null 表示進入等待
-  Future<String?> pairOrWait(
-    String activityId,
+  /// 回傳 對方ID (回傳 null 表示進入等待)
+  Future<String?> _pairOrWait(
     String userId,
-    List<String> tagIds,
+    String activityId,
   ) async {
-    final activityRef = firebaseFirestore
+    final activityRef = db
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityId);
 
+    assert((await activityRef.get()).exists, '活動不存在');
+
+    final userActivity =
+        await UserProvider().getUserActivity(userId, activityId);
+
     final waitingUserQuery = activityRef
         .collection(FirestoreConstants.chatQueueNodeCollectionPath.value)
-        .where(QueueConstants.tagIds.value, arrayContainsAny: tagIds)
+        .where(QueueConstants.tagIds.value,
+            arrayContainsAny: userActivity.tagIds)
         .orderBy(QueueConstants.timestamp.value)
         .limit(1);
 
-    var room = await firebaseFirestore.runTransaction((transaction) async {
+    final room = await db.runTransaction((transaction) async {
       if ((await waitingUserQuery.count().get()).count > 0) {
         final waitingUserRef =
             (await waitingUserQuery.get()).docs.first.reference;
@@ -85,10 +124,11 @@ class ChatProvider {
         await _createOrEnableRoom(
           activityId,
           [userId, waitingUser.userId],
-          _findMutualTag(tagIds, waitingUser.tags)!,
-          transaction,
+          _findMutualTag(userActivity.tagIds, waitingUser.tagIds)!,
+          transaction: transaction,
         );
         transaction.delete(waitingUserRef);
+
         return waitingUser.userId;
       } else {
         final queueNodeRef = activityRef
@@ -96,12 +136,11 @@ class ChatProvider {
             .doc(userId);
 
         // 不能重複排隊
-        final queueNodeData = await transaction.get(queueNodeRef);
-        assert(!queueNodeData.exists, '不能重複排隊');
+        assert(!(await transaction.get(queueNodeRef)).exists, '不能重複排隊');
 
         final curTime = DateTime.now().millisecondsSinceEpoch.toString();
         final chatQueueNode = ChatQueueNode(
-          tags: tagIds,
+          tagIds: userActivity.tagIds,
           userId: userId,
           timestamp: curTime,
         );
@@ -116,14 +155,43 @@ class ChatProvider {
     return room;
   }
 
+  /// 是否在聊天等待隊列中
+  Future<bool> isWaiting(
+    String userId,
+    String activityId,
+  ) async {
+    final queueNodeRef = db
+        .collection(FirestoreConstants.activityCollectionPath.value)
+        .doc(activityId)
+        .collection(FirestoreConstants.chatQueueNodeCollectionPath.value)
+        .doc(userId);
+
+    return (await queueNodeRef.get()).exists;
+  }
+
+  /// 取消等待
+  Future<void> cancelWaiting(
+    String userId,
+    String activityId,
+  ) async {
+    final queueNodeRef = db
+        .collection(FirestoreConstants.activityCollectionPath.value)
+        .doc(activityId)
+        .collection(FirestoreConstants.chatQueueNodeCollectionPath.value)
+        .doc(userId);
+
+    assert((await queueNodeRef.get()).exists, '不在等待隊列中');
+    await queueNodeRef.delete();
+  }
+
   /// 創建或啟用(更新)房間
   Future<Room?> _createOrEnableRoom(
     String activityId,
     List<String> userIds,
-    String tag, [
+    String tag, {
     Transaction? transaction,
-  ]) async {
-    final roomDataRef = firebaseFirestore
+  }) async {
+    final roomDataRef = db
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityId)
         .collection(FirestoreConstants.roomCollectionPath.value)
@@ -170,47 +238,41 @@ class ChatProvider {
   }
 
   /// 離開房間
-  Future<bool> leaveRoom(
+  Future<void> leaveRoom(
     String activityId,
     List<String> userIds,
   ) async {
-    final roomId = _getRoomId(userIds);
-    final roomQuery = firebaseFirestore
+    final roomQuery = db
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityId)
         .collection(FirestoreConstants.roomCollectionPath.value)
-        .doc(roomId);
+        .doc(_getRoomId(userIds));
 
     final roomData = await roomQuery.get();
-    if (roomData.exists && roomData.get(RoomConstants.isEnable.value)) {
-      await roomQuery.update({
-        RoomConstants.isEnable.value: false,
-      });
-      return true;
-    } else {
-      return false;
-    }
+    assert(roomData.exists, '房間不存在');
+    assert(roomData.get(RoomConstants.isEnable.value), '房間已停用');
+
+    await roomQuery.update({
+      RoomConstants.isEnable.value: false,
+    });
   }
 
   /// 取得房間資訊
-  Future<Room?> getRoom(
+  Future<Room> getRoom(
     String activityId,
     List<String> userIds,
   ) async {
-    final roomId = _getRoomId(userIds);
-    final roomQuery = firebaseFirestore
+    final roomQuery = db
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityId)
         .collection(FirestoreConstants.roomCollectionPath.value)
-        .doc(roomId);
+        .doc(_getRoomId(userIds));
 
     final roomData = await roomQuery.get();
-    if (roomData.exists) {
-      final room = Room.fromDocument(roomData);
-      return room;
-    } else {
-      return null;
-    }
+    assert(roomData.exists, '房間不存在');
+
+    final room = Room.fromDocument(roomData);
+    return room;
   }
 
   /// 傳遞訊息
@@ -222,8 +284,7 @@ class ChatProvider {
     MessageType type,
   ) async {
     final room = await getRoom(activityId, [fromId, toId]);
-    assert(room != null, '房間不存在');
-    assert(room!.isEnable, '房間已關閉');
+    assert(room.isEnable, '房間已關閉');
 
     final curTime = DateTime.now().millisecondsSinceEpoch.toString();
     final roomId = _getRoomId([fromId, toId]);
@@ -235,7 +296,7 @@ class ChatProvider {
       type: type,
     );
 
-    await firebaseFirestore
+    await db
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityId)
         .collection(FirestoreConstants.roomCollectionPath.value)
@@ -243,5 +304,21 @@ class ChatProvider {
         .collection(FirestoreConstants.messageCollectionPath.value)
         .doc(curTime)
         .set(messageData.toJson());
+  }
+
+  /// 取得使用者在某活動的聊天室列表
+  Future<List<Room>> getUserRooms(
+    String userId,
+    String activityId,
+  ) async {
+    final roomQuery = db
+        .collection(FirestoreConstants.activityCollectionPath.value)
+        .doc(activityId)
+        .collection(FirestoreConstants.roomCollectionPath.value)
+        .where(RoomConstants.users.value, arrayContains: userId);
+
+    final roomData = await roomQuery.get();
+    final rooms = roomData.docs.map((e) => Room.fromDocument(e)).toList();
+    return rooms;
   }
 }

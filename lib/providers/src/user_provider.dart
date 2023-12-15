@@ -6,9 +6,13 @@ import '../../constants/constants.dart';
 class UserProvider {
   final FirebaseFirestore db;
 
-  UserProvider({
-    required this.db,
-  });
+  static final UserProvider _instance = UserProvider._internal(
+    FirebaseFirestore.instance,
+  );
+
+  UserProvider._internal(this.db);
+  factory UserProvider() => _instance;
+
 
   /// 添加(覆寫)使用者資料
   ///

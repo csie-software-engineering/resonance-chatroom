@@ -1,17 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:resonance_chatroom/constants/constants.dart';
 import 'package:resonance_chatroom/models/models.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../../providers/providers.dart';
 
 class QuestionProvider {
-  final SharedPreferences pref;
-  final FirebaseFirestore firebaseFirestore;
+  final FirebaseFirestore db;
 
-  QuestionProvider({
-    required this.pref,
-    required this.firebaseFirestore
-  });
+  static final QuestionProvider _instance = QuestionProvider._internal(
+    FirebaseFirestore.instance,
+  );
+
+  QuestionProvider._internal(this.db);
+  factory QuestionProvider() => _instance;
 
   Future<void> UserAnswer(
       String activityid,
@@ -19,7 +18,7 @@ class QuestionProvider {
       String choice,
       String UserEmail)
   async{
-    var reviewcollection = firebaseFirestore
+    var reviewcollection = db
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityid)
         .collection(FirestoreConstants.questionCollectionPath.value)
@@ -48,7 +47,7 @@ class QuestionProvider {
       String activityid,
       String questionid,
       )async{
-    var reviewcollection = firebaseFirestore
+    var reviewcollection = db
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityid)
         .collection(FirestoreConstants.questionCollectionPath.value)

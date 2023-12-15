@@ -63,14 +63,14 @@ class ChatMessage {
 }
 
 class ReportMessage {
-  final String activityid;
+  final String activityId;
   final String fromId;
   final String toId;
   final String type;
   final String content;
 
   const ReportMessage({
-    required this.activityid,
+    required this.activityId,
     required this.fromId,
     required this.toId,
     required this.type,
@@ -79,7 +79,7 @@ class ReportMessage {
 
   Map<String, dynamic> toJson() {
     return {
-      ReportConstants.activityid.value: activityid,
+      ReportConstants.activityid.value: activityId,
       ReportConstants.idFrom.value: fromId,
       ReportConstants.idTo.value: toId,
       ReportConstants.type.value: type,
@@ -95,7 +95,7 @@ class ReportMessage {
     String type = doc.get(ReportConstants.type.value);
     String content = doc.get(ReportConstants.content.value);
     return ReportMessage(
-      activityid: activityid,
+      activityId: activityid,
       fromId: idFrom,
       toId: idTo,
       type: type,

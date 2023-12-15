@@ -24,18 +24,8 @@ class MyApp extends StatelessWidget {
           Provider<UserProvider>(create: (_) => UserProvider()),
           Provider<ChatProvider>(create: (_) => ChatProvider()),
           Provider<AuthProvider>(create: (_) => AuthProvider()),
-			Provider<SetActivityProvider>(
-            create: (_) => SetActivityProvider(
-              pref: pref,
-              firebaseFirestore: firebaseFirestore
-            ),
-          ),
-          Provider<QuestionProvider>(
-            create: (_) => QuestionProvider(
-                pref: pref,
-                firebaseFirestore: firebaseFirestore
-            ),
-          ),
+          Provider<SetActivityProvider>(create: (_) => SetActivityProvider()),
+          Provider<QuestionProvider>(create: (_) => QuestionProvider()),
         ],
         child: MaterialApp(
           title: AppConstants.appTitle,

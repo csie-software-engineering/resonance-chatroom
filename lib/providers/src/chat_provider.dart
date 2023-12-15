@@ -15,7 +15,6 @@ class ChatProvider {
   ChatProvider._internal(this.db);
   factory ChatProvider() => _instance;
 
-
   /// 取得聊天訊息串流
   Stream<QuerySnapshot> getChatStream(
     String activityId,
@@ -321,26 +320,22 @@ class ChatProvider {
     final roomData = await roomQuery.get();
     final rooms = roomData.docs.map((e) => Room.fromDocument(e)).toList();
     return rooms;
-  Future<void> Report(
-      String activityid,
-      String fromId,
-      String toId,
-      String type,
-      String content
-      )async{
-    String reportid = generateUuid();
+  }
+
+  Future<void> report(String activityId, String fromId, String toId,
+      String type, String content) async {
+    String reportId = generateUuid();
     ReportMessage reportdata = ReportMessage(
-      fromId: fromId,
-      toId: toId,
-      activityid: activityid,
-      type: type,
-      content: content
-    );
-    await firebaseFirestore
+        fromId: fromId,
+        toId: toId,
+        activityId: activityId,
+        type: type,
+        content: content);
+    await db
         .collection(FirestoreConstants.activityCollectionPath.value)
-        .doc(activityid)
+        .doc(activityId)
         .collection(FirestoreConstants.reportCollectionPath.value)
-        .doc(reportid)
+        .doc(reportId)
         .set(reportdata.toJson());
   }
 }

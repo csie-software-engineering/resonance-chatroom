@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
-import '../../providers/providers.dart';
+
 import '../routes.dart';
 
 class HostActivityTagPage extends StatefulWidget {
+  const HostActivityTagPage({Key? key}) : super(key: key);
+
+  static const routeName = '/host_activity_tag_page';
+
   @override
   State<HostActivityTagPage> createState() => _HostActivityTagPageState();
 }
@@ -105,7 +109,7 @@ class _NewTagFieldState extends State<NewTagField> {
               onPressed: () {
                 // 跳至預覽頁面的邏輯
                 // 傳遞createEvent()方法的回傳值給預覽頁面
-                Navigator.of(context).pushNamed(Routes.hostActivityTopicPage.value);
+                Navigator.of(context).pushNamed(HostActivityTopicPage.routeName);
               },
             ),
           ),

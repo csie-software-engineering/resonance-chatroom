@@ -4,11 +4,17 @@ import 'src/chat.dart';
 import 'src/host_activity_set_page.dart';
 import 'src/init.dart';
 import 'src/login_page.dart';
+import 'src/host_activity_tag_page.dart';
+import 'src/host_activity_topic_page.dart';
+import 'src/host_activity_question_page.dart';
 
 export 'src/chat.dart';
 export 'src/host_activity_set_page.dart';
 export 'src/init.dart';
 export 'src/login_page.dart';
+export 'src/host_activity_tag_page.dart';
+export 'src/host_activity_topic_page.dart';
+export 'src/host_activity_question_page.dart';
 
 Map<String, Widget Function(BuildContext)> routes = {
   InitPage.routeName: (_) => const InitPage(),
@@ -23,7 +29,7 @@ Map<String, Widget Function(BuildContext)> routes = {
         ),
         title: 'Robot_2',
       ),
-  Routes.hostActivityTagPage.value: (_) =>  HostActivityTagPage(),
-  Routes.hostActivityTopicPage.value: (_) =>  HostActivityTopicPage(),
-  Routes.hostActivityQuestionPage.value: (_) =>  HostActivityQuestionPage(),
+  HostActivityTagPage.routeName: (_) => const HostActivityTagPage(),
+  HostActivityTopicPage.routeName: (_) => const HostActivityTopicPage(),
+  HostActivityQuestionPage.routeName: (_) => const HostActivityQuestionPage(),
 };

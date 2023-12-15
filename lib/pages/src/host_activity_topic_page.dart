@@ -3,6 +3,10 @@ import '../../providers/providers.dart';
 import '../routes.dart';
 
 class HostActivityTopicPage extends StatefulWidget {
+  const HostActivityTopicPage({Key? key}) : super(key: key);
+
+  static const routeName = '/host_activity_topic_page';
+
   @override
   State<HostActivityTopicPage> createState() => _HostActivityTopicPageState();
 }
@@ -105,7 +109,7 @@ class _NewTopicFieldState extends State<NewTopicField> {
               onPressed: () {
                 // 跳至預覽頁面的邏輯
                 // 傳遞createEvent()方法的回傳值給預覽頁面
-                Navigator.of(context).pushNamed(Routes.hostActivityQuestionPage.value);
+                Navigator.of(context).pushNamed(HostActivityQuestionPage.routeName);
               },
             ),
           ),

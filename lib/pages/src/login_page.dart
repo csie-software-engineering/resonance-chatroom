@@ -1,65 +1,99 @@
 import 'package:flutter/material.dart';
-import '../../providers/providers.dart';
 import 'package:provider/provider.dart';
 
-class LoginPage extends StatelessWidget{
-  const LoginPage({Key? key}) : super(key: key);
+import '../routes.dart';
+import '../../providers/providers.dart';
+
+class LoginPage extends StatelessWidget {
+  const LoginPage({super.key});
 
   static const routeName = '/login';
 
   @override
-  Widget build(BuildContext context){
-    late final AuthProviders authProvider = context.read<AuthProviders>();
+  Widget build(BuildContext context) {
+    late final AuthProvider authProvider = context.read<AuthProvider>();
     return Scaffold(
-        body: Container(
-            alignment: Alignment.center,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('Login with'),
-                SizedBox(
-                    width: 200.0,
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        await authProvider.signInWithGoogle();
-                      },
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Image.asset('lib/assets/google.png', width:15, height:15),
-                          Text('  Google'),
-                        ],
+      body: Container(
+        alignment: Alignment.center,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('Login with'),
+            SizedBox(
+              width: 200.0,
+              child: ElevatedButton(
+                onPressed: () {
+                  authProvider.signInWithGoogle().then((user) {
+                    Navigator.of(context).pushNamed(
+                      InitPage.routeName,
+                      arguments: InitPageArguments(
+                        title: 'title',
+                        curUser: user,
                       ),
-                    )
+                    );
+                  });
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      'lib/assets/google.png',
+                      width: 15,
+                      height: 15,
+                    ),
+                    const Text('  Google'),
+                  ],
                 ),
-                SizedBox(
-                    width: 200.0,
-                    child: ElevatedButton(
-                        onPressed: () async {
-                          await authProvider.signInWithFacebook();
-                        },
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Image.asset('lib/assets/facebook.png', width: 15, height: 15),
-                            Text(' Facebook'),
-                          ],
-                        )
-                    )
+              ),
+            ),
+            SizedBox(
+              width: 200.0,
+              child: ElevatedButton(
+                onPressed: () {
+                  authProvider.signInWithFacebook().then((user) {
+                    Navigator.of(context).pushNamed(
+                      InitPage.routeName,
+                      arguments: InitPageArguments(
+                        title: 'title',
+                        curUser: user,
+                      ),
+                    );
+                  });
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      'lib/assets/facebook.png',
+                      width: 15,
+                      height: 15,
+                    ),
+                    const Text(' Facebook'),
+                  ],
                 ),
-                Text('OR'),
-                SizedBox(
-                    width: 200.0,
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        await authProvider.signInWithAnonymous();
-                      },
-                      child: Text('Login as guest'),
-                    )
-                )
-              ],
-            )
-        )
+              ),
+            ),
+            const Text('OR'),
+            SizedBox(
+              width: 200.0,
+              child: ElevatedButton(
+                onPressed: () {
+                  authProvider.signInWithAnonymous().then((user) {
+                    Navigator.of(context).pushNamed(
+                      InitPage.routeName,
+                      arguments: InitPageArguments(
+                        title: 'title',
+                        curUser: user,
+                      ),
+                    );
+                  });
+                },
+                child: const Text('Login as guest'),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

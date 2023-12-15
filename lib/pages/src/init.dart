@@ -23,7 +23,7 @@ class InitPage extends StatefulWidget {
 class _InitPageState extends State<InitPage> {
   int _counter = 0;
   late final ChatProvider chatProvider = context.read<ChatProvider>();
-  late final AuthProviders authProvider = context.read<AuthProviders>();
+  late final AuthProvider authProvider = context.read<AuthProvider>();
   late final UserProvider userProvider = context.read<UserProvider>();
 
   Future<void> _incrementCounter() async {

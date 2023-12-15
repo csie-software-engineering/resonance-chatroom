@@ -15,6 +15,7 @@ class ChatPage extends StatefulWidget {
   final ChatPageArguments arguments;
 
   // get inputOptions => null;
+  static const routeName = '/chat';
 
   @override
   State<ChatPage> createState() => _ChatPageState();

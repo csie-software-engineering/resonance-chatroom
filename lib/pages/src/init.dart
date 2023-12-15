@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../models/src/user.dart';
+import '../../models/models.dart';
 import '../../providers/providers.dart';
-import '../routes.dart';
+
+class InitPageArguments {
+  final String title;
+  final User curUser;
+
+  InitPageArguments({required this.title, required this.curUser});
+}
 
 class InitPage extends StatefulWidget {
-  const InitPage({super.key, required this.title});
-  final String title;
+  const InitPage({super.key});
+
+  static const routeName = '/init';
 
   @override
   State<InitPage> createState() => _InitPageState();
@@ -20,19 +27,20 @@ class _InitPageState extends State<InitPage> {
   late final UserProvider userProvider = context.read<UserProvider>();
 
   Future<void> _incrementCounter() async {
-
     setState(() {
       _counter++;
-      Navigator.of(context).pushNamed(Routes.chatPage.value);
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final InitPageArguments args =
+        ModalRoute.of(context)!.settings.arguments as InitPageArguments;
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
+        title: Text(args.title),
       ),
       body: Center(
         child: Column(
@@ -42,7 +50,7 @@ class _InitPageState extends State<InitPage> {
               'You have pushed the button this many times:',
             ),
             Text(
-              '$_counter',
+              '${args.curUser.uid} $_counter',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
           ],

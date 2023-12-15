@@ -32,6 +32,10 @@ class Event {
 }
 
 class HostActivitySetPage extends StatefulWidget {
+  const HostActivitySetPage({Key? key}) : super(key: key);
+
+  static const routeName = '/host_activity_set_page';
+
   @override
   _HostActivitySetPageState createState() => _HostActivitySetPageState();
 }

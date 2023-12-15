@@ -102,17 +102,18 @@ class _ChatPageState extends State<ChatPage> {
                   ),
                 ),
               ),
-              IconButton(onPressed: (){
-                setState(() {
-                  _height = 0;
-                  _showTopic = false;
-                });
-              }, icon: Icon(
-                  Icons.arrow_drop_up_outlined,
-                size: 30,
-                color: Theme.of(context).colorScheme.secondary,
-              )),
-
+              IconButton(
+                  onPressed: () {
+                    setState(() {
+                      _height = 0;
+                      _showTopic = false;
+                    });
+                  },
+                  icon: Icon(
+                    Icons.arrow_drop_up_outlined,
+                    size: 30,
+                    color: Theme.of(context).colorScheme.secondary,
+                  )),
             ],
           ),
         ),
@@ -165,7 +166,7 @@ class _ChatPageState extends State<ChatPage> {
     //         (Route<dynamic> route) => false,
     //   );
     // }
-    currentUserId = "15";
+    currentUserId = "14";
     String peerId = widget.arguments.peerId;
 
     groupMembers.add(currentUserId);
@@ -220,8 +221,8 @@ class _ChatPageState extends State<ChatPage> {
                     constraints: const BoxConstraints(maxWidth: 200),
                     // width: messageChat.content.length,
                     decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary,
-                        borderRadius: BorderRadius.circular(12)),
+                        color: Theme.of(context).colorScheme.inversePrimary,
+                        borderRadius: BorderRadius.circular(20)),
                     margin: const EdgeInsets.only(
                         // bottom: isLastMessageRight(index) ? 20 : 10, right: 10),
                         bottom: 10,
@@ -229,7 +230,7 @@ class _ChatPageState extends State<ChatPage> {
                     child: Text(
                       messageChat.content,
                       style: TextStyle(
-                        color: Theme.of(context).colorScheme.onPrimary,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ))
                 // Sticker
@@ -278,7 +279,7 @@ class _ChatPageState extends State<ChatPage> {
                         return Icon(
                           Icons.account_circle,
                           size: 35,
-                          color: Theme.of(context).colorScheme.onPrimary,
+                          color: Theme.of(context).colorScheme.onSurface,
                         );
                       },
                       width: 35,
@@ -291,13 +292,13 @@ class _ChatPageState extends State<ChatPage> {
                           padding: const EdgeInsets.fromLTRB(15, 10, 15, 10),
                           constraints: const BoxConstraints(maxWidth: 200),
                           decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.secondary,
-                              borderRadius: BorderRadius.circular(12)),
+                              color: Theme.of(context).colorScheme.inverseSurface.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(20)),
                           margin: EdgeInsets.only(bottom: 10, left: 10),
                           child: Text(
                             messageChat.content,
                             style: TextStyle(
-                                color: Theme.of(context).colorScheme.onPrimary),
+                                color: Theme.of(context).colorScheme.onSurface),
                           ),
                         )
                       : Container(
@@ -324,7 +325,7 @@ class _ChatPageState extends State<ChatPage> {
         children: [
           Container(
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
+              color: Theme.of(context).colorScheme.secondaryContainer,
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.2),
@@ -337,28 +338,39 @@ class _ChatPageState extends State<ChatPage> {
             child: Stack(
               alignment: Alignment.centerRight,
               children: [
-                const Align(
-                    child: const BackButton(),
-                  alignment: Alignment.centerLeft,
-                ),
+
                 Align(
                   alignment: Alignment.center,
                   child: Container(
                     height: kToolbarHeight,
+                    color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
                     child: Center(
-                      child: ClipRRect(
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(16)),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 2, horizontal: 20.0),
-                          color: Theme.of(context).colorScheme.background,
-                          child: Text("Tag",
-                              style: const TextStyle(
-                                  fontSize: 20, fontWeight: FontWeight.w700)),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .primary.withOpacity(0.8),
+                          borderRadius: const BorderRadius.all(Radius.circular(16)),
                         ),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 3, horizontal: 20.0),
+
+                        child: Text(widget.title,
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w700,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onInverseSurface,
+                            )),
                       ),
                     ),
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: BackButton(
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 Align(
@@ -366,7 +378,8 @@ class _ChatPageState extends State<ChatPage> {
                   child: Container(
                     child: IconButton(
                       padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
-                      icon: Icon(isOn ? Icons.lightbulb : Icons.lightbulb_outline),
+                      icon: Icon(
+                          isOn ? Icons.lightbulb : Icons.lightbulb_outline),
                       color: isOn ? Colors.amber : Colors.white,
                       onPressed: () {
                         setState(() {

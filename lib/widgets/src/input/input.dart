@@ -143,16 +143,6 @@ class _InputState extends State<Input> {
                   splashRadius: 1,
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
                 ),
-                // IconButton( // sticker
-                //   // isLoading: widget.isAttachmentUploading ?? false,
-                //   color: const Color(0xff5c8736),
-                //   icon: const Icon(Icons.emoji_emotions),
-                //   tooltip: "貼圖",
-                //   onPressed: () {}, //  插入 function
-                //   iconSize: 30,
-                //   splashRadius: 1,
-                //   padding: EdgeInsets.fromLTRB(10, 0, 20, 0),
-                // ),
                 Expanded(
                   child: Padding(
                     padding: textPadding,
@@ -164,16 +154,16 @@ class _InputState extends State<Input> {
                         autofocus: widget.options.autofocus,
                         enableSuggestions: widget.options.enableSuggestions,
                         controller: _textController,
-                        cursorColor: Theme.of(context).colorScheme.onPrimary,
+                        cursorColor: Theme.of(context).colorScheme.primary,
                         decoration: InputDecoration(
                           filled: true,
-                          fillColor: const Color(0xffc8d7a7),
+                          fillColor: Theme.of(context).colorScheme.secondary.withOpacity(0.2),
                           border: InputBorder.none,
                           hintStyle: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
                             height: 1.5,
-                            color: Theme.of(context).colorScheme.onPrimary,
+                            color: Theme.of(context).colorScheme.primary,
                           ),
                           hintText: 'Aa',
                           isCollapsed: true,
@@ -190,7 +180,7 @@ class _InputState extends State<Input> {
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
                           height: 1.5,
-                          color: Theme.of(context).colorScheme.onPrimary,
+                          color: Theme.of(context).colorScheme.primary,
                         ),
                         textCapitalization: TextCapitalization.sentences,
                       ),

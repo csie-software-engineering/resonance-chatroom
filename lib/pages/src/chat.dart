@@ -347,14 +347,41 @@ class _ChatPageState extends State<ChatPage> {
                                           ),
                                         ),
                                         Container(
-                                          width: 250,
+                                          width: 220,
                                           padding: EdgeInsets.only(left: 20),
                                           child: Text("一二三四五六七八九十ㄚㄚㄚㄚ阿",
                                               style: TextStyle(
-                                                fontSize: 20,
+                                                fontSize: 15,
                                                 fontWeight: FontWeight.w500,
                                               )),
                                         ),
+                                        IconButton(
+                                          iconSize: 20,
+                                          color: Theme.of(context).colorScheme.error.withOpacity(0.5),
+                                          icon: Icon(Icons.warning),
+                                          onPressed: (){
+                                            showDialog(
+                                                context: context,
+                                                builder:
+                                                    (BuildContext context) {
+                                                  return AlertDialog(
+                                                    title: Text('請輸入原因'),
+                                                    content: TextField(),
+                                                    actions: [
+                                                      TextButton(
+                                                        onPressed: () {
+                                                          // 串接舉報按鈕
+                                                          Navigator.of(
+                                                              context)
+                                                              .pop(); // 关闭对话框
+                                                        },
+                                                        child: Text('确定'),
+                                                      ),
+                                                    ],
+                                                  );
+                                                });
+                                          },
+                                        )
                                       ],
                                     ),
                                   ),
@@ -441,50 +468,6 @@ class _ChatPageState extends State<ChatPage> {
                                             ),
                                           ),
                                   ),
-                                  Expanded(
-                                    flex: 1,
-                                    child: Align(
-                                      alignment: Alignment.bottomCenter,
-                                      child: Container(
-                                          decoration: BoxDecoration(
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .error,
-                                            borderRadius:
-                                                BorderRadius.circular(12),
-                                          ),
-                                          child: TextButton(
-                                            child: Text("Report",
-                                                style: TextStyle(
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .onInverseSurface,
-                                                )),
-                                            onPressed: () {
-                                              showDialog(
-                                                  context: context,
-                                                  builder:
-                                                      (BuildContext context) {
-                                                    return AlertDialog(
-                                                      title: Text('請輸入原因'),
-                                                      content: TextField(),
-                                                      actions: [
-                                                        TextButton(
-                                                          onPressed: () {
-                                                            // 串接舉報按鈕
-                                                            Navigator.of(
-                                                                    context)
-                                                                .pop(); // 关闭对话框
-                                                          },
-                                                          child: Text('确定'),
-                                                        ),
-                                                      ],
-                                                    );
-                                                  });
-                                            },
-                                          )),
-                                    ),
-                                  )
                                 ],
                               ),
                             );

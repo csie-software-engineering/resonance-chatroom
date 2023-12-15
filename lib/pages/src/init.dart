@@ -25,10 +25,8 @@ class _InitPageState extends State<InitPage> {
   late final ChatProvider chatProvider = context.read<ChatProvider>();
   late final AuthProvider authProvider = context.read<AuthProvider>();
   late final UserProvider userProvider = context.read<UserProvider>();
-  late final SetActivityProvider setActivityProvider =
-      context.read<SetActivityProvider>();
-  late final QuestionProvider questionProvider =
-      context.read<QuestionProvider>();
+  late final SetActivityProvider setActivityProvider = context.read<SetActivityProvider>();
+  late final QuestionProvider questionProvider = context.read<QuestionProvider>();
 
   late final InitPageArguments args =
       ModalRoute.of(context)!.settings.arguments as InitPageArguments;

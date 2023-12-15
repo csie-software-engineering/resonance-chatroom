@@ -17,7 +17,7 @@ class SetActivityProvider {
   factory SetActivityProvider() => _instance;
 
   ///設置新活動
-  Future<void> SetNewActivity(Activity activitydata, String UserId) async {
+  Future<Activity?> SetNewActivity(Activity activitydata, String UserId) async {
     String activityid = generateUuid();
     DocumentReference documentReference = db
         .collection(FirestoreConstants.activityCollectionPath.value)
@@ -28,6 +28,28 @@ class SetActivityProvider {
 
     await documentReference
         .update({Activityconstants.activityid.value: activityid});
+    return Getactivity(activityid, UserId);
+  }
+
+  ///獲取自己主辦的活動
+  Future<List<Activity>?> GetAllActivity(String UserId) async {
+    var docquery = db
+        .collection(FirestoreConstants.activityCollectionPath.value)
+        .where('ownerid', isEqualTo: UserId)
+        .where('IsEnabled', isEqualTo: true);
+
+    if ((await docquery.count().get()).count > 0) {
+      var activitydocs = (await docquery.get()).docs;
+      List<Activity> activitylist = [];
+      for (var activitydoc in activitydocs) {
+        var activitydata = await activitydoc.reference.get();
+        activitylist.add(Activity.fromDocument(activitydata));
+      }
+      return activitylist;
+    } else {
+      log("You don't own any activities.");
+      return null;
+    }
   }
 
   ///取得活動
@@ -139,16 +161,17 @@ class SetActivityProvider {
   }
 
   ///新增標籤
-  Future<void> AddNewTag(
+  Future<String> AddNewTag(
     String activityid,
-    Tag tagdata,
+    String tagname,
     String UserId,
   ) async {
     if (!await IsManager(activityid, UserId)) {
       log("you are not manager.");
-      return;
+      return "";
     }
     String tagid = generateUuid();
+    var tagdata = Tag(activityid: activityid, tagname: tagname, tagid: tagid);
     DocumentReference documentReference = db
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityid)
@@ -157,27 +180,28 @@ class SetActivityProvider {
 
     await documentReference.set(tagdata.toJson());
     await documentReference.update({Tagconstants.tagid.value: tagid});
+    return tagid;
   }
 
   ///取得標籤
-  Future<Tag?> Gettag(String activityid, String tagid, String UserId) async {
-    if (!await IsManager(activityid, UserId)) {
-      log("you are not manager.");
-      return null;
-    }
-    DocumentReference documentReference = db
-        .collection(FirestoreConstants.activityCollectionPath.value)
-        .doc(activityid)
-        .collection(FirestoreConstants.tagCollectionPath.value)
-        .doc(tagid);
-
-    var tagdata = await documentReference.get();
-    if (tagdata.exists) {
-      return Tag.fromDocument(tagdata);
-    } else {
-      return null;
-    }
-  }
+  // Future<Tag?> Gettag(String activityid, String tagid, String UserId) async {
+  //   if (!await IsManager(activityid, UserId)) {
+  //     log("you are not manager.");
+  //     return null;
+  //   }
+  //   DocumentReference documentReference = db
+  //       .collection(FirestoreConstants.activityCollectionPath.value)
+  //       .doc(activityid)
+  //       .collection(FirestoreConstants.tagCollectionPath.value)
+  //       .doc(tagid);
+  //
+  //   var tagdata = await documentReference.get();
+  //   if (tagdata.exists) {
+  //     return Tag.fromDocument(tagdata);
+  //   } else {
+  //     return null;
+  //   }
+  // }
 
   ///取得所有標籤資訊
   Future<List<Tag>?> GetAllTags(String activityid, String UserId) async {
@@ -207,7 +231,7 @@ class SetActivityProvider {
 
   ///編輯標籤
   Future<void> EditTag(
-      String activityid, String tagid, Tag, tagdata, String UserId) async {
+      String activityid, String tagid, String tagname, String UserId) async {
     if (!await IsManager(activityid, UserId)) {
       log("you are not manager.");
       return;
@@ -218,10 +242,11 @@ class SetActivityProvider {
         .collection(FirestoreConstants.tagCollectionPath.value)
         .doc(tagid);
 
-    await documentReference.update({Tagconstants.tagname: tagdata.name});
+    await documentReference.update({Tagconstants.tagname: tagname});
   }
 
   ///刪除標籤
+  //需合併DeleteTopic和DeleteQuestion
   Future<void> DeleteTag(String activityid, String UserId, String tagid) async {
     if (!await IsManager(activityid, UserId)) {
       log("you are not manager.");
@@ -263,11 +288,11 @@ class SetActivityProvider {
   }
 
   ///新增話題
-  Future<void> AddNewTopic(
+  Future<String?> AddNewTopic(
       String activityid, Topic topicdata, String UserId) async {
     if (!await IsManager(activityid, UserId)) {
       log("You are not manager.");
-      return;
+      return null;
     }
 
     String topicid = generateUuid();
@@ -279,7 +304,10 @@ class SetActivityProvider {
 
     await topicdoc.set(topicdata.toJson());
     await topicdoc.update({Topicconstants.topicid.value: topicid});
+    return topicid;
   }
+
+
 
   ///取得話題
   Future<Topic?> Gettopic(
@@ -321,18 +349,18 @@ class SetActivityProvider {
   }
 
   ///新增問卷題目
-  Future<void> AddNewQuestion(
+  Future<String?> AddNewQuestion(
       String activityid, Question questiondata, String UserId) async {
     if (!await IsManager(activityid, UserId)) {
       log("You are not manager.");
-      return;
+      return null;
     }
 
     for (var i = 0; i < questiondata.choices.length; i++) {
       for (var j = i + 1; j < questiondata.choices.length; j++) {
         if (questiondata.choices[i] == questiondata.choices[j]) {
           log("There are two same choices");
-          return;
+          return null;
         }
       }
     }
@@ -354,6 +382,7 @@ class SetActivityProvider {
           .doc(questiondata.choices[i]);
       await reviewdoc.set(review.toJson());
     }
+    return questionid;
   }
 
   ///編輯問卷題目
@@ -376,21 +405,26 @@ class SetActivityProvider {
 
   ///取得問卷題目
   Future<Question?> Getquestion(
-      String activityid, String questionid, String UserId) async {
+      String activityid, String topicid, String UserId) async {
     if (!await IsManager(activityid, UserId)) {
       log("you are not manager.");
       return null;
     }
-    DocumentReference documentReference = db
+    var questionquery = db
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityid)
         .collection(FirestoreConstants.questionCollectionPath.value)
-        .doc(questionid);
+        .where('topicid', isEqualTo: topicid);
 
-    var questiondata = await documentReference.get();
-    if (questiondata.exists) {
-      return Question.fromDocument(questiondata);
-    } else {
+    if ((await questionquery.count().get()).count == 1) {
+      var questiondocs = (await questionquery.get()).docs;
+      for (var questiondoc in questiondocs) {
+        var questionref = await questiondoc.reference.get();
+        return Question.fromDocument(questionref);
+      }
+    }
+    else {
+      
       return null;
     }
   }

@@ -18,6 +18,10 @@ class User {
     this.socialMedia = const [],
     this.activities = const [],
   });
+
+  @override
+  String toString() =>
+      'User(uid: $uid, displayName: $displayName, email: $email, photoUrl: $photoUrl, isEnabled: $isEnabled)';
 }
 
 extension UserExtension on User {
@@ -38,6 +42,10 @@ class UserSocialMedia {
     required this.displayName,
     required this.linkUrl,
   });
+
+  @override
+  String toString() =>
+      'UserSocialMedia(displayName: $displayName, linkUrl: $linkUrl)';
 }
 
 extension UserSocialMediaExtension on UserSocialMedia {
@@ -55,6 +63,9 @@ class UserActivity {
     required this.uid,
     this.tagIds = const [],
   });
+
+  @override
+  String toString() => 'UserActivity(uid: $uid, tagIds: $tagIds)';
 }
 
 extension UserActivityExtension on UserActivity {

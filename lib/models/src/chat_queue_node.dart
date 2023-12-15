@@ -24,4 +24,8 @@ class ChatQueueNode {
         tagIds: List<String>.from(doc.get(QueueConstants.tagIds.value)),
         timestamp: doc.get(QueueConstants.timestamp.value),
       );
+
+  @override
+  String toString() =>
+      'ChatQueueNode(userId: $userId, tagIds: $tagIds, timestamp: $timestamp)';
 }

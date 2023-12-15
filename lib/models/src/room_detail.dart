@@ -36,6 +36,10 @@ class Room {
 
   factory Room.fromDocument(DocumentSnapshot<Map<String, dynamic>> doc) =>
       Room.fromJson(doc.data()!);
+
+  @override
+  String toString() =>
+      'Room(users: $users, tag: $tag, isEnable: $isEnable)';
 }
 
 class RoomUser {
@@ -65,4 +69,8 @@ class RoomUser {
 
   factory RoomUser.fromDocument(DocumentSnapshot<Map<String, dynamic>> doc) =>
       RoomUser.fromJson(doc.data()!);
+
+  @override
+  String toString() =>
+      'RoomUser(id: $id, shareSocialMedia: $shareSocialMedia)';
 }

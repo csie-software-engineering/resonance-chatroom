@@ -5,18 +5,15 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 
 
-class AuthProviders extends ChangeNotifier {
+class AuthProvider {
   final FirebaseAuth firebaseAuth;
-  final SharedPreferences pref;
-  late UserCredential userCredential;
 
-  AuthProviders({
-    required this.firebaseAuth,
-    required this.pref,
-  });
+  static final AuthProvider _instance = AuthProvider._internal(
+    FirebaseAuth.instance,
+  );
 
-  String? getUserId() {
-    return userCredential.user?.uid;
+  AuthProvider._internal(this.firebaseAuth);
+  factory AuthProvider() => _instance;
   }
 
   signInWithAnonymous() async {

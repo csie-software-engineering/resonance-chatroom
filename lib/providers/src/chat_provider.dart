@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../models/models.dart';
 import '../../constants/constants.dart';
@@ -7,16 +6,14 @@ import '../../providers/providers.dart';
 
 class ChatProvider {
   final FirebaseFirestore db;
-  final SharedPreferences pref;
 
-  ChatProvider({
-    required this.db,
-    required this.pref,
-  });
+  static final ChatProvider _instance = ChatProvider._internal(
+    FirebaseFirestore.instance,
+  );
 
-  String? getPref(String key) {
-    return pref.getString(key);
-  }
+  ChatProvider._internal(this.db);
+  factory ChatProvider() => _instance;
+
 
   /// 取得聊天訊息串流
   Stream<QuerySnapshot> getChatStream(
@@ -108,7 +105,7 @@ class ChatProvider {
     assert((await activityRef.get()).exists, '活動不存在');
 
     final userActivity =
-        await UserProvider(db: db).getUserActivity(userId, activityId);
+        await UserProvider().getUserActivity(userId, activityId);
 
     final waitingUserQuery = activityRef
         .collection(FirestoreConstants.chatQueueNodeCollectionPath.value)

@@ -48,6 +48,8 @@ class _ChatPageState extends State<ChatPage> {
   bool _showTopic = false;
   bool initial = false;
 
+  bool _socialMediaEnable = false; // 使用者自己同意可不可以公開，會按鈕可以公開自己的。
+
   List<QueryDocumentSnapshot> _chatMessages = [];
 
   final List<String> groupMembers = <String>[];
@@ -291,8 +293,12 @@ class _ChatPageState extends State<ChatPage> {
                     ),
                     clipBehavior: Clip.hardEdge,
                     child: GestureDetector(
-                      onTap: (){
+                      onTap: () {
                         showModalBottomSheet(
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(30),
+                                topRight: Radius.circular(30)),
                           // backgroundColor: Colors.red.withOpacity(0),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.only(topLeft: Radius.circular(30),
@@ -313,31 +319,172 @@ class _ChatPageState extends State<ChatPage> {
                           context: context,
                           builder: (BuildContext context) {
                             return Container(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 25, vertical: 20),
                               child: Column(
                                 children: <Widget>[
-                                  Stack(
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Container(
-                                            child: Text("頭像"),
-                                          ),
-                                          Container(
-                                            child: Text("匿名"),
-                                          ),
-                                        ],
-                                      ),
-                                      Align(
-                                        alignment: Alignment.centerRight,
-                                        child: Container(
-                                          child: Text("report Buttom"),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
                                   Container(
-                                    child: Text("social Media"),
+                                    padding: EdgeInsets.only(bottom: 10),
+                                    decoration: BoxDecoration(
+                                        border: Border(
+                                      bottom: BorderSide(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurface
+                                            .withOpacity(0.1),
+                                        width: 2,
+                                      ),
+                                    )),
+                                    child: Row(
+                                      children: [
+                                        ClipOval(
+                                          child: Container(
+                                            height: 80,
+                                            width: 80,
+                                            decoration: BoxDecoration(
+                                              color: Colors.red,
+                                            ),
+                                          ),
+                                        ),
+                                        Container(
+                                          width: 250,
+                                          padding: EdgeInsets.only(left: 20),
+                                          child: Text("一二三四五六七八九十ㄚㄚㄚㄚ阿",
+                                              style: TextStyle(
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.w500,
+                                              )),
+                                        ),
+                                      ],
+                                    ),
                                   ),
+                                  Align(
+                                    alignment: Alignment.topLeft,
+                                    child: Padding(
+                                      padding:
+                                          EdgeInsets.only(top: 20, bottom: 10),
+                                      child: Container(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 6, vertical: 6),
+                                          decoration: BoxDecoration(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .primary
+                                                .withOpacity(0.3),
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                          ),
+                                          child: Text("社群媒體連結")),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 2,
+                                    child: !_socialMediaEnable
+                                        ? Container(
+                                            decoration: BoxDecoration(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .inversePrimary
+                                                  .withOpacity(0.5),
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                            ),
+                                            child: Row(
+                                              children: [
+                                                Expanded(
+                                                  flex: 2,
+                                                  child: Center(
+                                                    child: Text(
+                                                      "對方以公開",
+                                                      style: TextStyle(
+                                                        color: Theme.of(context)
+                                                            .colorScheme
+                                                            .onSurface
+                                                            .withOpacity(0.5),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                                Expanded(
+                                                  flex: 1,
+                                                  child: IconButton(
+                                                    icon: Icon(Icons.add),
+                                                    onPressed: () {},
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          )
+                                        : Container(
+                                            decoration: BoxDecoration(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onSurface
+                                                  .withOpacity(0.05),
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                            ),
+                                            child: Center(
+                                              child: Container(
+                                                padding: EdgeInsets.symmetric(
+                                                    vertical: 20),
+                                                child: Text(
+                                                  "尚未公開",
+                                                  style: TextStyle(
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .onSurface
+                                                        .withOpacity(0.5),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                  ),
+                                  Expanded(
+                                    flex: 1,
+                                    child: Align(
+                                      alignment: Alignment.bottomCenter,
+                                      child: Container(
+                                          decoration: BoxDecoration(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .error,
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                          ),
+                                          child: TextButton(
+                                            child: Text("Report",
+                                                style: TextStyle(
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .onInverseSurface,
+                                                )),
+                                            onPressed: () {
+                                              showDialog(
+                                                  context: context,
+                                                  builder:
+                                                      (BuildContext context) {
+                                                    return AlertDialog(
+                                                      title: Text('請輸入原因'),
+                                                      content: TextField(),
+                                                      actions: [
+                                                        TextButton(
+                                                          onPressed: () {
+                                                            // 串接舉報按鈕
+                                                            Navigator.of(
+                                                                    context)
+                                                                .pop(); // 关闭对话框
+                                                          },
+                                                          child: Text('确定'),
+                                                        ),
+                                                      ],
+                                                    );
+                                                  });
+                                            },
+                                          )),
+                                    ),
+                                  )
                                 ],
                               ),
                             );

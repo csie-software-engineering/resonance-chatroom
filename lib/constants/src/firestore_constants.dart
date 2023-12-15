@@ -3,6 +3,11 @@ enum FirestoreConstants {
   roomCollectionPath,
   messageCollectionPath,
   chatQueueNodeCollectionPath,
+  tagCollectionPath,
+  topicCollectionPath,
+  questionCollectionPath,
+  reviewCollectionPath,
+  reportCollectionPath,
 
   nickname,
   aboutMe,
@@ -20,6 +25,16 @@ enum FirestoreConstants {
         return "messages";
       case FirestoreConstants.chatQueueNodeCollectionPath:
         return "chatQueueNodes";
+      case FirestoreConstants.tagCollectionPath:
+        return "tags";
+      case FirestoreConstants.topicCollectionPath:
+        return "topics";
+      case FirestoreConstants.questionCollectionPath:
+        return "questions";
+      case FirestoreConstants.reviewCollectionPath:
+        return "reviews";
+      case FirestoreConstants.reportCollectionPath:
+        return "reports";
       case FirestoreConstants.nickname:
         return "nickname";
       case FirestoreConstants.aboutMe:

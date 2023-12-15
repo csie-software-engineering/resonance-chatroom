@@ -15,23 +15,25 @@ class _HostActivityQuestionPageState extends State<HostActivityQuestionPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('問題頁面'),
+        title: Text('問卷頁面'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
           child: Column(
             children: [
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  const Text('問卷題目'),
+                  const SizedBox(width: 16.0),
                   Expanded(
-                    // 使用Expanded Widget來包裹TextFormField
-                    flex: 2, // 指定flex因數為2
-                    child: TextFormField(
+                    child: TextField(
                       controller: _questionController,
-                      decoration: const InputDecoration(labelText: "問卷題目"),
+                      maxLines: 5,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                      ),
                     ),
                   ),
                 ],
@@ -57,6 +59,16 @@ class _HostActivityQuestionPageState extends State<HostActivityQuestionPage> {
                 ),
               ),
               ...fields,
+              Container(
+                width: 100, // 使用Container來設定按鈕的寬度
+                child: ElevatedButton(
+                  onPressed: () {
+                    // 跳至送出頁面的邏輯
+                    // 傳遞createEvent()方法的回傳值給送出頁面
+                  },
+                  child: Text('送出'),
+                ),
+              ),
             ],
           ),
         ),
@@ -87,13 +99,13 @@ class NewChoiceField extends StatelessWidget {
               ),
             ),
           ),
-          OutlinedButton(
+          /*OutlinedButton(
             onPressed: () {
               // 跳至預覽頁面的邏輯
               // 傳遞createEvent()方法的回傳值給預覽頁面
             },
             child: Text('確認'),
-          ),
+          ),*/
           IconButton(
             icon: const Icon(Icons.delete_forever),
             onPressed: onDelete,

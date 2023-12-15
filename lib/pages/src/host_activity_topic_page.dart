@@ -48,6 +48,16 @@ class _HostActivityTopicPageState extends State<HostActivityTopicPage> {
                 ],
               ),
               ...fields,
+              Container(
+                width: 100, // 使用Container來設定按鈕的寬度
+                child: ElevatedButton(
+                  onPressed: () {
+                    // 跳至送出頁面的邏輯
+                    // 傳遞createEvent()方法的回傳值給送出頁面
+                  },
+                  child: Text('完成'),
+                ),
+              ),
             ],
           ),
         ),

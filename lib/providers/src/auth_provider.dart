@@ -15,17 +15,14 @@ class AuthProvider {
   AuthProvider._internal(this.firebaseAuth);
   factory AuthProvider() => _instance;
 
-
   /// 取得目前登入的使用者
-  Future<rc_user.User> getUser() async {
-    assert(getFBAUser() != null, "User is null");
-    return await UserProvider().getUser(getFBAUser()!.uid);
+  Future<rc_user.User> get currentUser async {
+    assert(getFBAUser != null, "User is null");
+    return await UserProvider().getUser(getFBAUser!.uid);
   }
 
   /// 取得 Firebase Auth 使用者
-  User? getFBAUser() {
-    return firebaseAuth.currentUser;
-  }
+  User? get getFBAUser => firebaseAuth.currentUser;
 
   /// 使用匿名登入
   Future<rc_user.User> signInWithAnonymous() async {

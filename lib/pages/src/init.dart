@@ -25,8 +25,12 @@ class _InitPageState extends State<InitPage> {
   late final ChatProvider chatProvider = context.read<ChatProvider>();
   late final AuthProvider authProvider = context.read<AuthProvider>();
   late final UserProvider userProvider = context.read<UserProvider>();
+  late final InitPageArguments args =
+      ModalRoute.of(context)!.settings.arguments as InitPageArguments;
 
   Future<void> _incrementCounter() async {
+    final curUser = await authProvider.currentUser;
+    debugPrint(curUser.toString());
     setState(() {
       _counter++;
     });
@@ -34,9 +38,6 @@ class _InitPageState extends State<InitPage> {
 
   @override
   Widget build(BuildContext context) {
-    final InitPageArguments args =
-        ModalRoute.of(context)!.settings.arguments as InitPageArguments;
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,

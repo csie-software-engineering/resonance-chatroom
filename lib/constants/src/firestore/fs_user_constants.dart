@@ -1,8 +1,7 @@
 enum FireStoreUserConstants {
   userCollectionPath,
   userSocialMediaCollectionPath,
-  userActivityCollectionPath,
-  userTagCollectionPath;
+  userActivityCollectionPath;
 
   String get value {
     switch (this) {
@@ -12,8 +11,6 @@ enum FireStoreUserConstants {
         return "userSocialMedias";
       case FireStoreUserConstants.userActivityCollectionPath:
         return "userActivities";
-      case FireStoreUserConstants.userTagCollectionPath:
-        return "userTags";
       default:
         throw Exception("Not found value for FireStoreUserConstants");
     }
@@ -21,7 +18,7 @@ enum FireStoreUserConstants {
 }
 
 enum FSUserConstants {
-  id,
+  uid,
   displayName,
   photoUrl,
   email,
@@ -29,7 +26,7 @@ enum FSUserConstants {
 
   String get value {
     switch (this) {
-      case FSUserConstants.id:
+      case FSUserConstants.uid:
         return "id";
       case FSUserConstants.displayName:
         return "displayName";
@@ -62,33 +59,17 @@ enum FSUserSocialMediaConstants {
 }
 
 enum FSUserActivityConstants {
-  id,
-  displayName;
+  uid,
+  tagIds;
 
   String get value {
     switch (this) {
-      case FSUserActivityConstants.id:
-        return "id";
-      case FSUserActivityConstants.displayName:
-        return "displayName";
+      case FSUserActivityConstants.uid:
+        return "uid";
+      case FSUserActivityConstants.tagIds:
+        return "tags";
       default:
         throw Exception("Not found value for FSUserActivityConstants");
-    }
-  }
-}
-
-enum FSUserTagConstants {
-  id,
-  displayName;
-
-  String get value {
-    switch (this) {
-      case FSUserTagConstants.id:
-        return "id";
-      case FSUserTagConstants.displayName:
-        return "displayName";
-      default:
-        throw Exception("Not found value for FSUserTagConstants");
     }
   }
 }

@@ -10,225 +10,147 @@ class UserProvider {
     required this.db,
   });
 
-  /// 添加使用者資料
+  /// 添加(覆寫)使用者資料
   ///
   /// [addSocial] 是否添加社群媒體資料
   ///
   /// [addActivity] 是否添加活動及標籤資料
-  Future<User?> addUser(
+  Future<User> addUser(
     User user, {
     bool addSocial = false,
     bool addActivity = false,
   }) async {
-    var userRef = db
+    final userRef = db
         .collection(FireStoreUserConstants.userCollectionPath.value)
-        .doc(user.id);
+        .doc(user.uid);
 
-    var fsUser = user.toFSUser();
-    await userRef.set(fsUser.toJson());
+    final fsUser = user.toFSUser();
 
-    if (addSocial) {
-      for (var socialMedia in user.socialMedia) {
-        await addUserSocialMedia(user.id, socialMedia);
+    await db.runTransaction((transaction) async {
+      transaction.set(userRef, fsUser.toJson());
+
+      if (addSocial) {
+        for (final socialMedia in user.socialMedia) {
+          await addUserSocialMedia(
+            user.uid,
+            socialMedia,
+            transaction: transaction,
+          );
+        }
       }
-    }
 
-    if (addActivity) {
-      for (var activity in user.activities) {
-        await addUserActivity(user.id, activity);
+      if (addActivity) {
+        for (final activity in user.activities) {
+          await addUserActivity(user.uid, activity, transaction: transaction);
+        }
       }
-    }
+    });
 
-    return await getUser(user.id,
-        loadSocial: addSocial, loadActivity: addActivity);
+    return await getUser(
+      user.uid,
+      loadSocial: addSocial,
+      loadActivity: addActivity,
+    );
   }
 
-  /// 添加使用者社群媒體資料
-  Future<User?> addUserSocialMedia(
+  /// 添加(覆寫)使用者社群媒體資料
+  Future<User> addUserSocialMedia(
     String userId,
-    UserSocialMedia socialMedia,
-  ) async {
-    var userRef = db
+    UserSocialMedia socialMedia, {
+    Transaction? transaction,
+  }) async {
+    final userRef = db
         .collection(FireStoreUserConstants.userCollectionPath.value)
         .doc(userId);
 
-    assert((await userRef.get()).exists, "User 不存在");
+    assert((await userRef.get()).exists, "使用者不存在");
 
-    var socialMediaRef = userRef
+    final socialMediaRef = userRef
         .collection(FireStoreUserConstants.userSocialMediaCollectionPath.value)
         .doc(socialMedia.displayName);
 
-    var fsUserSocialMedia = socialMedia.toFSUserSocialMedia();
-    await socialMediaRef.set(fsUserSocialMedia.toJson());
+    final fsUserSocialMedia = socialMedia.toFSUserSocialMedia();
+    transaction != null
+        ? transaction.set(socialMediaRef, fsUserSocialMedia.toJson())
+        : await socialMediaRef.set(fsUserSocialMedia.toJson());
 
     return await getUser(userId, loadSocial: true);
   }
 
-  /// 添加使用者活動資料
-  ///
-  /// [addTag] 是否添加活動標籤資料
-  Future<User?> addUserActivity(
+  /// 添加(覆寫)使用者活動資料
+  Future<UserActivity> addUserActivity(
     String userId,
     UserActivity activity, {
-    bool addTag = false,
+    Transaction? transaction,
   }) async {
-    var userRef = db
+    final userRef = db
         .collection(FireStoreUserConstants.userCollectionPath.value)
         .doc(userId);
 
-    assert((await userRef.get()).exists, "User 不存在");
+    assert((await userRef.get()).exists, "使用者不存在");
 
-    var activityRef = userRef
+    final activityRef = userRef
         .collection(FireStoreUserConstants.userActivityCollectionPath.value)
-        .doc(activity.id);
+        .doc(activity.uid);
 
-    var fsUserActivity = activity.toFSUserActivity();
-    await activityRef.set(fsUserActivity.toJson());
+    final fsUserActivity = activity.toFSUserActivity();
+    transaction != null
+        ? transaction.set(activityRef, fsUserActivity.toJson())
+        : await activityRef.set(fsUserActivity.toJson());
 
-    if (addTag) {
-      for (var tag in activity.tags) {
-        await addUserTag(userId, activity.id, tag);
-      }
-    }
-
-    return await getUser(userId, loadActivity: true);
-  }
-
-  /// 添加使用者活動標籤資料
-  Future<User?> addUserTag(
-    String userId,
-    String activityId,
-    UserTag tag,
-  ) async {
-    var userRef = db
-        .collection(FireStoreUserConstants.userCollectionPath.value)
-        .doc(userId);
-
-    assert((await userRef.get()).exists, "User 不存在");
-
-    var activityRef = userRef
-        .collection(FireStoreUserConstants.userActivityCollectionPath.value)
-        .doc(activityId);
-
-    assert((await activityRef.get()).exists, "UserActivity 不存在");
-
-    var tagRef = activityRef
-        .collection(FireStoreUserConstants.userTagCollectionPath.value)
-        .doc(tag.id);
-
-    var fsUserTag = tag.toFSUserTag();
-    await tagRef.set(fsUserTag.toJson());
-
-    return await getUser(userId, loadActivity: true);
+    return await getUserActivity(userId, activity.uid);
   }
 
   /// 刪除(停用)使用者資料
-  Future<bool> removeUser(String userId) async {
-    var userRef = db
+  Future<void> removeUser(String userId) async {
+    final userRef = db
         .collection(FireStoreUserConstants.userCollectionPath.value)
         .doc(userId);
 
-    var userData = await userRef.get();
-    if (userData.exists) {
-      await userRef.update({
-        FSUserConstants.isEnabled.value: false,
-      });
-      return true;
-    }
+    assert((await userRef.get()).exists, "使用者不存在");
 
-    return false;
+    await userRef.update({
+      FSUserConstants.isEnabled.value: false,
+    });
   }
 
   /// 刪除使用者社群媒體資料
-  Future<bool> removeUserSocialMedia(
-    String userId,
-    String displayName,
-  ) async {
-    var userRef = db
+  Future<void> removeUserSocialMedia(String userId, String displayName) async {
+    final userRef = db
         .collection(FireStoreUserConstants.userCollectionPath.value)
         .doc(userId);
 
-    var userData = await userRef.get();
-    if (userData.exists && userData.get(FSUserConstants.isEnabled.value)) {
-      var socialMediaRef = userRef
-          .collection(
-              FireStoreUserConstants.userSocialMediaCollectionPath.value)
-          .doc(displayName);
+    final userData = await userRef.get();
+    assert(userData.exists, "使用者不存在");
+    assert(userData.get(FSUserConstants.isEnabled.value), "使用者已被停用");
 
-      var socialMediaData = await socialMediaRef.get();
-      if (socialMediaData.exists) {
-        await socialMediaRef.delete();
-        return true;
-      }
-    }
+    final socialMediaRef = userRef
+        .collection(FireStoreUserConstants.userSocialMediaCollectionPath.value)
+        .doc(displayName);
 
-    return false;
+    assert((await socialMediaRef.get()).exists, "使用者未添加該社群媒體");
+    await socialMediaRef.delete();
   }
 
   /// 刪除使用者活動資料
-  Future<bool> removeUserActivity(
+  Future<void> removeUserActivity(
     String userId,
     String activityId,
   ) async {
-    var userRef = db
+    final userRef = db
         .collection(FireStoreUserConstants.userCollectionPath.value)
         .doc(userId);
 
-    var userData = await userRef.get();
-    if (userData.exists && userData.get(FSUserConstants.isEnabled.value)) {
-      var activityRef = userRef
-          .collection(FireStoreUserConstants.userActivityCollectionPath.value)
-          .doc(activityId);
+    final userData = await userRef.get();
+    assert(userData.exists, "使用者不存在");
+    assert(userData.get(FSUserConstants.isEnabled.value), "使用者已被停用");
 
-      var activityData = await activityRef.get();
-      if (activityData.exists) {
-        var userTagData = await activityRef
-            .collection(FireStoreUserConstants.userTagCollectionPath.value)
-            .get();
+    final activityRef = userRef
+        .collection(FireStoreUserConstants.userActivityCollectionPath.value)
+        .doc(activityId);
 
-        for (var tagData in userTagData.docs) {
-          await tagData.reference.delete();
-        }
-
-        await activityRef.delete();
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  /// 刪除使用者活動標籤資料
-  Future<bool> removeUserTag(
-    String userId,
-    String activityId,
-    String tagId,
-  ) async {
-    var userRef = db
-        .collection(FireStoreUserConstants.userCollectionPath.value)
-        .doc(userId);
-
-    var userData = await userRef.get();
-    if (userData.exists && userData.get(FSUserConstants.isEnabled.value)) {
-      var activityRef = userRef
-          .collection(FireStoreUserConstants.userActivityCollectionPath.value)
-          .doc(activityId);
-
-      var activityData = await activityRef.get();
-      if (activityData.exists) {
-        var tagRef = activityRef
-            .collection(FireStoreUserConstants.userTagCollectionPath.value)
-            .doc(tagId);
-
-        var tagData = await tagRef.get();
-        if (tagData.exists) {
-          await tagRef.delete();
-          return true;
-        }
-      }
-    }
-
-    return false;
+    assert((await activityRef.get()).exists, "使用者未參加該活動");
+    await activityRef.delete();
   }
 
   /// 修改(含啟用)使用者資料
@@ -236,146 +158,129 @@ class UserProvider {
   /// [updateSocial] 是否更新社群媒體資料
   ///
   /// [updateActivity] 是否更新活動及標籤資料
-  ///
-  /// [updateTag] 是否更新活動標籤資料
-  Future<User?> updateUser(
+  Future<User> updateUser(
     User user, {
     bool updateSocial = false,
     bool updateActivity = false,
-    bool updateTag = false,
   }) async {
-    var userRef = db
+    final userRef = db
         .collection(FireStoreUserConstants.userCollectionPath.value)
-        .doc(user.id);
+        .doc(user.uid);
 
-    var userData = await userRef.get();
-    if (userData.exists) {
-      var fsUser = user.toFSUser();
-      await userRef.update(fsUser.toJson());
+    final userData = await userRef.get();
+    assert(userData.exists, "使用者不存在");
+
+    final fsUser = user.toFSUser();
+
+    await db.runTransaction((transaction) async {
+      transaction.update(userRef, fsUser.toJson());
 
       if (updateSocial) {
-        for (var socialMedia in user.socialMedia) {
-          await updateUserSocialMedia(user.id, socialMedia);
+        for (final socialMedia in user.socialMedia) {
+          await updateUserSocialMedia(
+            user.uid,
+            socialMedia,
+            transaction: transaction,
+          );
         }
       }
 
       if (updateActivity) {
-        for (var activity in user.activities) {
-          await updateUserActivity(user.id, activity);
-
-          if (updateTag) {
-            for (var tag in activity.tags) {
-              await updateUserTag(user.id, activity.id, tag);
-            }
-          }
+        for (final activity in user.activities) {
+          await updateUserActivity(user.uid, activity, transaction: transaction);
         }
       }
+    });
 
-      return await getUser(
-        user.id,
-        loadSocial: updateSocial,
-        loadActivity: updateActivity,
-      );
-    }
-
-    return null;
+    return await getUser(
+      user.uid,
+      loadSocial: updateSocial,
+      loadActivity: updateActivity,
+    );
   }
 
   /// 修改使用者社群媒體資料
-  Future<User?> updateUserSocialMedia(
+  Future<User> updateUserSocialMedia(
     String userId,
-    UserSocialMedia socialMedia,
-  ) async {
-    var userRef = db
+    UserSocialMedia socialMedia, {
+    Transaction? transaction,
+  }) async {
+    final userRef = db
         .collection(FireStoreUserConstants.userCollectionPath.value)
         .doc(userId);
 
-    var userData = await userRef.get();
-    if (userData.exists && userData.get(FSUserConstants.isEnabled.value)) {
-      var socialMediaRef = userRef
-          .collection(
-              FireStoreUserConstants.userSocialMediaCollectionPath.value)
-          .doc(socialMedia.displayName);
+    final userData = await userRef.get();
+    assert(userData.exists, "使用者不存在");
+    assert(userData.get(FSUserConstants.isEnabled.value), "使用者已被停用");
 
-      var socialMediaData = await socialMediaRef.get();
-      if (socialMediaData.exists) {
-        var fsUserSocialMedia = socialMedia.toFSUserSocialMedia();
-        await socialMediaRef.update(fsUserSocialMedia.toJson());
-        return await getUser(userId, loadSocial: true);
-      }
-    }
+    final socialMediaRef = userRef
+        .collection(FireStoreUserConstants.userSocialMediaCollectionPath.value)
+        .doc(socialMedia.displayName);
 
-    return null;
+    final socialMediaData = await socialMediaRef.get();
+    assert(socialMediaData.exists, "使用者社群媒體不存在");
+
+    final fsUserSocialMedia = socialMedia.toFSUserSocialMedia();
+    transaction != null
+        ? transaction.update(socialMediaRef, fsUserSocialMedia.toJson())
+        : await socialMediaRef.update(fsUserSocialMedia.toJson());
+
+    return await getUser(userId, loadSocial: true);
   }
 
   /// 修改使用者活動資料
-  ///
-  /// [updateTag] 是否更新活動標籤資料
-  Future<User?> updateUserActivity(
+  Future<UserActivity> updateUserActivity(
     String userId,
     UserActivity activity, {
-    bool updateTag = false,
+    Transaction? transaction,
   }) async {
-    var userRef = db
+    final userRef = db
         .collection(FireStoreUserConstants.userCollectionPath.value)
         .doc(userId);
 
-    var userData = await userRef.get();
-    if (userData.exists && userData.get(FSUserConstants.isEnabled.value)) {
-      var activityRef = userRef
-          .collection(FireStoreUserConstants.userActivityCollectionPath.value)
-          .doc(activity.id);
+    final userData = await userRef.get();
+    assert(userData.exists, "使用者不存在");
+    assert(userData.get(FSUserConstants.isEnabled.value), "使用者已被停用");
 
-      var activityData = await activityRef.get();
-      if (activityData.exists) {
-        var fsUserActivity = activity.toFSUserActivity();
-        await activityRef.update(fsUserActivity.toJson());
+    final activityRef = userRef
+        .collection(FireStoreUserConstants.userActivityCollectionPath.value)
+        .doc(activity.uid);
 
-        if (updateTag) {
-          for (var tag in activity.tags) {
-            await updateUserTag(userId, activity.id, tag);
-          }
-        }
+    assert((await activityRef.get()).exists, "使用者未參加該活動");
 
-        return await getUser(userId, loadActivity: true);
-      }
-    }
+    final fsUserActivity = activity.toFSUserActivity();
+    transaction != null
+        ? transaction.update(activityRef, fsUserActivity.toJson())
+        : await activityRef.update(fsUserActivity.toJson());
 
-    return null;
+    return await getUserActivity(userId, activity.uid);
   }
 
   /// 修改使用者活動標籤資料
-  Future<User?> updateUserTag(
+  Future<User> updateUserTag(
     String userId,
     String activityId,
-    UserTag tag,
+    List<String> tagIds,
   ) async {
-    var userRef = db
+    final userRef = db
         .collection(FireStoreUserConstants.userCollectionPath.value)
         .doc(userId);
 
-    var userData = await userRef.get();
-    if (userData.exists && userData.get(FSUserConstants.isEnabled.value)) {
-      var activityRef = userRef
-          .collection(FireStoreUserConstants.userActivityCollectionPath.value)
-          .doc(activityId);
+    final userData = await userRef.get();
+    assert(userData.exists, "使用者不存在");
+    assert(userData.get(FSUserConstants.isEnabled.value), "使用者已被停用");
 
-      var activityData = await activityRef.get();
-      if (activityData.exists) {
-        var tagRef = activityRef
-            .collection(FireStoreUserConstants.userTagCollectionPath.value)
-            .doc(tag.id);
+    final activityRef = userRef
+        .collection(FireStoreUserConstants.userActivityCollectionPath.value)
+        .doc(activityId);
 
-        var tagData = await tagRef.get();
-        if (tagData.exists) {
-          var fsUserTag = tag.toFSUserTag();
-          await tagRef.update(fsUserTag.toJson());
-          return await getUser(userId, loadActivity: true);
-        }
-      }
-    }
+    assert((await activityRef.get()).exists, "使用者未參加該活動");
 
-    return null;
+    await activityRef.update({
+      FSUserActivityConstants.tagIds.value: tagIds,
+    });
+
+    return await getUser(userId, loadActivity: true);
   }
 
   /// 取得使用者資料
@@ -383,137 +288,121 @@ class UserProvider {
   /// [loadSocial] 是否載入社群媒體資料
   ///
   /// [loadActivity] 是否載入活動及標籤資料
-  Future<User?> getUser(
+  Future<User> getUser(
     String userId, {
     bool loadSocial = false,
     bool loadActivity = false,
   }) async {
-    var userRef = db
+    final userRef = db
         .collection(FireStoreUserConstants.userCollectionPath.value)
         .doc(userId);
 
-    var userData = await userRef.get();
-    if (userData.exists && userData.get(FSUserConstants.isEnabled.value)) {
-      var fsUser = FSUser.fromDocument(userData);
-      var user = fsUser.toUser();
+    final userData = await userRef.get();
+    assert(userData.exists, "使用者不存在");
+    assert(userData.get(FSUserConstants.isEnabled.value), "使用者已被停用");
 
-      if (loadSocial) {
-        var userSocialMediaData = await userRef
-            .collection(
-                FireStoreUserConstants.userSocialMediaCollectionPath.value)
-            .get();
+    final fsUser = FSUser.fromDocument(userData);
+    final user = fsUser.toUser();
 
-        user.socialMedia.addAll(userSocialMediaData.docs.map((e) {
-          var fsUserSocialMedia = FSUserSocialMedia.fromDocument(e);
-          var userSocialMedia = fsUserSocialMedia.toUserSocialMedia();
-
-          return userSocialMedia;
-        }));
-      }
-
-      if (loadActivity) {
-        var userActivityData = await userRef
-            .collection(FireStoreUserConstants.userActivityCollectionPath.value)
-            .get();
-
-        user.activities.addAll(userActivityData.docs.map((e) {
-          var fsUserActivity = FSUserActivity.fromDocument(e);
-          var userActivity = fsUserActivity.toUserActivity();
-
-          return userActivity;
-        }));
-
-        for (var activity in user.activities) {
-          var userTagData = await userRef
-              .collection(
-                  FireStoreUserConstants.userActivityCollectionPath.value)
-              .doc(activity.id)
-              .collection(FireStoreUserConstants.userTagCollectionPath.value)
-              .get();
-
-          activity.tags.addAll(userTagData.docs.map((e) {
-            var fsUserTag = FSUserTag.fromDocument(e);
-            var userTag = fsUserTag.toUserTag();
-
-            return userTag;
-          }));
-        }
-      }
-
-      return user;
+    if (loadSocial) {
+      user.socialMedia.addAll(await getUserSocialMedium(userId));
     }
 
-    return null;
+    if (loadActivity) {
+      user.activities.addAll(await getUserActivities(userId));
+    }
+
+    return user;
   }
 
   /// 取得使用者社群媒體資料
-  Future<List<UserSocialMedia>> getUserSocialMedia(String userId) async {
-    var userRef = db
+  Future<UserSocialMedia> getUserSocialMedia(
+    String userId,
+    String displayName,
+  ) async {
+    final userRef = db
         .collection(FireStoreUserConstants.userCollectionPath.value)
         .doc(userId);
 
-    var userData = await userRef.get();
-    if (userData.exists && userData.get(FSUserConstants.isEnabled.value)) {
-      var userSocialMediaData = await userRef
-          .collection(
-              FireStoreUserConstants.userSocialMediaCollectionPath.value)
-          .get();
+    final userData = await userRef.get();
+    assert(userData.exists, "使用者不存在");
+    assert(userData.get(FSUserConstants.isEnabled.value), "使用者已被停用");
 
-      return userSocialMediaData.docs.map((e) {
-        var fsUserSocialMedia = FSUserSocialMedia.fromDocument(e);
-        var userSocialMedia = fsUserSocialMedia.toUserSocialMedia();
+    final userSocialMediaData = await userRef
+        .collection(FireStoreUserConstants.userSocialMediaCollectionPath.value)
+        .doc(displayName)
+        .get();
 
-        return userSocialMedia;
-      }).toList();
-    }
+    assert(userSocialMediaData.exists, "使用者未添加該社群媒體");
+    final fsUserSocialMedia =
+        FSUserSocialMedia.fromDocument(userSocialMediaData);
 
-    return [];
+    final userSocialMedia = fsUserSocialMedia.toUserSocialMedia();
+
+    return userSocialMedia;
+  }
+
+  /// 取得使用者所有社群媒體資料
+  Future<List<UserSocialMedia>> getUserSocialMedium(String userId) async {
+    final userRef = db
+        .collection(FireStoreUserConstants.userCollectionPath.value)
+        .doc(userId);
+
+    final userData = await userRef.get();
+    assert(userData.exists, "使用者不存在");
+    assert(userData.get(FSUserConstants.isEnabled.value), "使用者已被停用");
+    final userSocialMediaData = await userRef
+        .collection(FireStoreUserConstants.userSocialMediaCollectionPath.value)
+        .get();
+
+    return userSocialMediaData.docs.map((e) {
+      final fsUserSocialMedia = FSUserSocialMedia.fromDocument(e);
+      final userSocialMedia = fsUserSocialMedia.toUserSocialMedia();
+
+      return userSocialMedia;
+    }).toList();
   }
 
   /// 取得使用者活動資料
-  ///
-  /// [loadTag] 是否載入活動標籤資料
-  Future<UserActivity?> getUserActivity(
-    String userId,
-    String activityId, {
-    bool loadTag = false,
-  }) async {
-    var userRef = db
+  Future<UserActivity> getUserActivity(String userId, String activityId) async {
+    final userRef = db
         .collection(FireStoreUserConstants.userCollectionPath.value)
         .doc(userId);
 
-    var userData = await userRef.get();
+    final userData = await userRef.get();
+    assert(userData.exists, "使用者不存在");
+    assert(userData.get(FSUserConstants.isEnabled.value), "使用者已被停用");
 
-    if (userData.exists && userData.get(FSUserConstants.isEnabled.value)) {
-      var userActivityData = await userRef
-          .collection(FireStoreUserConstants.userActivityCollectionPath.value)
-          .doc(activityId)
-          .get();
+    final userActivityData = await userRef
+        .collection(FireStoreUserConstants.userActivityCollectionPath.value)
+        .doc(activityId)
+        .get();
 
-      if (userActivityData.exists) {
-        var fsUserActivity = FSUserActivity.fromDocument(userActivityData);
-        var userActivity = fsUserActivity.toUserActivity();
+    assert(userActivityData.exists, "使用者未參加該活動");
+    final fsUserActivity = FSUserActivity.fromDocument(userActivityData);
+    final userActivity = fsUserActivity.toUserActivity();
 
-        if (loadTag) {
-          var userTagData = await userRef
-              .collection(
-                  FireStoreUserConstants.userActivityCollectionPath.value)
-              .doc(activityId)
-              .collection(FireStoreUserConstants.userTagCollectionPath.value)
-              .get();
+    return userActivity;
+  }
 
-          userActivity.tags.addAll(userTagData.docs.map((e) {
-            var fsUserTag = FSUserTag.fromDocument(e);
-            var userTag = fsUserTag.toUserTag();
+  /// 取得使用者所有活動資料
+  Future<List<UserActivity>> getUserActivities(String userId) async {
+    final userRef = db
+        .collection(FireStoreUserConstants.userCollectionPath.value)
+        .doc(userId);
 
-            return userTag;
-          }));
-        }
+    final userData = await userRef.get();
+    assert(userData.exists, "使用者不存在");
+    assert(userData.get(FSUserConstants.isEnabled.value), "使用者已被停用");
+    final userActivityData = await userRef
+        .collection(FireStoreUserConstants.userActivityCollectionPath.value)
+        .get();
 
-        return userActivity;
-      }
-    }
+    return userActivityData.docs.map((e) {
+      final fsUserActivity = FSUserActivity.fromDocument(e);
+      final userActivity = fsUserActivity.toUserActivity();
 
-    return null;
+      return userActivity;
+    }).toList();
   }
 }

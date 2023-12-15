@@ -1,19 +1,19 @@
 import 'package:resonance_chatroom/models/src/firestore/fs_user.dart';
 
 class User {
-  final String id;
-  final String displayName;
-  final String email;
-  final String? photo;
+  final String uid;
+  String displayName;
+  String? email;
+  String? photoUrl;
   final bool isEnabled;
   final List<UserSocialMedia> socialMedia;
   final List<UserActivity> activities;
 
   User({
-    required this.id,
+    required this.uid,
     required this.displayName,
-    required this.email,
-    this.photo,
+    this.email,
+    this.photoUrl,
     this.isEnabled = true,
     this.socialMedia = const [],
     this.activities = const [],
@@ -22,16 +22,16 @@ class User {
 
 extension UserExtension on User {
   FSUser toFSUser() => FSUser(
-        id: id,
+        uid: uid,
         displayName: displayName,
-        email: email,
-        photo: photo ?? "",
+        email: email ?? "",
+        photoUrl: photoUrl ?? "",
         isEnabled: isEnabled,
       );
 }
 
 class UserSocialMedia {
-  String displayName;
+  final String displayName;
   String linkUrl;
 
   UserSocialMedia({
@@ -48,37 +48,18 @@ extension UserSocialMediaExtension on UserSocialMedia {
 }
 
 class UserActivity {
-  String id;
-  String displayName;
-  List<UserTag> tags;
+  final String uid;
+  List<String> tagIds;
 
   UserActivity({
-    required this.id,
-    required this.displayName,
-    this.tags = const [],
+    required this.uid,
+    this.tagIds = const [],
   });
 }
 
 extension UserActivityExtension on UserActivity {
   FSUserActivity toFSUserActivity() => FSUserActivity(
-        id: id,
-        displayName: displayName,
-      );
-}
-
-class UserTag {
-  final String id;
-  final String displayName;
-
-  UserTag({
-    required this.id,
-    required this.displayName,
-  });
-}
-
-extension UserTagExtension on UserTag {
-  FSUserTag toFSUserTag() => FSUserTag(
-        id: id,
-        displayName: displayName,
+        uid: uid,
+        tagIds: tagIds,
       );
 }

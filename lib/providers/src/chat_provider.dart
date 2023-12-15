@@ -63,7 +63,7 @@ class ChatProvider {
   Future<String?> pairOrWait(
     String activityId,
     String userId,
-    List<String> tags,
+    List<String> tagIds,
   ) async {
     final activityRef = firebaseFirestore
         .collection(FirestoreConstants.activityCollectionPath.value)
@@ -71,7 +71,7 @@ class ChatProvider {
 
     final waitingUserQuery = activityRef
         .collection(FirestoreConstants.chatQueueNodeCollectionPath.value)
-        .where(QueueConstants.tag.value, arrayContainsAny: tags)
+        .where(QueueConstants.tagIds.value, arrayContainsAny: tagIds)
         .orderBy(QueueConstants.timestamp.value)
         .limit(1);
 
@@ -85,7 +85,7 @@ class ChatProvider {
         await _createOrEnableRoom(
           activityId,
           [userId, waitingUser.userId],
-          _findMutualTag(tags, waitingUser.tags)!,
+          _findMutualTag(tagIds, waitingUser.tags)!,
           transaction,
         );
         transaction.delete(waitingUserRef);
@@ -101,7 +101,7 @@ class ChatProvider {
 
         final curTime = DateTime.now().millisecondsSinceEpoch.toString();
         final chatQueueNode = ChatQueueNode(
-          tags: tags,
+          tags: tagIds,
           userId: userId,
           timestamp: curTime,
         );

@@ -15,14 +15,14 @@ class ChatQueueNode {
 
   Map<String, dynamic> toJson() {
     return {
-      QueueConstants.tag.value: tags,
+      QueueConstants.tagIds.value: tags,
       QueueConstants.userId.value: userId,
       QueueConstants.timestamp.value: timestamp,
     };
   }
 
   factory ChatQueueNode.fromDocument(DocumentSnapshot doc) {
-    List<dynamic> tag = doc.get(QueueConstants.tag.value);
+    List<dynamic> tag = doc.get(QueueConstants.tagIds.value);
     String userId = doc.get(QueueConstants.userId.value);
     String timestamp = doc.get(QueueConstants.timestamp.value);
     return ChatQueueNode(

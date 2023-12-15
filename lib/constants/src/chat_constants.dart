@@ -24,19 +24,19 @@ enum MessageConstants {
 }
 
 enum QueueConstants {
-  activityId,
-  tag,
   userId,
+  activityId,
+  tagIds,
   timestamp;
 
   String get value {
     switch (this) {
-      case QueueConstants.activityId:
-        return "activityId";
-      case QueueConstants.tag:
-        return "tag";
       case QueueConstants.userId:
         return "userId";
+      case QueueConstants.activityId:
+        return "activityId";
+      case QueueConstants.tagIds:
+        return "tag";
       case QueueConstants.timestamp:
         return "timestamp";
       default:
@@ -46,18 +46,18 @@ enum QueueConstants {
 }
 
 enum RoomConstants {
+  users,
   tag,
-  isEnable,
-  users;
+  isEnable;
 
   String get value {
     switch (this) {
+      case RoomConstants.users:
+        return "userIds";
       case RoomConstants.tag:
         return "tag";
       case RoomConstants.isEnable:
         return "isEnable";
-      case RoomConstants.users:
-        return "users";
       default:
         throw Exception("Not found value for RoomConstants");
     }

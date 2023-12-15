@@ -14,10 +14,12 @@ class Event {
   late int startTime; // 活動起始時間
   late int endTime; // 活動結束時間
   String info; // 活動資訊
-
   String? image; // 活動圖片的base64字串
+  // 新增一個Tag的陣列
+  List<Tag> tags; // 活動的標籤
 
-  Event(this.name, DateTime start, DateTime end, this.info, File? image) {
+  Event(this.name, DateTime start, DateTime end, this.info, File? image,
+      this.tags) {
     // 改為File? image
     // 將DateTime物件轉換為millisecondsSinceEpoch
     startTime = start.millisecondsSinceEpoch;
@@ -32,7 +34,26 @@ class Event {
   // 將Event物件轉換為字串
   @override
   String toString() {
-    return 'Event(name: $name, startTime: $startTime, endTime: $endTime, info: $info, image: $image)';
+    return 'Event(name: $name, startTime: $startTime, endTime: $endTime, info: $info, image: $image, tags: $tags)';
+  }
+}
+
+class Tag {
+  late String tagdata;
+  late List<Topic> topics;
+  Tag.construct(this.tagdata) {}
+}
+
+class Topic {
+  late String topicdata;
+  late String questiondata;
+  late List<String> choices;
+  Topic(this.topicdata, this.questiondata, this.choices);
+  // 使用一個無參數的建構式，並指派預設值給屬性
+  Topic.empty() {
+    topicdata = "";
+    questiondata = "";
+    choices = [];
   }
 }
 
@@ -54,6 +75,7 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
   File? _selectedImage;
   Uint8List? _checkselectedImage;
 
+  List<Tag> tags = []; // 活動標籤的List
   Future<void> _pickImage() async {
     final image = await ImagePicker().pickImage(source: ImageSource.gallery);
     setState(() {
@@ -135,6 +157,7 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
       _selectedDates[1], // 活動結束時間
       _infoController.text,
       _selectedImage,
+      tags,
     );
   }
 
@@ -143,7 +166,7 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
     final double height = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
-        title: Text('活動頁面'),
+        title: Text('活動設定頁面'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -227,13 +250,12 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
                   ),
                 ],
               ),
-
               SizedBox(height: 16.0),
               Container(
                 height: null, // 將高度改為null
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.grey),
-                  borderRadius: BorderRadius.circular(4.0),
+                  borderRadius: BorderRadius.circular(8.0),
                 ),
                 child: _checkselectedImage == null
                     ? Center(child: Text('沒有選擇圖片'))
@@ -248,6 +270,7 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
                       ),
               ),
 
+              
               SizedBox(height: 16.0),
               Row(
                 children: [

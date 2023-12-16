@@ -60,12 +60,15 @@ enum FSUserSocialMediaConstants {
 
 enum FSUserActivityConstants {
   uid,
+  isManager,
   tagIds;
 
   String get value {
     switch (this) {
       case FSUserActivityConstants.uid:
         return "uid";
+      case FSUserActivityConstants.isManager:
+        return "host";
       case FSUserActivityConstants.tagIds:
         return "tags";
       default:

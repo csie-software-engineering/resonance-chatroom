@@ -18,7 +18,7 @@ class Activity {
     required this.startDate,
     required this.endDate,
     required this.activityPhoto,
-    this.managers = const []
+    this.managers = const [],
   });
 
   Map<String, dynamic> toJson() {
@@ -31,7 +31,7 @@ class Activity {
       ActivityConstants.endDate.value: endDate,
       ActivityConstants.isEnabled.value: isEnabled,
       ActivityConstants.activityPhoto.value: activityPhoto,
-      ActivityConstants.managers.value: managers
+      ActivityConstants.managers.value: managers,
     };
   }
 

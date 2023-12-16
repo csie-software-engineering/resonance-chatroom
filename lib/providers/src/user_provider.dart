@@ -407,7 +407,7 @@ class UserProvider {
   }
 
   /// 取得使用者所有活動資料(僅能取得自己的資料)
-  Future<List<UserActivity>> getUserActivities({bool? outdated}) async {
+  Future<List<UserActivity>> getUserActivities({bool? isManager, bool? outdated}) async {
     final userId = AuthProvider().currentUserId;
     final userRef = db
         .collection(FireStoreUserConstants.userCollectionPath.value)
@@ -416,9 +416,15 @@ class UserProvider {
     final userData = await userRef.get();
     assert(userData.exists, "使用者不存在");
     assert(userData.get(FSUserConstants.isEnabled.value), "使用者已被停用");
-    final userActivityData = await userRef
-        .collection(FireStoreUserConstants.userActivityCollectionPath.value)
-        .get();
+
+    final userActivityRef = userRef
+        .collection(FireStoreUserConstants.userActivityCollectionPath.value);
+
+    final userActivityData = isManager != null
+        ? await userActivityRef
+            .where(FSUserActivityConstants.isManager.value, isEqualTo: isManager)
+            .get()
+        : await userActivityRef.get();
 
     var activities = userActivityData.docs.map((e) {
       final fsUserActivity = FSUserActivity.fromDocument(e);

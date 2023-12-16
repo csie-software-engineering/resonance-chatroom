@@ -33,7 +33,7 @@ class ActivityProvider {
     final curUserId = AuthProvider().currentUserId;
     activityData.ownerId = curUserId;
     activityData.managers.add(curUserId);
-    UserProvider().addUserActivity(UserActivity(uid: activityData.uid));
+    UserProvider().addUserActivity(UserActivity(uid: activityData.uid, isManager: true));
 
     await documentReference.set(activityData.toJson());
 
@@ -144,7 +144,7 @@ class ActivityProvider {
     assert(activityData.isEnabled, '活動已經被刪除');
 
     activityData.managers.add(addUserId);
-    UserProvider().addUserActivity(UserActivity(uid: activityData.uid));
+    UserProvider().addUserActivity(UserActivity(uid: activityData.uid, isManager: true));
     await documentReference.set(activityData.toJson());
   }
 

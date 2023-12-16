@@ -292,14 +292,12 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
                       Activity activitydata = Activity(
                           activitryphoto:
                               base64Encode(_selectedImage!.readAsBytesSync()),
-                          activityid: "id",
                           activityinfo: _infoController.text,
                           activityname: _nameController.text,
                           startdate: _selectedDates[0].toString(),
                           enddate: _selectedDates[1].toString(),
                           ownerid: "ownerid",
-                          IsEnabled: true,
-                          managers: []);
+                          );
                       await setActivityProvider.SetNewActivity(
                           activitydata, "ownerid");
                       // 跳至送出頁面的邏輯

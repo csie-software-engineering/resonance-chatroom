@@ -3,7 +3,7 @@ import 'package:resonance_chatroom/constants/constants.dart';
 
 class Activity {
   final String ownerid;
-  final String activityid;
+  String activityid;
   final String activityname;
   final String activityinfo;
   final String startdate;
@@ -12,16 +12,16 @@ class Activity {
   final String activitryphoto;
   final List<String> managers;
 
-  const Activity({
+  Activity({
     required this.ownerid,
-    required this.activityid,
+    this.activityid = "",
     required this.activityname,
     required this.activityinfo,
     required this.startdate,
     required this.enddate,
-    required this.IsEnabled,
+    this.IsEnabled = true,
     required this.activitryphoto,
-    required this.managers
+    this.managers = const []
   });
 
   Map<String, dynamic> toJson() {

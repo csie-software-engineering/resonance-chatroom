@@ -23,11 +23,9 @@ class SetActivityProvider {
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityid);
 
-    activitydata.managers.add(UserId);
+    activitydata.activityid = activityid;
     await documentReference.set(activitydata.toJson());
 
-    await documentReference
-        .update({Activityconstants.activityid.value: activityid});
     return Getactivity(activityid, UserId);
   }
 
@@ -242,7 +240,7 @@ class SetActivityProvider {
         .collection(FirestoreConstants.tagCollectionPath.value)
         .doc(tagid);
 
-    await documentReference.update({Tagconstants.tagname: tagname});
+    await documentReference.update({Tagconstants.tagname.value: tagname});
   }
 
   ///刪除標籤
@@ -424,7 +422,7 @@ class SetActivityProvider {
       }
     }
     else {
-      
+
       return null;
     }
   }

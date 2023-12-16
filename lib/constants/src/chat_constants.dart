@@ -81,24 +81,24 @@ enum RoomUserConstants {
 }
 
 enum ReportConstants {
+  uid,
   idFrom,
   idTo,
-  activityid,
-  content,
-  type;
+  activityId,
+  content;
 
   String get value {
     switch (this) {
+      case ReportConstants.uid:
+        return "uid";
       case ReportConstants.idFrom:
         return "idFrom";
       case ReportConstants.idTo:
         return "idTo";
-      case ReportConstants.activityid:
-        return "activityid";
+      case ReportConstants.activityId:
+        return "activityId";
       case ReportConstants.content:
         return "content";
-      case ReportConstants.type:
-        return "type";
       default:
         throw Exception("Not found value for ReportConstants");
     }

@@ -5,7 +5,7 @@ class User {
   String displayName;
   String? email;
   String? photoUrl;
-  final bool isEnabled;
+  late bool isEnabled;
   final List<UserSocialMedia> socialMedia;
   final List<UserActivity> activities;
 
@@ -14,7 +14,6 @@ class User {
     required this.displayName,
     this.email,
     this.photoUrl,
-    this.isEnabled = true,
     this.socialMedia = const [],
     this.activities = const [],
   });

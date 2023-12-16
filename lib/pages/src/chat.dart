@@ -49,7 +49,7 @@ class _ChatPageState extends State<ChatPage> {
   void onSendMessage(String content, MessageType type) {
     if (content.trim().isNotEmpty) {
       textEditingController.clear();
-      chatProvider.sendMessage(widget.arguments.activityId, currentUserId,
+      chatProvider.sendMessage(widget.arguments.activityId,
           widget.arguments.peerId, content, type);
       if (listScrollController.hasClients) {
         listScrollController.animateTo(0,

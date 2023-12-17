@@ -20,7 +20,7 @@ class ActivityProvider {
   factory ActivityProvider() => _instance;
 
   /// 設置新活動
-  Future<Activity?> setNewActivity(Activity activityData) async {
+  Future<Activity> setNewActivity(Activity activityData) async {
     assert(activityData.startDate.toEpochTime().isAfter(DateTime.now()),
         '活動開始時間需要在現在之後');
 

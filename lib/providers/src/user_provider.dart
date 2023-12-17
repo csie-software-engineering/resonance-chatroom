@@ -333,10 +333,9 @@ class UserProvider {
   ///
   /// [userId] 使用者ID，預設為目前登入者
   Future<UserSocialMedia> getUserSocialMedia(
-    String? userId,
+    String userId,
     String displayName,
   ) async {
-    userId ??= AuthProvider().currentUserId;
     final userRef = db
         .collection(FireStoreUserConstants.userCollectionPath.value)
         .doc(userId);
@@ -362,8 +361,7 @@ class UserProvider {
   /// 取得使用者所有社群媒體資料
   ///
   /// [userId] 使用者ID，預設為目前登入者
-  Future<List<UserSocialMedia>> getUserSocialMedium(String? userId) async {
-    userId ??= AuthProvider().currentUserId;
+  Future<List<UserSocialMedia>> getUserSocialMedium(String userId) async {
     final userRef = db
         .collection(FireStoreUserConstants.userCollectionPath.value)
         .doc(userId);

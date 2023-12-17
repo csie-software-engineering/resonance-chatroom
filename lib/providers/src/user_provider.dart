@@ -53,7 +53,7 @@ class UserProvider {
     });
 
     return await getUser(
-      user.uid,
+      userId: user.uid,
       loadSocial: addSocial,
       loadActivity: addActivity,
     );
@@ -80,7 +80,7 @@ class UserProvider {
         ? transaction.set(socialMediaRef, fsUserSocialMedia.toJson())
         : await socialMediaRef.set(fsUserSocialMedia.toJson());
 
-    return await getUser(userId, loadSocial: true);
+    return await getUser(userId: userId, loadSocial: true);
   }
 
   /// 添加(覆寫)使用者活動資料(僅能添加自己的資料)
@@ -205,7 +205,7 @@ class UserProvider {
     });
 
     return await getUser(
-      user.uid,
+      userId: user.uid,
       loadSocial: updateSocial,
       loadActivity: updateActivity,
     );
@@ -237,7 +237,7 @@ class UserProvider {
         ? transaction.update(socialMediaRef, fsUserSocialMedia.toJson())
         : await socialMediaRef.update(fsUserSocialMedia.toJson());
 
-    return await getUser(userId, loadSocial: true);
+    return await getUser(userId: userId, loadSocial: true);
   }
 
   /// 修改使用者活動資料(僅能修改自己的資料)
@@ -292,7 +292,7 @@ class UserProvider {
       FSUserActivityConstants.tagIds.value: tagIds,
     });
 
-    return await getUser(userId, loadActivity: true);
+    return await getUser(userId: userId, loadActivity: true);
   }
 
   /// 取得使用者資料
@@ -302,8 +302,8 @@ class UserProvider {
   /// [loadSocial] 是否載入社群媒體資料
   ///
   /// [loadActivity] 是否載入活動及標籤資料
-  Future<User> getUser(
-    String? userId, {
+  Future<User> getUser({
+    String? userId,
     bool loadSocial = false,
     bool loadActivity = false,
   }) async {
@@ -331,12 +331,11 @@ class UserProvider {
 
   /// 取得使用者社群媒體資料
   ///
-  /// [userId] 使用者ID，預設為目前登入者
+  /// [userId] 使用者ID
   Future<UserSocialMedia> getUserSocialMedia(
-    String? userId,
+    String userId,
     String displayName,
   ) async {
-    userId ??= AuthProvider().currentUserId;
     final userRef = db
         .collection(FireStoreUserConstants.userCollectionPath.value)
         .doc(userId);
@@ -361,9 +360,8 @@ class UserProvider {
 
   /// 取得使用者所有社群媒體資料
   ///
-  /// [userId] 使用者ID，預設為目前登入者
-  Future<List<UserSocialMedia>> getUserSocialMedium(String? userId) async {
-    userId ??= AuthProvider().currentUserId;
+  /// [userId] 使用者ID
+  Future<List<UserSocialMedia>> getUserSocialMedium(String userId) async {
     final userRef = db
         .collection(FireStoreUserConstants.userCollectionPath.value)
         .doc(userId);
@@ -407,7 +405,7 @@ class UserProvider {
   }
 
   /// 取得使用者所有活動資料(僅能取得自己的資料)
-  Future<List<UserActivity>> getUserActivities({bool? outdated}) async {
+  Future<List<UserActivity>> getUserActivities({bool? isManager, bool? outdated}) async {
     final userId = AuthProvider().currentUserId;
     final userRef = db
         .collection(FireStoreUserConstants.userCollectionPath.value)
@@ -416,9 +414,15 @@ class UserProvider {
     final userData = await userRef.get();
     assert(userData.exists, "使用者不存在");
     assert(userData.get(FSUserConstants.isEnabled.value), "使用者已被停用");
-    final userActivityData = await userRef
-        .collection(FireStoreUserConstants.userActivityCollectionPath.value)
-        .get();
+
+    final userActivityRef = userRef
+        .collection(FireStoreUserConstants.userActivityCollectionPath.value);
+
+    final userActivityData = isManager != null
+        ? await userActivityRef
+            .where(FSUserActivityConstants.isManager.value, isEqualTo: isManager)
+            .get()
+        : await userActivityRef.get();
 
     var activities = userActivityData.docs.map((e) {
       final fsUserActivity = FSUserActivity.fromDocument(e);

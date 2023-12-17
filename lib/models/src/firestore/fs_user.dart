@@ -92,10 +92,12 @@ extension FSUserSocialMediaExtension on FSUserSocialMedia {
 
 class FSUserActivity {
   final String uid;
+  final bool isManager;
   final List<String> tagIds;
 
   const FSUserActivity({
     required this.uid,
+    required this.isManager,
     required this.tagIds,
   });
 
@@ -109,6 +111,7 @@ class FSUserActivity {
   ) =>
       FSUserActivity(
         uid: doc.get(FSUserActivityConstants.uid.value),
+        isManager: doc.get(FSUserActivityConstants.isManager.value),
         tagIds:
             List<String>.from(doc.get(FSUserActivityConstants.tagIds.value)),
       );
@@ -120,6 +123,7 @@ class FSUserActivity {
 extension FSUserActivityExtension on FSUserActivity {
   UserActivity toUserActivity() => UserActivity(
         uid: uid,
+        isManager: isManager,
         tagIds: tagIds,
       );
 }

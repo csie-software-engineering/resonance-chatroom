@@ -256,13 +256,13 @@ class ChatProvider {
     String activityId,
     List<String> userIds,
   ) async {
-    final roomQuery = db
+    final roomRef = db
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityId)
         .collection(FirestoreConstants.roomCollectionPath.value)
         .doc(_getRoomId(userIds));
 
-    final roomData = await roomQuery.get();
+    final roomData = await roomRef.get();
     assert(roomData.exists, '房間不存在');
 
     final room = Room.fromDocument(roomData);
@@ -298,6 +298,98 @@ class ChatProvider {
         .collection(FirestoreConstants.messageCollectionPath.value)
         .doc(curTime)
         .set(messageData.toJson());
+  }
+
+  /// 取得是否同意分享社群媒體
+  Future<bool> getIsAgreeShareSocialMedia(
+    String activityId,
+    String toId,
+  ) async {
+    final fromId = AuthProvider().currentUserId;
+    final room = await getRoom(activityId, [fromId, toId]);
+    assert(room.isEnable, '房間已關閉');
+
+    final roomUserIndex = room.users.indexWhere((e) => e.id == fromId);
+    assert(roomUserIndex != -1, '使用者不在房間中');
+
+    final roomUser = room.users[roomUserIndex];
+    return roomUser.shareSocialMedia;
+  }
+
+  /// 同意分享社群媒體
+  Future<void> agreeShareSocialMedia(
+    String activityId,
+    String toId,
+  ) async {
+    final fromId = AuthProvider().currentUserId;
+    final room = await getRoom(activityId, [fromId, toId]);
+    assert(room.isEnable, '房間已關閉');
+
+    final roomUserIndex = room.users.indexWhere((e) => e.id == fromId);
+    assert(roomUserIndex != -1, '使用者不在房間中');
+
+    final roomUser = room.users[roomUserIndex];
+    assert(!roomUser.shareSocialMedia, '已同意分享社群媒體');
+
+    final roomRef = db
+        .collection(FirestoreConstants.activityCollectionPath.value)
+        .doc(activityId)
+        .collection(FirestoreConstants.roomCollectionPath.value)
+        .doc(_getRoomId([fromId, toId]));
+
+    roomUser.shareSocialMedia = true;
+    room.users[roomUserIndex] = roomUser;
+
+    await roomRef.update({
+      RoomConstants.users.value: room.users.map((e) => e.toJson()).toList(),
+    });
+  }
+
+  /// 不同意分享社群媒體
+  Future<void> disagreeShareSocialMedia(
+    String activityId,
+    String toId,
+  ) async {
+    final fromId = AuthProvider().currentUserId;
+    final room = await getRoom(activityId, [fromId, toId]);
+    assert(room.isEnable, '房間已關閉');
+
+    final roomUserIndex = room.users.indexWhere((e) => e.id == fromId);
+    assert(roomUserIndex != -1, '使用者不在房間中');
+
+    final roomUser = room.users[roomUserIndex];
+    assert(roomUser.shareSocialMedia, '已不同意分享社群媒體');
+
+    final roomRef = db
+        .collection(FirestoreConstants.activityCollectionPath.value)
+        .doc(activityId)
+        .collection(FirestoreConstants.roomCollectionPath.value)
+        .doc(_getRoomId([fromId, toId]));
+
+    roomUser.shareSocialMedia = false;
+    room.users[roomUserIndex] = roomUser;
+
+    await roomRef.update({
+      RoomConstants.users.value: room.users.map((e) => e.toJson()).toList(),
+    });
+  }
+
+  /// 取得對方所有社群媒體
+  Future<List<UserSocialMedia>> getOtherSocialMedium(
+    String activityId,
+    String toId,
+  ) async {
+    final fromId = AuthProvider().currentUserId;
+    final room = await getRoom(activityId, [fromId, toId]);
+    assert(room.isEnable, '房間已關閉');
+
+    final roomUserIndex = room.users.indexWhere((e) => e.id == toId);
+    assert(roomUserIndex != -1, '對方不在房間中');
+
+    final roomUser = room.users[roomUserIndex];
+    assert(roomUser.shareSocialMedia, '對方未同意分享社群媒體');
+
+    return await UserProvider().getUserSocialMedium(toId);
   }
 
   /// 取得使用者在某活動的聊天室列表

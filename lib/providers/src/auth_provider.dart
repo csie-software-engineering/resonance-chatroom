@@ -26,7 +26,7 @@ class AuthProvider {
 
   /// 取得目前登入的使用者
   Future<rc_user.User> get currentUser async {
-    return await UserProvider().getUser(currentUserId);
+    return await UserProvider().getUser(userId: currentUserId);
   }
 
   /// 使用匿名登入
@@ -76,7 +76,7 @@ class AuthProvider {
   Future<rc_user.User> _createOrGetUser(User? user) async {
     assert(user != null, "User is null");
 
-    return await UserProvider().getUser(user!.uid).catchError((_) async {
+    return await UserProvider().getUser(userId: user!.uid).catchError((_) async {
       return await UserProvider().addUser(
         rc_user.User(
           uid: user.uid,

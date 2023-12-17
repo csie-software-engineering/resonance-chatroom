@@ -2,15 +2,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:resonance_chatroom/constants/constants.dart';
 
 class Activity {
-  late String uid;
-  late String ownerId;
+  late final String uid;
+  late final String ownerId;
   String activityName;
   String activityInfo;
   String startDate;
   String endDate;
   String activityPhoto;
-  late bool isEnabled;
-  late List<String> managers;
+  late final bool isEnabled;
+  late final List<String> managers;
 
   Activity({
     required this.activityName,
@@ -62,7 +62,7 @@ class Activity {
 }
 
 class Tag {
-  late String uid;
+  late final String uid;
   final String activityId;
   String tagName;
 
@@ -95,7 +95,7 @@ class Tag {
 }
 
 class Topic {
-  late String uid;
+  late final String uid;
   final String activityId;
   final String tagId;
   String topicName;
@@ -133,7 +133,7 @@ class Topic {
 }
 
 class Question {
-  late String uid;
+  late final String uid;
   final String activityId;
   final String tagId;
   final String topicId;

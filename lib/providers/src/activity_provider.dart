@@ -134,7 +134,7 @@ class ActivityProvider {
   /// 增加管理者
   Future<void> addManagers(String activityId, String addUserId) async {
     assert(await _isHost(activityId), '你不是主辦方');
-    assert(await _isManager(activityId, userId: addUserId), '該用戶已經是管理者');
+    assert(!await _isManager(activityId, userId: addUserId), '該用戶已經是管理者');
 
     final documentReference = db
         .collection(FirestoreConstants.activityCollectionPath.value)

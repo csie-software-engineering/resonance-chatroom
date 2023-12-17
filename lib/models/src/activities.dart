@@ -2,202 +2,208 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:resonance_chatroom/constants/constants.dart';
 
 class Activity {
-  final String ownerid;
-  final String activityid;
-  final String activityname;
-  final String activityinfo;
-  final String startdate;
-  final String enddate;
-  final bool IsEnabled;
-  final String activitryphoto;
+  late String uid;
+  late String ownerId;
+  String activityName;
+  String activityInfo;
+  String startDate;
+  String endDate;
+  String activityPhoto;
+  late bool isEnabled;
   final List<String> managers;
 
-  const Activity({
-    required this.ownerid,
-    required this.activityid,
-    required this.activityname,
-    required this.activityinfo,
-    required this.startdate,
-    required this.enddate,
-    required this.IsEnabled,
-    required this.activitryphoto,
-    required this.managers
+  Activity({
+    required this.activityName,
+    required this.activityInfo,
+    required this.startDate,
+    required this.endDate,
+    required this.activityPhoto,
+    this.managers = const []
   });
 
   Map<String, dynamic> toJson() {
     return {
-      Activityconstants.ownerid.value: ownerid,
-      Activityconstants.activityid.value: activityid,
-      Activityconstants.activityname.value: activityname,
-      Activityconstants.activityinfo.value: activityinfo,
-      Activityconstants.startdate.value: startdate,
-      Activityconstants.enddate.value: enddate,
-      Activityconstants.IsEnabled.value: IsEnabled,
-      Activityconstants.activitryphoto.value: activitryphoto,
-      Activityconstants.managers.value: managers
+      ActivityConstants.ownerId.value: ownerId,
+      ActivityConstants.uid.value: uid,
+      ActivityConstants.activityName.value: activityName,
+      ActivityConstants.activityInfo.value: activityInfo,
+      ActivityConstants.startDate.value: startDate,
+      ActivityConstants.endDate.value: endDate,
+      ActivityConstants.isEnabled.value: isEnabled,
+      ActivityConstants.activityPhoto.value: activityPhoto,
+      ActivityConstants.managers.value: managers
     };
   }
 
   factory Activity.fromDocument(DocumentSnapshot doc) {
-    String ownerid = doc.get(Activityconstants.ownerid.value);
-    String activityid = doc.get(Activityconstants.activityid.value);
-    String activityname = doc.get(Activityconstants.activityname.value);
-    String activityinfo = doc.get(Activityconstants.activityinfo.value);
-    String startdate = doc.get(Activityconstants.startdate.value);
-    String enddate = doc.get(Activityconstants.enddate.value);
-    bool IsEnabled = doc.get(Activityconstants.IsEnabled.value);
-    String activitryphoto = doc.get(Activityconstants.activitryphoto.value);
-    List<dynamic> managers = doc.get(Activityconstants.managers.value);
-    return Activity(
-      ownerid: ownerid,
-      activityid: activityid,
-      activityname: activityname,
-      activityinfo: activityinfo,
-      startdate: startdate,
-      enddate: enddate,
-      IsEnabled: IsEnabled,
-      activitryphoto: activitryphoto,
+    String ownerId = doc.get(ActivityConstants.ownerId.value);
+    String activityId = doc.get(ActivityConstants.uid.value);
+    String activityName = doc.get(ActivityConstants.activityName.value);
+    String activityInfo = doc.get(ActivityConstants.activityInfo.value);
+    String startDate = doc.get(ActivityConstants.startDate.value);
+    String endDate = doc.get(ActivityConstants.endDate.value);
+    bool isEnabled = doc.get(ActivityConstants.isEnabled.value);
+    String activityPhoto = doc.get(ActivityConstants.activityPhoto.value);
+    List<dynamic> managers = doc.get(ActivityConstants.managers.value);
+
+    var activity = Activity(
+      activityName: activityName,
+      activityInfo: activityInfo,
+      startDate: startDate,
+      endDate: endDate,
+      activityPhoto: activityPhoto,
       managers: managers.cast<String>()
     );
+
+    activity.uid = activityId;
+    activity.ownerId = ownerId;
+    activity.isEnabled = isEnabled;
+    return activity;
   }
 }
 
 class Tag {
-  final String activityid;
-  final String tagname;
-  final String tagid;
+  late String uid;
+  final String activityId;
+  String tagName;
 
-  const Tag({
-    required this.activityid,
-    required this.tagname,
-    required this.tagid,
+  Tag({
+    required this.activityId,
+    required this.tagName,
   });
 
   Map<String, dynamic> toJson() {
     return {
-      Tagconstants.activityid.value: activityid,
-      Tagconstants.tagname.value: tagname,
-      Tagconstants.tagid.value: tagid,
+      TagConstants.uid.value: uid,
+      TagConstants.activityId.value: activityId,
+      TagConstants.tagName.value: tagName,
     };
   }
 
   factory Tag.fromDocument(DocumentSnapshot doc) {
-    String activityid = doc.get(Tagconstants.activityid.value);
-    String tagname = doc.get(Tagconstants.tagname.value);
-    String tagid = doc.get(Tagconstants.tagid.value);
-    return Tag(
-      activityid: activityid,
-      tagname: tagname,
-      tagid: tagid,
+    String uid = doc.get(TagConstants.uid.value);
+    String activityId = doc.get(TagConstants.activityId.value);
+    String tagName = doc.get(TagConstants.tagName.value);
+
+    var tag = Tag(
+      activityId: activityId,
+      tagName: tagName,
     );
+
+    tag.uid = uid;
+    return tag;
   }
 }
 
 class Topic {
-  final String activityid;
-  final String tagid;
-  final String topicname;
-  final String topicid;
+  late String uid;
+  final String activityId;
+  final String tagId;
+  String topicName;
 
-  const Topic({
-    required this.activityid,
-    required this.tagid,
-    required this.topicname,
-    required this.topicid,
+  Topic({
+    required this.activityId,
+    required this.tagId,
+    required this.topicName,
   });
 
   Map<String, dynamic> toJson() {
     return {
-      Topicconstants.activityid.value: activityid,
-      Topicconstants.tagid.value: tagid,
-      Topicconstants.topicname.value: topicname,
-      Topicconstants.topicid.value: topicid,
+      TopicConstants.uid.value: uid,
+      TopicConstants.activityId.value: activityId,
+      TopicConstants.tagId.value: tagId,
+      TopicConstants.topicName.value: topicName,
     };
   }
 
   factory Topic.fromDocument(DocumentSnapshot doc) {
-    String activityid = doc.get(Topicconstants.activityid.value);
-    String tagid = doc.get(Topicconstants.tagid.value);
-    String topicname = doc.get(Topicconstants.topicname.value);
-    String topicid = doc.get(Topicconstants.topicid.value);
-    return Topic(
-      activityid: activityid,
-      tagid: tagid,
-      topicname: topicname,
-      topicid: topicid,
+    String activityId = doc.get(TopicConstants.activityId.value);
+    String tagId = doc.get(TopicConstants.tagId.value);
+    String topicName = doc.get(TopicConstants.topicName.value);
+    String topicId = doc.get(TopicConstants.uid.value);
+
+    var topic = Topic(
+      activityId: activityId,
+      tagId: tagId,
+      topicName: topicName,
     );
+
+    topic.uid = topicId;
+    return topic;
   }
 }
 
 class Question {
-  final String activityid;
-  final String tagid;
-  final String topicid;
-  final String questionid;
-  final String questionname;
+  late String uid;
+  final String activityId;
+  final String tagId;
+  final String topicId;
+  String questionName;
   final List<String> choices;
 
 
-  const Question({
-    required this.activityid,
-    required this.tagid,
-    required this.topicid,
-    required this.questionid,
-    required this.questionname,
+  Question({
+    required this.activityId,
+    required this.tagId,
+    required this.topicId,
+    required this.questionName,
     required this.choices,
   });
 
   Map<String, dynamic> toJson() {
     return {
-      Questionconstants.activityid.value: activityid,
-      Questionconstants.tagid.value: tagid,
-      Questionconstants.topicid.value: topicid,
-      Questionconstants.questionid.value: questionid,
-      Questionconstants.questionname.value: questionname,
-      Questionconstants.choices.value: choices,
+      QuestionConstants.activityId.value: activityId,
+      QuestionConstants.tagId.value: tagId,
+      QuestionConstants.topicId.value: topicId,
+      QuestionConstants.questionId.value: uid,
+      QuestionConstants.questionName.value: questionName,
+      QuestionConstants.choices.value: choices,
     };
   }
 
   factory Question.fromDocument(DocumentSnapshot doc) {
-    String activityid = doc.get(Questionconstants.activityid.value);
-    String tagid = doc.get(Questionconstants.tagid.value);
-    String topicid = doc.get(Questionconstants.topicid.value);
-    String questionid = doc.get(Questionconstants.questionid.value);
-    String questionname = doc.get(Questionconstants.questionname.value);
-    List<dynamic> choices = doc.get(Questionconstants.choices.value);
-    return Question(
-      activityid: activityid,
-      tagid: tagid,
-      topicid: topicid,
-      questionid: questionid,
-      questionname: questionname,
+    String uid = doc.get(QuestionConstants.questionId.value);
+    String activityId = doc.get(QuestionConstants.activityId.value);
+    String tagId = doc.get(QuestionConstants.tagId.value);
+    String topicId = doc.get(QuestionConstants.topicId.value);
+    String questionName = doc.get(QuestionConstants.questionName.value);
+    List<dynamic> choices = doc.get(QuestionConstants.choices.value);
+
+    var question = Question(
+      activityId: activityId,
+      tagId: tagId,
+      topicId: topicId,
+      questionName: questionName,
       choices: choices.cast<String>(),
     );
+
+    question.uid = uid;
+    return question;
   }
 }
 
-class Review{
+class Reply{
+  final String email;
   final String choice;
-  final List<String> userlist;
 
-  const Review({
+  const Reply({
+    required this.email,
     required this.choice,
-    required this.userlist
   });
 
   Map<String, dynamic> toJson() {
     return {
-      Questionconstants.choice.value: choice,
-      Questionconstants.userlist.value: userlist
+      ReplyConstants.choice.value: choice,
+      ReplyConstants.email.value: email
     };
   }
 
-  factory Review.fromDocument(DocumentSnapshot doc) {
-    String choice = doc.get(Questionconstants.choice.value);
-    List<dynamic> userlist = doc.get(Questionconstants.userlist.value);
-    return Review(
+  factory Reply.fromDocument(DocumentSnapshot doc) {
+    String email = doc.get(ReplyConstants.email.value);
+    String choice = doc.get(ReplyConstants.choice.value);
+    return Reply(
+        email: email,
         choice: choice,
-        userlist: userlist.cast<String>()
     );
   }
 }

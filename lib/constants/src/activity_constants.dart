@@ -1,111 +1,121 @@
-enum Activityconstants {
-  activityname,
-  ownerid,
-  activityid,
-  activityinfo,
-  startdate,
-  enddate,
-  activitryphoto,
-  IsEnabled,
+enum ActivityConstants {
+  uid,
+  activityName,
+  ownerId,
+  activityInfo,
+  startDate,
+  endDate,
+  activityPhoto,
+  isEnabled,
   managers;
 
   String get value {
     switch (this) {
-      case Activityconstants.activityname:
-        return "activityname";
-      case Activityconstants.ownerid:
-        return "ownerid";
-      case Activityconstants.activityid:
-        return "activityid";
-      case Activityconstants.activityinfo:
-        return "activityinfo";
-      case Activityconstants.startdate:
-        return "startdate";
-      case Activityconstants.enddate:
-        return "enddate";
-      case Activityconstants.activitryphoto:
-        return "activitryphoto";
-      case Activityconstants.IsEnabled:
-        return "IsEnabled";
-      case Activityconstants.managers:
+      case ActivityConstants.uid:
+        return "uid";
+      case ActivityConstants.activityName:
+        return "activityName";
+      case ActivityConstants.ownerId:
+        return "ownerId";
+      case ActivityConstants.activityInfo:
+        return "activityInfo";
+      case ActivityConstants.startDate:
+        return "startDate";
+      case ActivityConstants.endDate:
+        return "endDate";
+      case ActivityConstants.activityPhoto:
+        return "activityPhoto";
+      case ActivityConstants.isEnabled:
+        return "isEnabled";
+      case ActivityConstants.managers:
         return "managers";
       default:
-        throw Exception("Not found value for Activityconstants");
+        throw Exception("Not found value for ActivityConstants");
     }
   }
 }
 
-enum Tagconstants{
-  activityid,
-  tagid,
-  tagname;
+enum TagConstants{
+  uid,
+  activityId,
+  tagName;
 
   String get value {
     switch (this) {
-      case Tagconstants.activityid:
-        return "activityid";
-      case Tagconstants.tagid:
-        return "tagid";
-      case Tagconstants.tagname:
-        return "tagname";
+      case TagConstants.uid:
+        return "uid";
+      case TagConstants.activityId:
+        return "activityId";
+      case TagConstants.tagName:
+        return "tagName";
       default:
-        throw Exception("Not found value for Tagconstants");
+        throw Exception("Not found value for TagConstants");
     }
   }
 }
 
-enum Topicconstants{
-  activityid,
-  tagid,
-  topicname,
-  topicid;
+enum TopicConstants{
+  uid,
+  activityId,
+  tagId,
+  topicName;
 
   String get value {
     switch (this) {
-      case Topicconstants.activityid:
-        return "activityid";
-      case Topicconstants.tagid:
-        return "tagid";
-      case Topicconstants.topicid:
-        return "topicid";
-      case Topicconstants.topicname:
-        return "topicname";
+      case TopicConstants.uid:
+        return "uid";
+      case TopicConstants.activityId:
+        return "activityId";
+      case TopicConstants.tagId:
+        return "tagId";
+      case TopicConstants.topicName:
+        return "topicName";
       default:
-        throw Exception("Not found value for Topicconstants");
+        throw Exception("Not found value for TopicConstants");
     }
   }
 }
 
-enum Questionconstants{
-  activityid,
-  tagid,
-  topicid,
-  questionid,
-  questionname,
-  choices,
-  choice,
-  userlist;
+enum QuestionConstants{
+  activityId,
+  tagId,
+  topicId,
+  questionId,
+  questionName,
+  choices;
 
   String get value {
     switch (this) {
-      case Questionconstants.activityid:
-        return "activityid";
-      case Questionconstants.tagid:
-        return "tagid";
-      case Questionconstants.topicid:
-        return "topicid";
-      case Questionconstants.questionid:
-        return "questionid";
-      case Questionconstants.questionname:
-        return "questionname";
-      case Questionconstants.choices:
+      case QuestionConstants.activityId:
+        return "activityId";
+      case QuestionConstants.tagId:
+        return "tagId";
+      case QuestionConstants.topicId:
+        return "topicId";
+      case QuestionConstants.questionId:
+        return "questionId";
+      case QuestionConstants.questionName:
+        return "questionName";
+      case QuestionConstants.choices:
         return "choices";
-      case Questionconstants.choice:
-        return "choice";
-      case Questionconstants.userlist:
-        return "userlist";
       default:
-        throw Exception("Not found value for Questionconstants");
+        throw Exception("Not found value for QuestionConstants");
+    }
+  }
+}
+
+enum ReplyConstants{
+  choice,
+  email;
+
+  String get value {
+    switch (this) {
+      case ReplyConstants.choice:
+        return "choice";
+      case ReplyConstants.email:
+        return "email";
+      default:
+        throw Exception("Not found value for ReviewConstants");
     }
   }
 }

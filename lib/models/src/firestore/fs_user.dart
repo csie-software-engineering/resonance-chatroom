@@ -41,14 +41,19 @@ class FSUser {
 }
 
 extension FSUserExtension on FSUser {
-  User toUser() => User(
-        uid: uid,
-        displayName: displayName,
-        photoUrl: photoUrl.isEmpty ? null : photoUrl,
-        email: email.isEmpty ? null : email,
-        socialMedia: [],
-        activities: [],
-      );
+  User toUser() {
+    var user = User(
+      uid: uid,
+      displayName: displayName,
+      photoUrl: photoUrl.isEmpty ? null : photoUrl,
+      email: email.isEmpty ? null : email,
+      socialMedia: const [],
+      activities: const [],
+    );
+
+    user.isEnabled = isEnabled;
+    return user;
+  }
 }
 
 class FSUserSocialMedia {
@@ -104,7 +109,8 @@ class FSUserActivity {
   ) =>
       FSUserActivity(
         uid: doc.get(FSUserActivityConstants.uid.value),
-        tagIds: List<String>.from(doc.get(FSUserActivityConstants.tagIds.value)),
+        tagIds:
+            List<String>.from(doc.get(FSUserActivityConstants.tagIds.value)),
       );
 
   @override

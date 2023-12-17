@@ -33,15 +33,13 @@ class ChatMessage {
     required this.type,
   });
 
-  Map<String, dynamic> toJson() {
-    return {
-      MessageConstants.idFrom.value: fromId,
-      MessageConstants.idTo.value: toId,
-      MessageConstants.timestamp.value: timestamp,
-      MessageConstants.content.value: content,
-      MessageConstants.type.value: type.value,
-    };
-  }
+  Map<String, dynamic> toJson() => {
+        MessageConstants.idFrom.value: fromId,
+        MessageConstants.idTo.value: toId,
+        MessageConstants.timestamp.value: timestamp,
+        MessageConstants.content.value: content,
+        MessageConstants.type.value: type.value,
+      };
 
   factory ChatMessage.fromDocument(DocumentSnapshot doc) {
     String idFrom = doc.get(MessageConstants.idFrom.value);
@@ -63,43 +61,40 @@ class ChatMessage {
 }
 
 class ReportMessage {
+  final String uid;
   final String activityId;
   final String fromId;
   final String toId;
-  final String type;
   final String content;
 
   const ReportMessage({
+    required this.uid,
     required this.activityId,
     required this.fromId,
     required this.toId,
-    required this.type,
-    required this.content
+    required this.content,
   });
 
-  Map<String, dynamic> toJson() {
-    return {
-      ReportConstants.activityid.value: activityId,
-      ReportConstants.idFrom.value: fromId,
-      ReportConstants.idTo.value: toId,
-      ReportConstants.type.value: type,
-      ReportConstants.content.value: content,
-
-    };
-  }
+  Map<String, dynamic> toJson() => {
+        ReportConstants.uid.value: uid,
+        ReportConstants.activityId.value: activityId,
+        ReportConstants.idFrom.value: fromId,
+        ReportConstants.idTo.value: toId,
+        ReportConstants.content.value: content,
+      };
 
   factory ReportMessage.fromDocument(DocumentSnapshot doc) {
-    String activityid = doc.get(ReportConstants.activityid.value);
+    String uid = doc.get(ReportConstants.uid.value);
+    String activityId = doc.get(ReportConstants.activityId.value);
     String idFrom = doc.get(ReportConstants.idFrom.value);
     String idTo = doc.get(ReportConstants.idTo.value);
-    String type = doc.get(ReportConstants.type.value);
     String content = doc.get(ReportConstants.content.value);
     return ReportMessage(
-      activityId: activityid,
+      uid: uid,
+      activityId: activityId,
       fromId: idFrom,
       toId: idTo,
-      type: type,
-      content: content
+      content: content,
     );
   }
 }

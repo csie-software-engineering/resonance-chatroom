@@ -1,6 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:resonance_chatroom/constants/constants.dart';
-import 'package:resonance_chatroom/models/models.dart';
+
+import '../../constants/constants.dart';
+import '../../models/models.dart';
+import '../../providers/providers.dart';
+import '../../utils/utils.dart';
 
 class QuestionProvider {
   final FirebaseFirestore db;
@@ -12,54 +15,65 @@ class QuestionProvider {
   QuestionProvider._internal(this.db);
   factory QuestionProvider() => _instance;
 
-  Future<void> UserAnswer(
-      String activityid,
-      String questionid,
-      String choice,
-      String UserEmail)
-  async{
-    var reviewcollection = db
-        .collection(FirestoreConstants.activityCollectionPath.value)
-        .doc(activityid)
-        .collection(FirestoreConstants.questionCollectionPath.value)
-        .doc(questionid)
-        .collection(FirestoreConstants.reviewCollectionPath.value);
+  /// 回答問題
+  ///
+  /// 匿名無法回答
+  Future<void> userAnswer(
+    String activityId,
+    String questionId,
+    String choice,
+  ) async {
+    assert(AuthProvider().getFBAUser!.isAnonymous == false, '匿名無法回答問題');
 
-    var reviewquery = await reviewcollection.get();
-    for(int i = 0; i < reviewquery.docs.length; i++){
-      var reviewdoc = Review.fromDocument(reviewquery.docs[i]);
-      for (int j = 0; j < reviewdoc.userlist.length; j++){
-        if (reviewdoc.userlist[j] == UserEmail){
-          reviewdoc.userlist.remove(UserEmail);
-          break;
-        }
-      }
-      if (reviewdoc.choice == choice) {
-        reviewdoc.userlist.add(UserEmail);
-      }
-      await reviewcollection.doc(reviewdoc.choice).update({
-        Questionconstants.userlist.value: reviewdoc.userlist
-      });
-    }
+    final email = (await AuthProvider().currentUser).email;
+    assert(email != null, 'email 不可為空');
+
+    var ansRef = db
+        .collection(FirestoreConstants.activityCollectionPath.value)
+        .doc(activityId)
+        .collection(FirestoreConstants.questionCollectionPath.value)
+        .doc(questionId)
+        .collection(FirestoreConstants.replyCollectionPath.value)
+        .doc(email);
+
+    final activityData = await ActivityProvider().getActivity(activityId);
+    assert(
+      activityData.startDate.toEpochTime().isBefore(DateTime.now()),
+      '活動尚未開始',
+    );
+    assert(
+      activityData.endDate.toEpochTime().isAfter(DateTime.now()),
+      '活動已經結束',
+    );
+
+    ansRef.set({
+      ReplyConstants.email.value: email,
+      ReplyConstants.choice.value: choice,
+    });
   }
 
-  Future<List<int>>GetReview(
-      String activityid,
-      String questionid,
-      )async{
-    var reviewcollection = db
+  Future<List<int>> getReplyResult(
+    String activityId,
+    String questionId,
+  ) async {
+    final repliesData = await db
         .collection(FirestoreConstants.activityCollectionPath.value)
-        .doc(activityid)
+        .doc(activityId)
         .collection(FirestoreConstants.questionCollectionPath.value)
-        .doc(questionid)
-        .collection(FirestoreConstants.reviewCollectionPath.value);
+        .doc(questionId)
+        .collection(FirestoreConstants.replyCollectionPath.value)
+        .get();
 
-    var reviewquery = await reviewcollection.get();
-    List<int> reviewconclusion = [];
-    for(int i = 0; i < reviewquery.docs.length; i++){
-      var reviewdoc = Review.fromDocument(reviewquery.docs[i]);
-      reviewconclusion.add(reviewdoc.userlist.length);
+    final replies = repliesData.docs.map((e) => Reply.fromDocument(e)).toList();
+    final question =
+        await ActivityProvider().getQuestion(activityId, questionId);
+
+    final result = List<int>.filled(question.choices.length, 0);
+    for (var reply in replies) {
+      final index = question.choices.indexOf(reply.choice);
+      result[index]++;
     }
-    return reviewconclusion;
+
+    return result;
   }
 }

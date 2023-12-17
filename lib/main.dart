@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
           Provider<UserProvider>(create: (_) => UserProvider()),
           Provider<ChatProvider>(create: (_) => ChatProvider()),
           Provider<AuthProvider>(create: (_) => AuthProvider()),
-          Provider<SetActivityProvider>(create: (_) => SetActivityProvider()),
+          Provider<ActivityProvider>(create: (_) => ActivityProvider()),
           Provider<QuestionProvider>(create: (_) => QuestionProvider()),
         ],
         child: MaterialApp(

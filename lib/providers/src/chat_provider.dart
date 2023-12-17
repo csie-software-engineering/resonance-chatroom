@@ -58,10 +58,8 @@ class ChatProvider {
   /// 獲取聊天對象 ID，若沒有聊天對象則進行配對
   ///
   /// 會先查看是否有啟用的聊天室，若有則直接進入，若沒有則進入等待配對
-  Future<String?> getChatToUserId(
-    String userId,
-    String activityId,
-  ) async {
+  Future<String?> getChatToUserId(String activityId) async {
+    final userId = AuthProvider().currentUserId;
     final enableRoomUserId =
         await _getChatToUserIdInEnableRoom(userId, activityId);
     if (enableRoomUserId != null) return enableRoomUserId;
@@ -104,8 +102,8 @@ class ChatProvider {
 
     assert((await activityRef.get()).exists, '活動不存在');
 
-    final userActivity =
-        await UserProvider().getUserActivity(userId, activityId);
+    final userActivity = await UserProvider().getUserActivity(activityId);
+    assert(userActivity.tagIds.isNotEmpty, '沒有標籤無法進行配對');
 
     final waitingUserQuery = activityRef
         .collection(FirestoreConstants.chatQueueNodeCollectionPath.value)
@@ -156,10 +154,8 @@ class ChatProvider {
   }
 
   /// 是否在聊天等待隊列中
-  Future<bool> isWaiting(
-    String userId,
-    String activityId,
-  ) async {
+  Future<bool> isWaiting(String activityId) async {
+    final userId = AuthProvider().currentUserId;
     final queueNodeRef = db
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityId)
@@ -170,10 +166,8 @@ class ChatProvider {
   }
 
   /// 取消等待
-  Future<void> cancelWaiting(
-    String userId,
-    String activityId,
-  ) async {
+  Future<void> cancelWaiting(String activityId) async {
+    final userId = AuthProvider().currentUserId;
     final queueNodeRef = db
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityId)
@@ -278,11 +272,11 @@ class ChatProvider {
   /// 傳遞訊息
   Future<void> sendMessage(
     String activityId,
-    String fromId,
     String toId,
     String content,
     MessageType type,
   ) async {
+    final fromId = AuthProvider().currentUserId;
     final room = await getRoom(activityId, [fromId, toId]);
     assert(room.isEnable, '房間已關閉');
 
@@ -307,10 +301,8 @@ class ChatProvider {
   }
 
   /// 取得使用者在某活動的聊天室列表
-  Future<List<Room>> getUserRooms(
-    String userId,
-    String activityId,
-  ) async {
+  Future<List<Room>> getUserRooms(String activityId) async {
+    final userId = AuthProvider().currentUserId;
     final roomQuery = db
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityId)
@@ -322,20 +314,26 @@ class ChatProvider {
     return rooms;
   }
 
-  Future<void> report(String activityId, String fromId, String toId,
-      String type, String content) async {
-    String reportId = generateUuid();
-    ReportMessage reportdata = ReportMessage(
-        fromId: fromId,
-        toId: toId,
-        activityId: activityId,
-        type: type,
-        content: content);
+  Future<void> report(
+    String activityId,
+    String toId,
+    String type,
+    String content,
+  ) async {
+    final fromId = AuthProvider().currentUserId;
+    final reportId = generateUuid();
+    final reportData = ReportMessage(
+      uid: reportId,
+      fromId: fromId,
+      toId: toId,
+      activityId: activityId,
+      content: content,
+    );
     await db
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityId)
         .collection(FirestoreConstants.reportCollectionPath.value)
         .doc(reportId)
-        .set(reportdata.toJson());
+        .set(reportData.toJson());
   }
 }

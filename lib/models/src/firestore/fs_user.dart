@@ -103,6 +103,7 @@ class FSUserActivity {
 
   Map<String, dynamic> toJson() => {
         FSUserActivityConstants.uid.value: uid,
+        FSUserActivityConstants.isManager.value: isManager,
         FSUserActivityConstants.tagIds.value: tagIds,
       };
 

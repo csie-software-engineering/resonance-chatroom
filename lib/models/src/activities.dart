@@ -10,7 +10,7 @@ class Activity {
   String endDate;
   String activityPhoto;
   late bool isEnabled;
-  final List<String> managers;
+  late List<String> managers;
 
   Activity({
     required this.activityName,
@@ -18,7 +18,6 @@ class Activity {
     required this.startDate,
     required this.endDate,
     required this.activityPhoto,
-    this.managers = const [],
   });
 
   Map<String, dynamic> toJson() {
@@ -52,12 +51,12 @@ class Activity {
       startDate: startDate,
       endDate: endDate,
       activityPhoto: activityPhoto,
-      managers: managers.cast<String>()
     );
 
     activity.uid = activityId;
     activity.ownerId = ownerId;
     activity.isEnabled = isEnabled;
+    activity.managers = managers.cast<String>();
     return activity;
   }
 }

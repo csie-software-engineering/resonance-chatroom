@@ -32,7 +32,7 @@ class ActivityProvider {
     activityData.isEnabled = true;
     final curUserId = AuthProvider().currentUserId;
     activityData.ownerId = curUserId;
-    activityData.managers.add(curUserId);
+    activityData.managers = [curUserId];
     UserProvider().addUserActivity(UserActivity(uid: activityData.uid, isManager: true));
 
     await documentReference.set(activityData.toJson());

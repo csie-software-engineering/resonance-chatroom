@@ -18,14 +18,14 @@ class ChatProvider {
   /// 取得聊天訊息串流
   Stream<QuerySnapshot> getChatStream(
     String activityId,
-    List<String> userIds, {
+    String peerId, {
     int limit = 20,
   }) =>
       db
           .collection(FirestoreConstants.activityCollectionPath.value)
           .doc(activityId)
           .collection(FirestoreConstants.roomCollectionPath.value)
-          .doc(_getRoomId(userIds))
+          .doc(_getRoomId([AuthProvider().currentUserId, peerId]))
           .collection(FirestoreConstants.messageCollectionPath.value)
           .orderBy(MessageConstants.timestamp.value, descending: true)
           .limit(limit)
@@ -121,7 +121,7 @@ class ChatProvider {
 
         await _createOrEnableRoom(
           activityId,
-          [userId, waitingUser.userId],
+          waitingUser.userId,
           _findMutualTag(userActivity.tagIds, waitingUser.tagIds)!,
           transaction: transaction,
         );
@@ -181,7 +181,7 @@ class ChatProvider {
   /// 創建或啟用(更新)房間
   Future<Room?> _createOrEnableRoom(
     String activityId,
-    List<String> userIds,
+    String peerId,
     String tag, {
     Transaction? transaction,
   }) async {
@@ -189,7 +189,7 @@ class ChatProvider {
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityId)
         .collection(FirestoreConstants.roomCollectionPath.value)
-        .doc(_getRoomId(userIds));
+        .doc(_getRoomId([AuthProvider().currentUserId, peerId]));
 
     final roomData = transaction == null
         ? await roomDataRef.get()
@@ -211,11 +211,11 @@ class ChatProvider {
         isEnable: true,
         users: [
           RoomUser(
-            id: userIds.first,
+            id: AuthProvider().currentUserId,
             shareSocialMedia: false,
           ),
           RoomUser(
-            id: userIds.last,
+            id: peerId,
             shareSocialMedia: false,
           ),
         ],
@@ -234,13 +234,13 @@ class ChatProvider {
   /// 離開房間
   Future<void> leaveRoom(
     String activityId,
-    List<String> userIds,
+    String peerId,
   ) async {
     final roomQuery = db
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityId)
         .collection(FirestoreConstants.roomCollectionPath.value)
-        .doc(_getRoomId(userIds));
+        .doc(_getRoomId([AuthProvider().currentUserId, peerId]));
 
     final roomData = await roomQuery.get();
     assert(roomData.exists, '房間不存在');
@@ -254,13 +254,13 @@ class ChatProvider {
   /// 取得房間資訊
   Future<Room> getRoom(
     String activityId,
-    List<String> userIds,
+    String peerId,
   ) async {
     final roomRef = db
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityId)
         .collection(FirestoreConstants.roomCollectionPath.value)
-        .doc(_getRoomId(userIds));
+        .doc(_getRoomId([AuthProvider().currentUserId, peerId]));
 
     final roomData = await roomRef.get();
     assert(roomData.exists, '房間不存在');
@@ -272,19 +272,19 @@ class ChatProvider {
   /// 傳遞訊息
   Future<void> sendMessage(
     String activityId,
-    String toId,
+    String peerId,
     String content,
     MessageType type,
   ) async {
     final fromId = AuthProvider().currentUserId;
-    final room = await getRoom(activityId, [fromId, toId]);
+    final room = await getRoom(activityId, peerId);
     assert(room.isEnable, '房間已關閉');
 
     final curTime = DateTime.now().millisecondsSinceEpoch.toString();
-    final roomId = _getRoomId([fromId, toId]);
+    final roomId = _getRoomId([fromId, peerId]);
     ChatMessage messageData = ChatMessage(
       fromId: fromId,
-      toId: toId,
+      toId: peerId,
       timestamp: curTime,
       content: content,
       type: type,
@@ -303,10 +303,10 @@ class ChatProvider {
   /// 取得是否同意分享社群媒體
   Future<bool> getIsAgreeShareSocialMedia(
     String activityId,
-    String toId,
+    String peerId,
   ) async {
     final fromId = AuthProvider().currentUserId;
-    final room = await getRoom(activityId, [fromId, toId]);
+    final room = await getRoom(activityId, peerId);
     assert(room.isEnable, '房間已關閉');
 
     final roomUserIndex = room.users.indexWhere((e) => e.id == fromId);
@@ -319,10 +319,10 @@ class ChatProvider {
   /// 同意分享社群媒體
   Future<void> agreeShareSocialMedia(
     String activityId,
-    String toId,
+    String peerId,
   ) async {
     final fromId = AuthProvider().currentUserId;
-    final room = await getRoom(activityId, [fromId, toId]);
+    final room = await getRoom(activityId, peerId);
     assert(room.isEnable, '房間已關閉');
 
     final roomUserIndex = room.users.indexWhere((e) => e.id == fromId);
@@ -335,7 +335,7 @@ class ChatProvider {
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityId)
         .collection(FirestoreConstants.roomCollectionPath.value)
-        .doc(_getRoomId([fromId, toId]));
+        .doc(_getRoomId([fromId, peerId]));
 
     roomUser.shareSocialMedia = true;
     room.users[roomUserIndex] = roomUser;
@@ -348,10 +348,10 @@ class ChatProvider {
   /// 不同意分享社群媒體
   Future<void> disagreeShareSocialMedia(
     String activityId,
-    String toId,
+    String peerId,
   ) async {
     final fromId = AuthProvider().currentUserId;
-    final room = await getRoom(activityId, [fromId, toId]);
+    final room = await getRoom(activityId, peerId);
     assert(room.isEnable, '房間已關閉');
 
     final roomUserIndex = room.users.indexWhere((e) => e.id == fromId);
@@ -364,7 +364,7 @@ class ChatProvider {
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityId)
         .collection(FirestoreConstants.roomCollectionPath.value)
-        .doc(_getRoomId([fromId, toId]));
+        .doc(_getRoomId([fromId, peerId]));
 
     roomUser.shareSocialMedia = false;
     room.users[roomUserIndex] = roomUser;
@@ -377,19 +377,18 @@ class ChatProvider {
   /// 取得對方所有社群媒體
   Future<List<UserSocialMedia>> getOtherSocialMedium(
     String activityId,
-    String toId,
+    String peerId,
   ) async {
-    final fromId = AuthProvider().currentUserId;
-    final room = await getRoom(activityId, [fromId, toId]);
+    final room = await getRoom(activityId, peerId);
     assert(room.isEnable, '房間已關閉');
 
-    final roomUserIndex = room.users.indexWhere((e) => e.id == toId);
+    final roomUserIndex = room.users.indexWhere((e) => e.id == peerId);
     assert(roomUserIndex != -1, '對方不在房間中');
 
     final roomUser = room.users[roomUserIndex];
     assert(roomUser.shareSocialMedia, '對方未同意分享社群媒體');
 
-    return await UserProvider().getUserSocialMedium(toId);
+    return await UserProvider().getUserSocialMedium(peerId);
   }
 
   /// 取得使用者在某活動的聊天室列表
@@ -408,7 +407,7 @@ class ChatProvider {
 
   Future<void> report(
     String activityId,
-    String toId,
+    String peerId,
     String type,
     String content,
   ) async {
@@ -417,7 +416,7 @@ class ChatProvider {
     final reportData = ReportMessage(
       uid: reportId,
       fromId: fromId,
-      toId: toId,
+      toId: peerId,
       activityId: activityId,
       content: content,
     );

@@ -5,7 +5,7 @@ class User {
   String displayName;
   String? email;
   String? photoUrl;
-  late bool isEnabled;
+  late final bool isEnabled;
   final List<UserSocialMedia> socialMedia;
   final List<UserActivity> activities;
 

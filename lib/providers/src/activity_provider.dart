@@ -20,7 +20,7 @@ class ActivityProvider {
   factory ActivityProvider() => _instance;
 
   /// 設置新活動
-  Future<Activity?> setNewActivity(Activity activityData) async {
+  Future<Activity> setNewActivity(Activity activityData) async {
     assert(activityData.startDate.toEpochTime().isAfter(DateTime.now()),
         '活動開始時間需要在現在之後');
 
@@ -32,7 +32,7 @@ class ActivityProvider {
     activityData.isEnabled = true;
     final curUserId = AuthProvider().currentUserId;
     activityData.ownerId = curUserId;
-    activityData.managers.add(curUserId);
+    activityData.managers = [curUserId];
     UserProvider().addUserActivity(UserActivity(uid: activityData.uid, isManager: true));
 
     await documentReference.set(activityData.toJson());
@@ -134,7 +134,7 @@ class ActivityProvider {
   /// 增加管理者
   Future<void> addManagers(String activityId, String addUserId) async {
     assert(await _isHost(activityId), '你不是主辦方');
-    assert(await _isManager(activityId, userId: addUserId), '該用戶已經是管理者');
+    assert(!await _isManager(activityId, userId: addUserId), '該用戶已經是管理者');
 
     final documentReference = db
         .collection(FirestoreConstants.activityCollectionPath.value)

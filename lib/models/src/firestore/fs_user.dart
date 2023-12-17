@@ -47,8 +47,8 @@ extension FSUserExtension on FSUser {
       displayName: displayName,
       photoUrl: photoUrl.isEmpty ? null : photoUrl,
       email: email.isEmpty ? null : email,
-      socialMedia: const [],
-      activities: const [],
+      socialMedia: [],
+      activities: [],
     );
 
     user.isEnabled = isEnabled;
@@ -103,6 +103,7 @@ class FSUserActivity {
 
   Map<String, dynamic> toJson() => {
         FSUserActivityConstants.uid.value: uid,
+        FSUserActivityConstants.isManager.value: isManager,
         FSUserActivityConstants.tagIds.value: tagIds,
       };
 

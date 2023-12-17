@@ -68,7 +68,7 @@ enum FSUserActivityConstants {
       case FSUserActivityConstants.uid:
         return "uid";
       case FSUserActivityConstants.isManager:
-        return "host";
+        return "isManager";
       case FSUserActivityConstants.tagIds:
         return "tags";
       default:

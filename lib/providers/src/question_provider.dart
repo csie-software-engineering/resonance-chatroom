@@ -12,54 +12,54 @@ class QuestionProvider {
   QuestionProvider._internal(this.db);
   factory QuestionProvider() => _instance;
 
-  Future<void> UserAnswer(
-      String activityid,
-      String questionid,
+  Future<void> userAnswer(
+      String activityId,
+      String questionId,
       String choice,
-      String UserEmail)
+      String userEmail)
   async{
-    var reviewcollection = db
+    var reviewCollection = db
         .collection(FirestoreConstants.activityCollectionPath.value)
-        .doc(activityid)
+        .doc(activityId)
         .collection(FirestoreConstants.questionCollectionPath.value)
-        .doc(questionid)
+        .doc(questionId)
         .collection(FirestoreConstants.reviewCollectionPath.value);
 
-    var reviewquery = await reviewcollection.get();
-    for(int i = 0; i < reviewquery.docs.length; i++){
-      var reviewdoc = Review.fromDocument(reviewquery.docs[i]);
-      for (int j = 0; j < reviewdoc.userlist.length; j++){
-        if (reviewdoc.userlist[j] == UserEmail){
-          reviewdoc.userlist.remove(UserEmail);
+    var reviewQuery = await reviewCollection.get();
+    for(int i = 0; i < reviewQuery.docs.length; i++){
+      var reviewDoc = Review.fromDocument(reviewQuery.docs[i]);
+      for (int j = 0; j < reviewDoc.userList.length; j++){
+        if (reviewDoc.userList[j] == userEmail){
+          reviewDoc.userList.remove(userEmail);
           break;
         }
       }
-      if (reviewdoc.choice == choice) {
-        reviewdoc.userlist.add(UserEmail);
+      if (reviewDoc.choice == choice) {
+        reviewDoc.userList.add(userEmail);
       }
-      await reviewcollection.doc(reviewdoc.choice).update({
-        Questionconstants.userlist.value: reviewdoc.userlist
+      await reviewCollection.doc(reviewDoc.choice).update({
+        QuestionConstants.userList.value: reviewDoc.userList
       });
     }
   }
 
-  Future<List<int>>GetReview(
-      String activityid,
-      String questionid,
+  Future<List<int>>getReview(
+      String activityId,
+      String questionId,
       )async{
-    var reviewcollection = db
+    var reviewCollection = db
         .collection(FirestoreConstants.activityCollectionPath.value)
-        .doc(activityid)
+        .doc(activityId)
         .collection(FirestoreConstants.questionCollectionPath.value)
-        .doc(questionid)
+        .doc(questionId)
         .collection(FirestoreConstants.reviewCollectionPath.value);
 
-    var reviewquery = await reviewcollection.get();
-    List<int> reviewconclusion = [];
-    for(int i = 0; i < reviewquery.docs.length; i++){
-      var reviewdoc = Review.fromDocument(reviewquery.docs[i]);
-      reviewconclusion.add(reviewdoc.userlist.length);
+    var reviewQuery = await reviewCollection.get();
+    List<int> reviewConclusion = [];
+    for(int i = 0; i < reviewQuery.docs.length; i++){
+      var reviewDoc = Review.fromDocument(reviewQuery.docs[i]);
+      reviewConclusion.add(reviewDoc.userList.length);
     }
-    return reviewconclusion;
+    return reviewConclusion;
   }
 }

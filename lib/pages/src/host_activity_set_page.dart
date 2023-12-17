@@ -276,10 +276,10 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
                 children: [
                   ElevatedButton(
                     onPressed: () async {
-                      final data = await setActivityProvider.Getactivity(
+                      final data = await setActivityProvider.getActivity(
                           "8a815b73-8fde-4564-8c11-e3d738f547d8", "ownerid");
                       setState(() {
-                        _checkselectedImage = base64Decode(data!.activitryphoto);
+                        _checkselectedImage = base64Decode(data!.activityPhoto);
                       });
                       // 跳至預覽頁面的邏輯
                       // 傳遞createEvent()方法的回傳值給預覽頁面
@@ -290,15 +290,15 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
                   ElevatedButton(
                     onPressed: () async {
                       Activity activitydata = Activity(
-                          activitryphoto:
+                          activityPhoto:
                               base64Encode(_selectedImage!.readAsBytesSync()),
-                          activityinfo: _infoController.text,
-                          activityname: _nameController.text,
-                          startdate: _selectedDates[0].toString(),
-                          enddate: _selectedDates[1].toString(),
-                          ownerid: "ownerid",
+                          activityInfo: _infoController.text,
+                          activityName: _nameController.text,
+                          startDate: _selectedDates[0].toString(),
+                          endDate: _selectedDates[1].toString(),
+                          ownerId: "ownerid",
                           );
-                      await setActivityProvider.SetNewActivity(
+                      await setActivityProvider.setNewActivity(
                           activitydata, "ownerid");
                       // 跳至送出頁面的邏輯
                       // 傳遞createEvent()方法的回傳值給送出頁面

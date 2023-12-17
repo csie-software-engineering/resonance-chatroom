@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -36,13 +34,13 @@ class _InitPageState extends State<InitPage> {
   Future<void> _incrementCounter() async {
     final curUser = await authProvider.currentUser;
     Activity activity = Activity(
-        ownerid: "ownerid",
-        activityname: 'activityname',
-        activityinfo: "activityinfo",
-        startdate: "startdate",
-        enddate: "enddate",
-        activitryphoto: "activitryphoto");
-    await setActivityProvider.SetNewActivity(activity, "ownerid");
+        ownerId: "ownerid",
+        activityName: 'activityname',
+        activityInfo: "activityinfo",
+        startDate: "startdate",
+        endDate: "enddate",
+        activityPhoto: "activitryphoto");
+    await setActivityProvider.setNewActivity(activity, "ownerid");
     debugPrint(curUser.toString());
     setState(() {
       _counter++;

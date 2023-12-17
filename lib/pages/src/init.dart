@@ -25,7 +25,7 @@ class _InitPageState extends State<InitPage> {
   late final ChatProvider chatProvider = context.read<ChatProvider>();
   late final AuthProvider authProvider = context.read<AuthProvider>();
   late final UserProvider userProvider = context.read<UserProvider>();
-  late final SetActivityProvider setActivityProvider = context.read<SetActivityProvider>();
+  late final ActivityProvider setActivityProvider = context.read<ActivityProvider>();
   late final QuestionProvider questionProvider = context.read<QuestionProvider>();
 
   late final InitPageArguments args =
@@ -34,13 +34,12 @@ class _InitPageState extends State<InitPage> {
   Future<void> _incrementCounter() async {
     final curUser = await authProvider.currentUser;
     Activity activity = Activity(
-        ownerId: "ownerid",
         activityName: 'activityname',
         activityInfo: "activityinfo",
         startDate: "startdate",
         endDate: "enddate",
         activityPhoto: "activitryphoto");
-    await setActivityProvider.setNewActivity(activity, "ownerid");
+    await setActivityProvider.setNewActivity(activity);
     debugPrint(curUser.toString());
     setState(() {
       _counter++;

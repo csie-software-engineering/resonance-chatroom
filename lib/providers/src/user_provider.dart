@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:resonance_chatroom/utils/src/time.dart';
 
 import '../../constants/constants.dart';
 import '../../models/models.dart';
@@ -406,7 +407,7 @@ class UserProvider {
   }
 
   /// 取得使用者所有活動資料(僅能取得自己的資料)
-  Future<List<UserActivity>> getUserActivities() async {
+  Future<List<UserActivity>> getUserActivities({bool? outdated}) async {
     final userId = AuthProvider().currentUserId;
     final userRef = db
         .collection(FireStoreUserConstants.userCollectionPath.value)
@@ -419,11 +420,32 @@ class UserProvider {
         .collection(FireStoreUserConstants.userActivityCollectionPath.value)
         .get();
 
-    return userActivityData.docs.map((e) {
+    var activities = userActivityData.docs.map((e) {
       final fsUserActivity = FSUserActivity.fromDocument(e);
       final userActivity = fsUserActivity.toUserActivity();
 
       return userActivity;
     }).toList();
+
+    if (outdated != null) {
+      final allActivities = await ActivityProvider().getAllActivities();
+      return outdated
+          ? activities
+              .where((ua) => allActivities
+                  .firstWhere((aa) => aa.uid == ua.uid)
+                  .endDate
+                  .toEpochTime()
+                  .isBefore(DateTime.now()))
+              .toList()
+          : activities
+              .where((ua) => allActivities
+                  .firstWhere((aa) => aa.uid == ua.uid)
+                  .endDate
+                  .toEpochTime()
+                  .isAfter(DateTime.now()))
+              .toList();
+    }
+
+    return activities;
   }
 }

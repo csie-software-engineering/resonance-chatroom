@@ -323,11 +323,12 @@ class ChatProvider {
     final fromId = AuthProvider().currentUserId;
     final reportId = generateUuid();
     final reportData = ReportMessage(
-        fromId: fromId,
-        toId: toId,
-        activityId: activityId,
-        type: type,
-        content: content);
+      uid: reportId,
+      fromId: fromId,
+      toId: toId,
+      activityId: activityId,
+      content: content,
+    );
     await db
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityId)

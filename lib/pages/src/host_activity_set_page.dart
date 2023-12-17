@@ -67,8 +67,8 @@ class HostActivitySetPage extends StatefulWidget {
 }
 
 class _HostActivitySetPageState extends State<HostActivitySetPage> {
-  late final SetActivityProvider setActivityProvider =
-      context.read<SetActivityProvider>();
+  late final ActivityProvider setActivityProvider =
+      context.read<ActivityProvider>();
   TextEditingController _nameController = TextEditingController();
   TextEditingController _infoController = TextEditingController();
   final List<DateTime> _selectedDates = [DateTime.now(), DateTime.now()];
@@ -270,14 +270,14 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
                       ),
               ),
 
-              
+
               SizedBox(height: 16.0),
               Row(
                 children: [
                   ElevatedButton(
                     onPressed: () async {
                       final data = await setActivityProvider.getActivity(
-                          "8a815b73-8fde-4564-8c11-e3d738f547d8", "ownerid");
+                          "8a815b73-8fde-4564-8c11-e3d738f547d8");
                       setState(() {
                         _checkselectedImage = base64Decode(data!.activityPhoto);
                       });
@@ -296,10 +296,9 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
                           activityName: _nameController.text,
                           startDate: _selectedDates[0].toString(),
                           endDate: _selectedDates[1].toString(),
-                          ownerId: "ownerid",
                           );
                       await setActivityProvider.setNewActivity(
-                          activitydata, "ownerid");
+                          activitydata);
                       // 跳至送出頁面的邏輯
                       // 傳遞createEvent()方法的回傳值給送出頁面
                     },

@@ -1,7 +1,7 @@
 enum ActivityConstants {
+  uid,
   activityName,
   ownerId,
-  activityId,
   activityInfo,
   startDate,
   endDate,
@@ -11,12 +11,12 @@ enum ActivityConstants {
 
   String get value {
     switch (this) {
+      case ActivityConstants.uid:
+        return "uid";
       case ActivityConstants.activityName:
         return "activityName";
       case ActivityConstants.ownerId:
         return "ownerId";
-      case ActivityConstants.activityId:
-        return "activityId";
       case ActivityConstants.activityInfo:
         return "activityInfo";
       case ActivityConstants.startDate:
@@ -36,16 +36,16 @@ enum ActivityConstants {
 }
 
 enum TagConstants{
+  uid,
   activityId,
-  tagId,
   tagName;
 
   String get value {
     switch (this) {
+      case TagConstants.uid:
+        return "uid";
       case TagConstants.activityId:
         return "activityId";
-      case TagConstants.tagId:
-        return "tagId";
       case TagConstants.tagName:
         return "tagName";
       default:
@@ -55,19 +55,19 @@ enum TagConstants{
 }
 
 enum TopicConstants{
+  uid,
   activityId,
   tagId,
-  topicName,
-  topicId;
+  topicName;
 
   String get value {
     switch (this) {
+      case TopicConstants.uid:
+        return "uid";
       case TopicConstants.activityId:
         return "activityId";
       case TopicConstants.tagId:
         return "tagId";
-      case TopicConstants.topicId:
-        return "topicId";
       case TopicConstants.topicName:
         return "topicName";
       default:
@@ -82,9 +82,7 @@ enum QuestionConstants{
   topicId,
   questionId,
   questionName,
-  choices,
-  choice,
-  userList;
+  choices;
 
   String get value {
     switch (this) {
@@ -100,12 +98,24 @@ enum QuestionConstants{
         return "questionName";
       case QuestionConstants.choices:
         return "choices";
-      case QuestionConstants.choice:
-        return "choice";
-      case QuestionConstants.userList:
-        return "userList";
       default:
         throw Exception("Not found value for QuestionConstants");
+    }
+  }
+}
+
+enum ReplyConstants{
+  choice,
+  email;
+
+  String get value {
+    switch (this) {
+      case ReplyConstants.choice:
+        return "choice";
+      case ReplyConstants.email:
+        return "email";
+      default:
+        throw Exception("Not found value for ReviewConstants");
     }
   }
 }

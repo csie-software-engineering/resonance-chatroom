@@ -67,12 +67,13 @@ class ReportMessage {
   final String toId;
   final String content;
 
-  const ReportMessage(
-      {required this.uid,
-      required this.activityId,
-      required this.fromId,
-      required this.toId,
-      required this.content});
+  const ReportMessage({
+    required this.uid,
+    required this.activityId,
+    required this.fromId,
+    required this.toId,
+    required this.content,
+  });
 
   Map<String, dynamic> toJson() => {
         ReportConstants.uid.value: uid,

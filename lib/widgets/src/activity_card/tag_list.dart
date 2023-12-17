@@ -1,10 +1,10 @@
-import '../../../models/src/user.dart';
+import '../../../models/src/activities.dart';
 import 'package:flutter/material.dart';
 
 class Tags extends StatefulWidget {
   const Tags({super.key, required this.tagList, required this.tagSelectedTmp});
 
-  final List<UserTag> tagList;
+  final List<Tag> tagList;
   final List<bool> tagSelectedTmp;
 
   @override
@@ -35,12 +35,12 @@ class _TagsState extends State<Tags> {
                     color: Theme.of(context).colorScheme.secondary.withOpacity(0.4),
                     blurRadius: 1,
                     spreadRadius: 0,
-                    offset: Offset(2, 2)
+                    offset: const Offset(2, 2)
                   )
                 ]
               ),
               child: CheckboxListTile(
-                  title: Text(widget.tagList[index].displayName,
+                  title: Text(widget.tagList[index].tagName,
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.onSurface
                   )),

@@ -37,12 +37,12 @@ class Event {
     return 'Event(name: $name, startTime: $startTime, endTime: $endTime, info: $info, image: $image, tags: $tags)';
   }
 }
-
-class Tag {
-  late String tagdata;
-  late List<Topic> topics;
-  Tag.construct(this.tagdata) {}
-}
+//
+// class Tag {
+//   late String tagdata;
+//   late List<Topic> topics;
+//   Tag.construct(this.tagdata) {}
+// }
 
 class Topic {
   late String topicdata;

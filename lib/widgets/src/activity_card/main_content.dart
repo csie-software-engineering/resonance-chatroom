@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:resonance_chatroom/utils/src/base64.dart';
 import 'date_card.dart';
 
 class ActivityMainContent extends StatelessWidget {
   const ActivityMainContent(
-      {super.key, required this.date, required this.imageUrl});
+      {super.key, required this.date, required this.imageData});
 
-  final String imageUrl;
+  final String imageData;
   final String date;
 
   @override
@@ -38,9 +39,7 @@ class ActivityMainContent extends StatelessWidget {
               elevation: 10,
               shadowColor: Theme.of(context).colorScheme.primary,
               child: Container(
-                child: Image.network(
-                  imageUrl,
-                ),
+                child: Image.memory(base64ToImage(imageData)),
               ),
             ),
           ],

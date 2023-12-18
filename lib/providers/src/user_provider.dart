@@ -4,6 +4,7 @@ import 'package:resonance_chatroom/utils/src/time.dart';
 import '../../constants/constants.dart';
 import '../../models/models.dart';
 import '../../providers/providers.dart';
+import '../../models/src/firestore/fs_user.dart';
 
 class UserProvider {
   final FirebaseFirestore db;

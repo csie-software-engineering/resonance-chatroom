@@ -21,8 +21,8 @@ class ActivityProvider {
 
   /// 設置新活動
   Future<Activity> setNewActivity(Activity activityData) async {
-    assert(activityData.startDate.toEpochTime().isAfter(DateTime.now()),
-        '活動開始時間需要在現在之後');
+    // assert(activityData.startDate.toEpochTime().isAfter(DateTime.now()),
+    //     '活動開始時間需要在現在之後');
 
     activityData.uid = generateUuid();
     final documentReference = db
@@ -33,7 +33,8 @@ class ActivityProvider {
     final curUserId = AuthProvider().currentUserId;
     activityData.ownerId = curUserId;
     activityData.managers = [curUserId];
-    UserProvider().addUserActivity(UserActivity(uid: activityData.uid, isManager: true));
+    UserProvider()
+        .addUserActivity(UserActivity(uid: activityData.uid, isManager: true));
 
     await documentReference.set(activityData.toJson());
 
@@ -144,7 +145,8 @@ class ActivityProvider {
     assert(activityData.isEnabled, '活動已經被刪除');
 
     activityData.managers.add(addUserId);
-    UserProvider().addUserActivity(UserActivity(uid: activityData.uid, isManager: true));
+    UserProvider()
+        .addUserActivity(UserActivity(uid: activityData.uid, isManager: true));
     await documentReference.set(activityData.toJson());
   }
 
@@ -368,9 +370,8 @@ class ActivityProvider {
     final questionData = await questionDoc.get();
     assert(questionData.exists, '問卷不存在');
 
-    final activityData = await getActivity(activityId);
-    assert(
-        activityData.startDate.toEpochTime().isAfter(DateTime.now()), '活動已經開始');
+    // final activityData = await getActivity(activityId);
+    // assert(activityData.startDate.toEpochTime().isAfter(DateTime.now()), '活動已經開始');
 
     await db.runTransaction((transaction) async {
       transaction
@@ -402,9 +403,8 @@ class ActivityProvider {
         .doc(questionId);
 
     assert((await questionDoc.get()).exists, '問卷不存在');
-    final activityData = await getActivity(activityId);
-    assert(
-        activityData.startDate.toEpochTime().isAfter(DateTime.now()), '活動已經開始');
+    // final activityData = await getActivity(activityId);
+    // assert(activityData.startDate.toEpochTime().isAfter(DateTime.now()), '活動已經開始');
 
     await questionDoc.update(
         {QuestionConstants.questionName.value: questionData.questionName});
@@ -432,9 +432,8 @@ class ActivityProvider {
   ) async {
     assert(await _isManager(activityId), '你不是管理者');
 
-    final activityData = await getActivity(activityId);
-    assert(
-        activityData.startDate.toEpochTime().isAfter(DateTime.now()), '活動已經開始');
+    // final activityData = await getActivity(activityId);
+    // assert(activityData.startDate.toEpochTime().isAfter(DateTime.now()), '活動已經開始');
 
     final topicDoc = db
         .collection(FirestoreConstants.activityCollectionPath.value)

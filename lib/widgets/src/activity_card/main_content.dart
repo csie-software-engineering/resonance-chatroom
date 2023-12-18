@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:resonance_chatroom/utils/src/base64.dart';
 import 'date_card.dart';
 
 class ActivityMainContent extends StatelessWidget {
   const ActivityMainContent(
-      {super.key, required this.date, required this.imageData});
+      {super.key, required this.image, required this.startDate, required this.endDate});
 
-  final String imageData;
-  final String date;
+  final DateTime startDate;
+  final DateTime endDate;
+  final Image image;
 
   @override
   Widget build(BuildContext context) {
@@ -20,17 +20,17 @@ class ActivityMainContent extends StatelessWidget {
           children: <Widget>[
             Container(
                 padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
-                child: const Padding(
+                child: Padding(
                   padding: EdgeInsets.symmetric(vertical: 5.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      StartDateCard(date: "日期資料"),
-                      Padding(
+                      StartDateCard(date: startDate),
+                      const Padding(
                         padding: EdgeInsets.all(8.0),
                         child: Icon(Icons.arrow_forward),
                       ),
-                      EndDateCard(date: "日期資料"),
+                      EndDateCard(date: endDate),
                     ],
                   ),
                 )),
@@ -39,7 +39,7 @@ class ActivityMainContent extends StatelessWidget {
               elevation: 10,
               shadowColor: Theme.of(context).colorScheme.primary,
               child: Container(
-                child: Image.memory(base64ToImage(imageData)),
+                child: image,
               ),
             ),
           ],

@@ -1,9 +1,51 @@
 import 'package:flutter/material.dart';
 
+String monthToAbbreviation(int month) {
+  final monthAbbreviations = {
+    1: 'JAN',
+    2: 'FEB',
+    3: 'MAR',
+    4: 'APR',
+    5: 'MAY',
+    6: 'JUN',
+    7: 'JUL',
+    8: 'AUG',
+    9: 'SEP',
+    10: 'OCT',
+    11: 'NOV',
+    12: 'DEC',
+  };
+  // 检查月份是否在有效范围内
+  if (month < 1 || month > 12) {
+    throw ArgumentError('Invalid month: $month. Month should be between 1 and 12.');
+  }
+
+  return monthAbbreviations[month]!;
+}
+
+String numberToChinese(int number) {
+  final chineseNumbers = {
+    1: '一',
+    2: '二',
+    3: '三',
+    4: '四',
+    5: '五',
+    6: '六',
+    7: '日',
+  };
+
+  // 检查数字是否在有效范围内
+  if (number < 1 || number > 7) {
+    throw ArgumentError('Invalid number: $number. Number should be between 1 and 7.');
+  }
+
+  return chineseNumbers[number]!;
+}
+
 class StartDateCard extends StatelessWidget {
   const StartDateCard({super.key, required this.date});
 
-  final String date;
+  final DateTime date;
 
   @override
   Widget build(BuildContext context) {
@@ -26,13 +68,13 @@ class StartDateCard extends StatelessWidget {
         // crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
-            "AUG",
+            monthToAbbreviation(date.month),
             style: TextStyle(
               color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const SizedBox(width: 10),
-          Text("31",
+          Text(date.day.toString(),
               style: TextStyle(
                 fontSize: 30,
                 // fontWeight: FontWeight.w600
@@ -40,7 +82,7 @@ class StartDateCard extends StatelessWidget {
               )),
           const SizedBox(width: 10),
           Text(
-            "THU",
+            numberToChinese(date.weekday),
             style: TextStyle(
               color: Theme.of(context).colorScheme.onSurface,
             ),
@@ -54,7 +96,7 @@ class StartDateCard extends StatelessWidget {
 class EndDateCard extends StatelessWidget {
   const EndDateCard({super.key, required this.date});
 
-  final String date;
+  final DateTime date;
 
   @override
   Widget build(BuildContext context) {
@@ -77,13 +119,13 @@ class EndDateCard extends StatelessWidget {
         // crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
-            "SEP",
+            monthToAbbreviation(date.month),
             style: TextStyle(
               color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const SizedBox(width: 10),
-          Text("02",
+          Text(date.day.toString(),
               style: TextStyle(
                 fontSize: 30,
                 // fontWeight: FontWeight.w600
@@ -91,7 +133,7 @@ class EndDateCard extends StatelessWidget {
               )),
           const SizedBox(width: 10),
           Text(
-            "SAT",
+          numberToChinese(date.weekday),
             style: TextStyle(
               color: Theme.of(context).colorScheme.onSurface,
             ),

@@ -102,7 +102,7 @@ class ChatProvider {
 
     assert((await activityRef.get()).exists, '活動不存在');
 
-    final userActivity = await UserProvider().getUserActivity(activityId);
+    final userActivity = await UserProvider().getUserActivity(activityId, isManager: false);
     assert(userActivity.tagIds.isNotEmpty, '沒有標籤無法進行配對');
 
     final waitingUserQuery = activityRef

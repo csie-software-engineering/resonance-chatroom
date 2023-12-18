@@ -59,6 +59,9 @@ class _InitPageState extends State<InitPage> {
     //     uid: "20231218-0118-8038-a440-9cfda5307c72", isManager: false);
     //
     // await userProvider.addUserActivity(act);
+    // await userProvider.addUserSocialMedia(UserSocialMedia(displayName: "Discord", linkUrl: "Discord:123"));
+    // await userProvider.addUserSocialMedia(UserSocialMedia(displayName: "wechat", linkUrl: "wechat:123"));
+    // await userProvider.addUserSocialMedia(UserSocialMedia(displayName: "Thread", linkUrl: "Thread:123"));
     // //
     // await activityProvider.addNewTag(activityId, "好");
     // await activityProvider.addNewTag(activityId, "很好");

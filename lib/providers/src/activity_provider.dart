@@ -165,7 +165,7 @@ class ActivityProvider {
     assert(activityData.ownerId != deleteUserId, '不能刪除主辦方');
 
     assert(activityData.managers.remove(deleteUserId), '該用戶不是管理者');
-    UserProvider().removeUserActivity(activityId);
+    UserProvider().removeUserActivity(activityId, isManager: true);
     await documentReference.set(activityData.toJson());
   }
 

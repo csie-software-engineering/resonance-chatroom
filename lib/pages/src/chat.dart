@@ -3,8 +3,10 @@ import 'package:async/async.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 import 'package:resonance_chatroom/models/models.dart';
+import 'package:resonance_chatroom/pages/src/user_activity_main_page.dart';
 import 'package:resonance_chatroom/widgets/widgets.dart';
 import 'package:resonance_chatroom/providers/providers.dart';
 
@@ -56,25 +58,29 @@ class _ChatPageState extends State<ChatPage> {
   late final AuthProvider authProvider = context.read<AuthProvider>();
   late final UserProvider userProvider = context.read<UserProvider>();
   late final ActivityProvider activityProvider =
-  context.read<ActivityProvider>();
+      context.read<ActivityProvider>();
   late final QuestionProvider questionProvider =
-  context.read<QuestionProvider>();
+      context.read<QuestionProvider>();
 
   final TextEditingController textEditingController = TextEditingController();
   final ScrollController listScrollController = ScrollController();
   final FocusNode focusNode = FocusNode();
 
-  void onSendMessage(String content, MessageType type) {
+  Future<void> onSendMessage(String content, MessageType type) async {
     if (content.trim().isNotEmpty) {
-      textEditingController.clear();
-      chatProvider.sendMessage(args.activityId, args.peerId, content, type);
-      if (listScrollController.hasClients) {
-        listScrollController.animateTo(0,
-            duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
+      try {
+        await chatProvider.sendMessage(args.activityId, args.peerId, content, type);
+        textEditingController.clear();
+        if (listScrollController.hasClients) {
+          listScrollController.animateTo(0,
+              duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
+        }
+      } catch (e) { // todo 因為沒有辦法分辨錯誤，所以只能抓所有看看
+        Fluttertoast.showToast(msg: '對方已離開，無法傳送訊息', backgroundColor: Theme.of(context).colorScheme.onSurface, textColor: Theme.of(context).colorScheme.onInverseSurface);
       }
     } else {
       // 當沒有文字的時候
-      // Fluttertoast.showToast(msg: 'Nothing to send', backgroundColor: ColorConstants.greyColor);
+      Fluttertoast.showToast(msg: 'Nothing to send', backgroundColor: Theme.of(context).colorScheme.onSurface, textColor: Theme.of(context).colorScheme.onInverseSurface);
     }
   }
 
@@ -154,10 +160,12 @@ class _ChatPageState extends State<ChatPage> {
 
   void _init() async {
     if (!initial) {
-      peerUser = await userProvider.getUser(userId: args.peerId); // todo 我可以直接載入對方的 social media?
+      peerUser = await userProvider.getUser(
+          userId: args.peerId); // todo 我可以直接載入對方的 social media?
       room = await chatProvider.getRoom(args.activityId, args.peerId);
       currentUser = await authProvider.currentUser;
-      _tagName = (await activityProvider.getTag(args.activityId, room.tag)).tagName;
+      _tagName =
+          (await activityProvider.getTag(args.activityId, room.tag)).tagName;
       initial = true;
     }
   }
@@ -362,6 +370,7 @@ class _ChatPageState extends State<ChatPage> {
             return Scaffold(
               body: Column(
                 children: [
+                  SizedBox(height: MediaQuery.of(context).padding.top),
                   Container(
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.secondaryContainer,
@@ -413,6 +422,27 @@ class _ChatPageState extends State<ChatPage> {
                           alignment: Alignment.centerLeft,
                           child: BackButton(
                             color: Theme.of(context).colorScheme.onSurface,
+                            onPressed: () {
+                              showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: Text("確定要退出？"),
+                                      actions: [
+                                        TextButton(
+                                          child: Text("確定"),
+                                          onPressed: () {
+                                            chatProvider.leaveRoom(
+                                                args.activityId, args.peerId); // todo 如果對方已經離開則這個就會 assert
+                                            setState(() {
+                                              Navigator.popUntil(context, ModalRoute.withName(UserActivityMainPage.routeName));
+                                            });
+                                          },
+                                        )
+                                      ],
+                                    );
+                                  });
+                            },
                           ),
                         ),
                         Align(

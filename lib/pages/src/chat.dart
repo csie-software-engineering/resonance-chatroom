@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:async/async.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -9,10 +10,15 @@ import 'package:resonance_chatroom/providers/providers.dart';
 
 import '../../constants/src/firestore_constants.dart';
 
+class ChatPageArguments {
+  final String peerId;
+  final String activityId;
+
+  ChatPageArguments({required this.activityId, required this.peerId});
+}
+
 class ChatPage extends StatefulWidget {
-  const ChatPage({super.key, required this.arguments, required this.title});
-  final String title;
-  final ChatPageArguments arguments;
+  const ChatPage({super.key});
 
   // get inputOptions => null;
   static const routeName = '/chat';
@@ -26,21 +32,33 @@ class _ChatPageState extends State<ChatPage> {
   int _limit = 20;
   int _limitIncrement = 20;
 
+  AsyncMemoizer _memoization = AsyncMemoizer<void>();
+
   double _height = 0;
 
-  // File? imageFile;
+  late final ChatPageArguments args =
+      ModalRoute.of(context)!.settings.arguments as ChatPageArguments;
+  late final room;
+  late final _tagName;
+
   bool isLoading = false;
   bool isShowSticker = false;
   bool _showTopic = false;
-  String imageUrl = "";
+  bool initial = false;
 
   List<QueryDocumentSnapshot> _chatMessages = [];
 
   final List<String> groupMembers = <String>[];
-  late final String currentUserId;
+  late final User currentUser;
+  late final User peerUser;
 
   late final ChatProvider chatProvider = context.read<ChatProvider>();
-  // late final AuthProviders authProvider = context.read<AuthProviders>();
+  late final AuthProvider authProvider = context.read<AuthProvider>();
+  late final UserProvider userProvider = context.read<UserProvider>();
+  late final ActivityProvider activityProvider =
+  context.read<ActivityProvider>();
+  late final QuestionProvider questionProvider =
+  context.read<QuestionProvider>();
 
   final TextEditingController textEditingController = TextEditingController();
   final ScrollController listScrollController = ScrollController();
@@ -49,8 +67,7 @@ class _ChatPageState extends State<ChatPage> {
   void onSendMessage(String content, MessageType type) {
     if (content.trim().isNotEmpty) {
       textEditingController.clear();
-      chatProvider.sendMessage(widget.arguments.activityId,
-          widget.arguments.peerId, content, type);
+      chatProvider.sendMessage(args.activityId, args.peerId, content, type);
       if (listScrollController.hasClients) {
         listScrollController.animateTo(0,
             duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
@@ -133,7 +150,16 @@ class _ChatPageState extends State<ChatPage> {
     super.initState();
     focusNode.addListener(onFocusChange);
     listScrollController.addListener(_scrollListener);
-    readLocal();
+  }
+
+  void _init() async {
+    if (!initial) {
+      peerUser = await userProvider.getUser(userId: args.peerId); // todo 我可以直接載入對方的 social media?
+      room = await chatProvider.getRoom(args.activityId, args.peerId);
+      currentUser = await authProvider.currentUser;
+      _tagName = (await activityProvider.getTag(args.activityId, room.tag)).tagName;
+      initial = true;
+    }
   }
 
   _scrollListener() {
@@ -157,7 +183,7 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
-  void readLocal() {
+  void readLocal() async {
     // if (authProvider.getUserId()?.isNotEmpty == true) {
     //   currentUserId = authProvider.getUserId()!;
     // } else {
@@ -166,11 +192,7 @@ class _ChatPageState extends State<ChatPage> {
     //         (Route<dynamic> route) => false,
     //   );
     // }
-    currentUserId = "14";
-    String peerId = widget.arguments.peerId;
 
-    groupMembers.add(currentUserId);
-    groupMembers.add(peerId);
     // if (currentUserId.compareTo(peerId) > 0) {
     //   groupMembers = '$currentUserId-$peerId';
     // } else {
@@ -184,32 +206,32 @@ class _ChatPageState extends State<ChatPage> {
     // );
   }
 
-  bool isLastMessageLeft(int index) {
-    if ((index > 0 &&
-            _chatMessages[index - 1].get(FirestoreConstants.id) ==
-                currentUserId) ||
-        index == 0) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  bool isLastMessageRight(int index) {
-    if ((index > 0 &&
-            _chatMessages[index - 1].get(FirestoreConstants.id) !=
-                currentUserId) ||
-        index == 0) {
-      return true;
-    } else {
-      return false;
-    }
-  }
+  // bool isLastMessageLeft(int index) {
+  //   if ((index > 0 &&
+  //           _chatMessages[index - 1].get(FirestoreConstants.id) ==
+  //               currentUserId) ||
+  //       index == 0) {
+  //     return true;
+  //   } else {
+  //     return false;
+  //   }
+  // }
+  //
+  // bool isLastMessageRight(int index) {
+  //   if ((index > 0 &&
+  //           _chatMessages[index - 1].get(FirestoreConstants.id) !=
+  //               currentUserId) ||
+  //       index == 0) {
+  //     return true;
+  //   } else {
+  //     return false;
+  //   }
+  // }
 
   Widget buildItem(int index, DocumentSnapshot? document) {
     if (document != null) {
       ChatMessage messageChat = ChatMessage.fromDocument(document);
-      if (messageChat.fromId == currentUserId) {
+      if (messageChat.fromId == currentUser.uid) {
         // Right (my message)
         return Row(
           mainAxisAlignment: MainAxisAlignment.end,
@@ -260,7 +282,7 @@ class _ChatPageState extends State<ChatPage> {
                     ),
                     clipBehavior: Clip.hardEdge,
                     child: Image.network(
-                      widget.arguments.peerAvatar, // 會是一個 url 載入使用者的頭貼
+                      peerUser.photoUrl ?? "空照片", // 會是一個 url 載入使用者的頭貼
                       loadingBuilder: (BuildContext context, Widget child,
                           ImageChunkEvent? loadingProgress) {
                         if (loadingProgress == null) return child;
@@ -292,7 +314,10 @@ class _ChatPageState extends State<ChatPage> {
                           padding: const EdgeInsets.fromLTRB(15, 10, 15, 10),
                           constraints: const BoxConstraints(maxWidth: 200),
                           decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.inverseSurface.withOpacity(0.1),
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .inverseSurface
+                                  .withOpacity(0.1),
                               borderRadius: BorderRadius.circular(20)),
                           margin: EdgeInsets.only(bottom: 10, left: 10),
                           child: Text(
@@ -320,180 +345,199 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.secondaryContainer,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
-                  spreadRadius: 2,
-                  blurRadius: 4,
-                  offset: Offset(0, 2), // 阴影位置，可以调整阴影的方向
-                ),
-              ],
-            ),
-            child: Stack(
-              alignment: Alignment.centerRight,
-              children: [
-
-                Align(
-                  alignment: Alignment.center,
-                  child: Container(
-                    height: kToolbarHeight,
-                    color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
-                    child: Center(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .primary.withOpacity(0.8),
-                          borderRadius: const BorderRadius.all(Radius.circular(16)),
+    return FutureBuilder(
+        future: _memoization.runOnce(_init),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            // 如果 Future 還在執行中，返回 loading UI
+            return Center(
+                child: Container(
+                    width: 100,
+                    height: 100,
+                    child: const CircularProgressIndicator()));
+          } else if (snapshot.hasError) {
+            // 如果 Future 發生錯誤，返回錯誤 UI
+            return Text('Error: ${snapshot.error}');
+          } else {
+            return Scaffold(
+              body: Column(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.secondaryContainer,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          spreadRadius: 2,
+                          blurRadius: 4,
+                          offset: Offset(0, 2), // 阴影位置，可以调整阴影的方向
                         ),
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 3, horizontal: 20.0),
-
-                        child: Text(widget.title,
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w700,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onInverseSurface,
-                            )),
-                      ),
+                      ],
                     ),
-                  ),
-                ),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: BackButton(
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: Container(
-                    child: IconButton(
-                      padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
-                      icon: Icon(
-                          isOn ? Icons.lightbulb : Icons.lightbulb_outline),
-                      color: isOn ? Colors.amber : Colors.white,
-                      onPressed: () {
-                        setState(() {
-                          isOn = !isOn;
-                        });
-                      },
-                    ),
-                  ),
-                )
-              ],
-            ),
-          ),
-          AnimatedContainer(
-            duration: Duration(milliseconds: 1000),
-            curve: Curves.easeOutQuint,
-            height: _height,
-            width: MediaQuery.of(context).size.width,
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-            ),
-            child: _subTitle(),
-          ),
-          Expanded(
-            child: Stack(
-              children: [
-                Container(
-                  color: Theme.of(context).colorScheme.background,
-                  child: Column(
-                    children: [
-                      Flexible(
-                        child: GestureDetector(
-                          onTap: () {
-                            FocusManager.instance.primaryFocus?.unfocus();
-                            // widget.onBackgroundTap?.call();
-                          },
-                          child: LayoutBuilder(
-                            builder: (
-                              BuildContext context,
-                              BoxConstraints constraints,
-                            ) =>
-                                widget.arguments.activityId.isNotEmpty
-                                    ? StreamBuilder<QuerySnapshot>(
-                                        stream: chatProvider.getChatStream(
-                                            widget.arguments.activityId,
-                                            groupMembers,
-                                            limit: _limit),
-                                        builder: (BuildContext context,
-                                            AsyncSnapshot<QuerySnapshot>
-                                                snapshot) {
-                                          if (snapshot.hasData) {
-                                            _chatMessages = snapshot.data!.docs;
-                                            if (_chatMessages.isNotEmpty) {
-                                              return ListView.builder(
-                                                padding:
-                                                    const EdgeInsets.all(10),
-                                                itemBuilder: (context, index) =>
-                                                    buildItem(
-                                                        index,
-                                                        snapshot
-                                                            .data?.docs[index]),
-                                                itemCount:
-                                                    snapshot.data?.docs.length,
-                                                reverse: true,
-                                                controller:
-                                                    listScrollController,
-                                              );
-                                            } else {
-                                              return const Center(
-                                                  child: const Text(
-                                                      "No message here yet..."));
-                                            }
-                                          } else {
-                                            return Center(
-                                              child: CircularProgressIndicator(
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .onPrimary,
-                                              ),
-                                            );
-                                          }
-                                        },
-                                      )
-                                    : Center(
-                                        child: CircularProgressIndicator(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .background,
-                                        ),
-                                      ),
+                    child: Stack(
+                      alignment: Alignment.centerRight,
+                      children: [
+                        Align(
+                          alignment: Alignment.center,
+                          child: Container(
+                            height: kToolbarHeight,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .surface
+                                .withOpacity(0.5),
+                            child: Center(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .primary
+                                      .withOpacity(0.8),
+                                  borderRadius: const BorderRadius.all(
+                                      Radius.circular(16)),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 3, horizontal: 20.0),
+                                child: Text(_tagName,
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w700,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onInverseSurface,
+                                    )),
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                      Input(
-                        onSendPressed: onSendMessage,
-                        callback: updateHeight,
-                      )
-                    ],
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: BackButton(
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                        ),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: Container(
+                            child: IconButton(
+                              padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
+                              icon: Icon(isOn
+                                  ? Icons.lightbulb
+                                  : Icons.lightbulb_outline),
+                              color: isOn ? Colors.amber : Colors.white,
+                              onPressed: () {
+                                setState(() {
+                                  isOn = !isOn;
+                                });
+                              },
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+                  AnimatedContainer(
+                    duration: Duration(milliseconds: 1000),
+                    curve: Curves.easeOutQuint,
+                    height: _height,
+                    width: MediaQuery.of(context).size.width,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                    ),
+                    child: _subTitle(),
+                  ),
+                  Expanded(
+                    child: Stack(
+                      children: [
+                        Container(
+                          color: Theme.of(context).colorScheme.background,
+                          child: Column(
+                            children: [
+                              Flexible(
+                                child: GestureDetector(
+                                  onTap: () {
+                                    FocusManager.instance.primaryFocus
+                                        ?.unfocus();
+                                    // widget.onBackgroundTap?.call();
+                                  },
+                                  child: LayoutBuilder(
+                                    builder: (
+                                      BuildContext context,
+                                      BoxConstraints constraints,
+                                    ) =>
+                                        args.activityId.isNotEmpty
+                                            ? StreamBuilder<QuerySnapshot>(
+                                                stream:
+                                                    chatProvider.getChatStream(
+                                                        args.activityId,
+                                                        args.peerId,
+                                                        limit: _limit),
+                                                builder: (BuildContext context,
+                                                    AsyncSnapshot<QuerySnapshot>
+                                                        snapshot) {
+                                                  if (snapshot.hasData) {
+                                                    _chatMessages =
+                                                        snapshot.data!.docs;
+                                                    if (_chatMessages
+                                                        .isNotEmpty) {
+                                                      return ListView.builder(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(10),
+                                                        itemBuilder: (context,
+                                                                index) =>
+                                                            buildItem(
+                                                                index,
+                                                                snapshot.data
+                                                                        ?.docs[
+                                                                    index]),
+                                                        itemCount: snapshot
+                                                            .data?.docs.length,
+                                                        reverse: true,
+                                                        controller:
+                                                            listScrollController,
+                                                      );
+                                                    } else {
+                                                      return const Center(
+                                                          child: const Text(
+                                                              "No message here yet..."));
+                                                    }
+                                                  } else {
+                                                    return Center(
+                                                      child:
+                                                          CircularProgressIndicator(
+                                                        color: Theme.of(context)
+                                                            .colorScheme
+                                                            .onPrimary,
+                                                      ),
+                                                    );
+                                                  }
+                                                },
+                                              )
+                                            : Center(
+                                                child:
+                                                    CircularProgressIndicator(
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .background,
+                                                ),
+                                              ),
+                                  ),
+                                ),
+                              ),
+                              Input(
+                                onSendPressed: onSendMessage,
+                                callback: updateHeight,
+                              )
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+        });
   }
-}
-
-class ChatPageArguments {
-  final String peerId;
-  final String peerAvatar;
-  final String peerNickname;
-  final String activityId;
-
-  ChatPageArguments(this.peerAvatar, this.activityId,
-      {required this.peerId, required this.peerNickname});
 }

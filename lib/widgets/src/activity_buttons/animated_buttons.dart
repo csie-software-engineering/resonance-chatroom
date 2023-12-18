@@ -15,27 +15,31 @@ class AnimatedButtons extends StatefulWidget {
       required this.buttonPositionLeft,
       required this.tagSelected,
       required this.currentActivityTags,
-      required this.changeTag,
-      required this.enableMatch});
+      required this.changeTagAndName,
+      required this.enableMatch,
+      required this.currentUserName});
 
   final bool enableTagWidget;
   final bool enableMatch;
   final bool startMatching;
   final Function() matching;
-  final void Function(List<bool>) changeTag;
+  final void Function(TextEditingController, List<bool>) changeTagAndName;
   final double buttonPositionTop;
   final double buttonPositionLeft;
   final List<bool> tagSelected;
   final List<Tag> currentActivityTags;
+  final String currentUserName;
 
   @override
-  State<AnimatedButtons> createState() => _AnimatedButtonsState();
+  State<AnimatedButtons> createState() => AnimatedButtonsState();
 }
 
-class _AnimatedButtonsState extends State<AnimatedButtons>
+class AnimatedButtonsState extends State<AnimatedButtons>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation _animation;
+
+  TextEditingController _textEditingController = TextEditingController();
 
   bool toggle = true;
   late double top1;
@@ -62,6 +66,7 @@ class _AnimatedButtonsState extends State<AnimatedButtons>
   @override
   void initState() {
     super.initState();
+
     _controller = AnimationController(
       vsync: this,
       duration: Duration(milliseconds: 350),
@@ -76,6 +81,7 @@ class _AnimatedButtonsState extends State<AnimatedButtons>
     _controller.addListener(() {
       setState(() {});
     });
+    _textEditingController.text = widget.currentUserName;
   }
 
   @override
@@ -179,6 +185,7 @@ class _AnimatedButtonsState extends State<AnimatedButtons>
 
                       showDialog(
                           context: context,
+                          barrierDismissible: false,
                           builder: (BuildContext context) {
                             List<bool> _tagTmp = List.generate(
                                 widget.currentActivityTags.length,
@@ -191,7 +198,7 @@ class _AnimatedButtonsState extends State<AnimatedButtons>
                             return AlertDialog(
                               insetPadding: const EdgeInsets.symmetric(
                                   vertical: 10.0, horizontal: 40.0),
-                              actionsPadding: const EdgeInsets.only(top: 0),
+                              actionsPadding: const EdgeInsets.only(top: 0, right: 20, bottom: 10),
                               scrollable: true,
                               title: Column(
                                 // alignment: AlignmentDirectional.topStart,
@@ -218,7 +225,7 @@ class _AnimatedButtonsState extends State<AnimatedButtons>
                                             padding: const EdgeInsets.only(
                                                 right: 10),
                                             child: Container(
-                                              padding: EdgeInsets.symmetric(
+                                              padding: const EdgeInsets.symmetric(
                                                   horizontal: 6, vertical: 2),
                                               decoration: BoxDecoration(
                                                 color: Theme.of(context)
@@ -228,7 +235,7 @@ class _AnimatedButtonsState extends State<AnimatedButtons>
                                                 borderRadius:
                                                     BorderRadius.circular(10),
                                               ),
-                                              child: Text(
+                                              child: const Text(
                                                 "暱稱",
                                                 style: TextStyle(
                                                   fontSize: 16,
@@ -239,9 +246,10 @@ class _AnimatedButtonsState extends State<AnimatedButtons>
                                           Container(
                                               width: width * 0.5,
                                               child: TextField(
+                                                controller:
+                                                    _textEditingController,
                                                 decoration: InputDecoration(
-                                                    isCollapsed: true,
-                                                    hintText: "冰機靈"),
+                                                    isCollapsed: true),
                                                 maxLines: 1,
                                               )),
                                         ],
@@ -298,9 +306,17 @@ class _AnimatedButtonsState extends State<AnimatedButtons>
                               actions: [
                                 TextButton(
                                   onPressed: () {
-                                    widget.changeTag(_tagTmp);
+                                    widget.changeTagAndName(
+                                        _textEditingController, _tagTmp);
                                   },
                                   child: Text('確定'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    _textEditingController.text = widget.currentUserName;
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: Text('取消'),
                                 ),
                               ],
                             );

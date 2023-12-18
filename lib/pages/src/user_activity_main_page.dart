@@ -3,9 +3,12 @@ import 'dart:isolate';
 
 // import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:async/async.dart';
+import 'package:resonance_chatroom/utils/src/base64.dart';
+import 'package:resonance_chatroom/utils/src/time.dart';
 
 import '../../models/models.dart';
 import '../../providers/providers.dart';
@@ -35,20 +38,19 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
   late AnimationController _controller;
   late Animation _animation;
 
-  AsyncMemoizer _memoization = AsyncMemoizer<void>();
+  final AsyncMemoizer _memoization = AsyncMemoizer<void>();
 
   late final ChatProvider chatProvider = context.read<ChatProvider>();
   late final AuthProvider authProvider = context.read<AuthProvider>();
   late final UserProvider userProvider = context.read<UserProvider>();
   late final ActivityProvider activityProvider =
       context.read<ActivityProvider>();
-  late final QuestionProvider questionProvider =
-      context.read<QuestionProvider>();
 
   late final args = ModalRoute.of(context)!.settings.arguments
       as UserActivityMainPageArguments;
   late final _currentUser;
   late final _currentUserActivity;
+  late final _image;
 
   FloatingActionButtonLocation buttonPosition =
       FloatingActionButtonLocation.centerFloat;
@@ -67,7 +69,7 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
   bool _enableTagWidget = false;
   bool _enableMatch = false;
 
-  bool Initial = false;
+  bool initial = false;
 
   late double buttonPositionTop;
   late double buttonPositionLeft;
@@ -80,14 +82,13 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
   }
 
   Future<String?> _matchingChecker() async {
-    debugPrint("getin");
-    while(true) {
-      if(await chatProvider.isWaiting(args.activityId)) {
-        debugPrint("wait");
+    while (true) {
+      if (await chatProvider.isWaiting(args.activityId)) {
         await Future.delayed(const Duration(seconds: 1));
-        }
-      else {
-        return chatProvider.getChatToUserId(args.activityId);
+      } else {
+        var peerId = await chatProvider.getChatToUserId(args.activityId);
+        debugPrint("peerId:${peerId ?? "no"}, currentId:${_currentUser.uid}");
+        return peerId;
       }
     }
   }
@@ -108,32 +109,33 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
         _timer = Timer.periodic(const Duration(seconds: 1), _onTimerTick);
       });
 
-      var peerId =
-          await chatProvider.getChatToUserId(args.activityId);
+      var peerId = await chatProvider.getChatToUserId(args.activityId);
 
-      if(peerId == null) { // 在等待
+      if (peerId == null) {
+        // 在等待
         peerId = await _matchingChecker();
-        assert(peerId != null, "peerId != null");
-        _getIntRoom(peerId);
-      }
-      else {
+        if (peerId != null) {
+          _getIntRoom(peerId);
+        }
+        // peerId == null, 代表我可能主動退出了
+      } else {
         _getIntRoom(peerId);
       }
     }
   }
 
   void _getIntRoom(peerId) async {
-
+    _timer?.cancel();
     setState(() {
       _height = 0;
       Navigator.of(context).pushNamed(ChatPage.routeName,
           arguments: ChatPageArguments(
-              activityId: _currentActivity.uid,
-              peerId: peerId));
+              activityId: _currentActivity.uid, peerId: peerId));
     });
   }
 
-  Future<void> changeTag(List<bool> tagTmp) async {
+  Future<void> changeTagAndName(
+      TextEditingController textEditingController, List<bool> tagTmp) async {
     _tagSelected = tagTmp;
     var newUserTags = <String>[];
     int cnt = 0;
@@ -143,27 +145,30 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
         newUserTags.add(_currentActivityTags[i].uid);
       }
     }
+    _enableMatch = false;
     setState(() {
       Navigator.of(context).pop();
     });
+    var newName = textEditingController.text;
+    if (newName != _currentUser.displayName && newName.isNotEmpty) {
+      _currentUser.displayName = textEditingController.text;
+      await userProvider.updateUser(_currentUser);
+    }
     await userProvider.updateUserTag(args.activityId, newUserTags);
-    if(cnt > 0) {
+    if (cnt > 0) {
       _enableMatch = true;
-    } else {
-      _enableMatch = false;
     }
     setState(() {});
   }
 
-    String _formatTime() {
-      int minutes = timeShowUp ~/ 60;
-      int remainingSeconds = timeShowUp % 60;
+  String _formatTime() {
+    int minutes = timeShowUp ~/ 60;
+    int remainingSeconds = timeShowUp % 60;
 
-      return '$minutes:${remainingSeconds.toString().padLeft(2, '0')}';
-    }
+    return '$minutes:${remainingSeconds.toString().padLeft(2, '0')}';
+  }
 
-
-    Widget? _subTitle() {
+  Widget? _subTitle() {
     if (!startMatching) {
       return AnimatedContainer(
         duration: const Duration(milliseconds: 500),
@@ -206,6 +211,7 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
       );
     }
   }
+
   /// 初始化
   /// fetch 使用者標籤，並使用 List<bool> 來記錄使用者之前所勾選的標籤
   void _initSetTag() {
@@ -217,17 +223,20 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
       cnt++;
       map[i] = true;
     }
-    if(cnt == 0) {
+    if (cnt == 0) {
       _enableMatch = false;
     } else {
       _enableMatch = true;
     }
     _tagSelected = List.generate(_currentActivityTags.length, (index) => false);
     int i = 0;
-    debugPrint("${map.length}");
     map.forEach((key, value) {
       _tagSelected[i++] = value;
     });
+  }
+
+  void _initImage() {
+    _image = Image.memory(base64ToImage(_currentActivity.activityPhoto));
   }
 
   Future<void> _initActivityContent() async {
@@ -238,8 +247,7 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
     // set _currentUserActivity
 
     _currentUser = await authProvider.currentUser;
-    _currentUserActivity =
-        await userProvider.getUserActivity(args.activityId);
+    _currentUserActivity = await userProvider.getUserActivity(args.activityId);
     var getActivity = await activityProvider.getActivity(args.activityId);
 
     if (getActivity != null) {
@@ -248,8 +256,7 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
       Navigator.of(context).pop();
     }
 
-    var getTags =
-        await activityProvider.getAllTags(args.activityId);
+    var getTags = await activityProvider.getAllTags(args.activityId);
 
     if (getTags != null) {
       _enableTagWidget = true;
@@ -258,12 +265,13 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
   }
 
   Future<void> _init() async {
-    if (!Initial) {
+    if (!initial) {
       buttonPositionTop = MediaQuery.of(context).size.height - 70; //70
       buttonPositionLeft = MediaQuery.of(context).size.width - 100;
       await _initActivityContent();
       _initSetTag();
-      Initial = true;
+      _initImage();
+      initial = true;
     }
   }
 
@@ -385,9 +393,9 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
                     child: ListView(
                       children: [
                         ActivityMainContent(
-                          imageData: _currentActivity.activityPhoto,
-                          date: '',
-                        ),
+                            startDate: _currentActivity.startDate.toEpochTime(),
+                            endDate: _currentActivity.endDate.toEpochTime(),
+                            image: _image),
                         ActivityDescription(
                           description:
                               _currentActivity.activityInfo, // 這邊會給過是最前面檢查過
@@ -406,7 +414,9 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
                 buttonPositionLeft: buttonPositionLeft,
                 tagSelected: _tagSelected,
                 currentActivityTags: _currentActivityTags,
-                changeTag: changeTag, enableMatch: _enableMatch,
+                enableMatch: _enableMatch,
+                changeTagAndName: changeTagAndName,
+                currentUserName: _currentUser.displayName,
               ),
               backgroundColor: Theme.of(context).colorScheme.background,
               // floatingActionButtonLocation: buttonPosition,

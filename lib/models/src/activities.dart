@@ -9,7 +9,7 @@ class Activity {
   String startDate;
   String endDate;
   String activityPhoto;
-  late final bool isEnabled;
+  late bool isEnabled;
   late final List<String> managers;
 
   Activity({

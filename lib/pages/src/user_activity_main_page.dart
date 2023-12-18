@@ -125,6 +125,7 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
   }
 
   void _getIntRoom(peerId) async {
+    startMatching = false;
     _timer?.cancel();
     setState(() {
       _height = 0;

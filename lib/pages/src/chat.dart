@@ -46,7 +46,8 @@ class _ChatPageState extends State<ChatPage> {
   late final QuestionProvider questionProvider =
       context.read<QuestionProvider>();
 
-  final AsyncMemoizer _memoization = AsyncMemoizer<void>();
+  final AsyncMemoizer _initalPageMemoization = AsyncMemoizer<void>();
+  final AsyncMemoizer _socialMedialMemoization = AsyncMemoizer<void>();
   final TextEditingController textEditingController = TextEditingController();
   final TextEditingController reportTextController = TextEditingController();
   final ScrollController listScrollController = ScrollController();
@@ -342,7 +343,7 @@ class _ChatPageState extends State<ChatPage> {
                                                       size: 35,
                                                       color: Theme.of(context)
                                                           .colorScheme
-                                                          .onPrimary,
+                                                          .primary,
                                                     );
                                                   },
                                                   fit: BoxFit.cover,
@@ -474,7 +475,7 @@ class _ChatPageState extends State<ChatPage> {
                                   Expanded(
                                     flex: 2,
                                     child: FutureBuilder(
-                                        future: _getPeerSocialMedia(),
+                                        future: _socialMedialMemoization.runOnce(_getPeerSocialMedia),
                                         builder: (context, snapshot) {
                                           if (snapshot.connectionState ==
                                               ConnectionState.waiting) {
@@ -655,7 +656,7 @@ class _ChatPageState extends State<ChatPage> {
                           return Icon(
                             Icons.account_circle,
                             size: 35,
-                            color: Theme.of(context).colorScheme.onPrimary,
+                            color: Theme.of(context).colorScheme.primary,
                           );
                         },
                         width: 35,
@@ -701,7 +702,7 @@ class _ChatPageState extends State<ChatPage> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-        future: _memoization.runOnce(_init),
+        future: _initalPageMemoization.runOnce(_init),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             // 如果 Future 還在執行中，返回 loading UI
@@ -750,6 +751,14 @@ class _ChatPageState extends State<ChatPage> {
                                       .withOpacity(0.8),
                                   borderRadius: const BorderRadius.all(
                                       Radius.circular(16)),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.2),
+                                      offset: const Offset(2, 2),
+                                      blurRadius: 2,
+                                      spreadRadius: 1,
+                                    )
+                                  ]
                                 ),
                                 padding: const EdgeInsets.symmetric(
                                     vertical: 3, horizontal: 20.0),

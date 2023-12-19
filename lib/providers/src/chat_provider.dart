@@ -78,14 +78,14 @@ class ChatProvider {
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityId)
         .collection(FirestoreConstants.roomCollectionPath.value)
-        .where(RoomConstants.users.value, arrayContains: userId)
-        .where(RoomConstants.isEnable.value, isEqualTo: true)
-        .limit(1);
+        .where(RoomConstants.isEnable.value, isEqualTo: true);
 
     final roomData = await roomQuery.get();
-    if (roomData.docs.isEmpty) return null;
+    var rooms = roomData.docs.map((e) => Room.fromDocument(e)).toList();
+    rooms = rooms.where((e) => e.users.any((e) => e.id == userId)).toList();
+    if (rooms.isEmpty) return null;
 
-    final room = Room.fromDocument(roomData.docs.first);
+    final room = rooms.first;
     return room.users.firstWhere((e) => e.id != userId).id;
   }
 

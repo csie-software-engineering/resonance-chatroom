@@ -123,7 +123,7 @@ class _InputState extends State<Input> {
           borderRadius: const BorderRadius.vertical(
             top: Radius.circular(20),
           ),
-          color: Theme.of(context).colorScheme.surface,
+          color: Theme.of(context).colorScheme.surface.withOpacity(0.9),
           surfaceTintColor: Theme.of(context).colorScheme.onPrimary,
           elevation: 0,
           child: Container(
@@ -157,7 +157,7 @@ class _InputState extends State<Input> {
                         cursorColor: Theme.of(context).colorScheme.primary,
                         decoration: InputDecoration(
                           filled: true,
-                          fillColor: Theme.of(context).colorScheme.secondary.withOpacity(0.2),
+                          fillColor: Theme.of(context).colorScheme.secondary.withOpacity(0.1),
                           border: InputBorder.none,
                           hintStyle: TextStyle(
                             fontSize: 16,

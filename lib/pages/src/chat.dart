@@ -4,7 +4,7 @@ import 'package:async/async.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:url_launcher/url_launcher.dart';
+// import 'package:url_launcher/url_launcher.dart';
 import 'package:provider/provider.dart';
 import 'package:resonance_chatroom/models/models.dart';
 import 'package:resonance_chatroom/pages/src/user_activity_main_page.dart';
@@ -31,31 +31,12 @@ class ChatPage extends StatefulWidget {
 }
 
 class _ChatPageState extends State<ChatPage> {
-  bool isOn = true;
-  int _limit = 20;
-  int _limitIncrement = 20;
-
-  AsyncMemoizer _memoization = AsyncMemoizer<void>();
-
-  double _height = 0;
-
   late final ChatPageArguments args =
       ModalRoute.of(context)!.settings.arguments as ChatPageArguments;
-  late final room;
-  late final _tagName;
-
-  bool isLoading = false;
-  bool isShowSticker = false;
-  bool _showTopic = false;
-  bool initial = false;
-
-  bool _socialMediaEnable = false; // 使用者自己同意可不可以公開，會按鈕可以公開自己的。
-
-  List<QueryDocumentSnapshot> _chatMessages = [];
-
-  final List<String> groupMembers = <String>[];
   late final User currentUser;
   late final User peerUser;
+  late final Room room;
+  late final String _tagName;
 
   late final ChatProvider chatProvider = context.read<ChatProvider>();
   late final AuthProvider authProvider = context.read<AuthProvider>();
@@ -65,9 +46,24 @@ class _ChatPageState extends State<ChatPage> {
   late final QuestionProvider questionProvider =
       context.read<QuestionProvider>();
 
+  final AsyncMemoizer _memoization = AsyncMemoizer<void>();
   final TextEditingController textEditingController = TextEditingController();
+  final TextEditingController reportTextController = TextEditingController();
   final ScrollController listScrollController = ScrollController();
   final FocusNode focusNode = FocusNode();
+
+  int _limit = 20;
+  int _limitIncrement = 20;
+  double _height = 0;
+
+  bool isOn = true;
+  bool isLoading = false;
+  bool isShowSticker = false;
+  bool _showTopic = false;
+  bool initial = false;
+  bool _isAlreadyReport = false;
+
+  List<QueryDocumentSnapshot> _chatMessages = [];
 
   Future<void> onSendMessage(String content, MessageType type) async {
     if (content.trim().isNotEmpty) {
@@ -195,7 +191,8 @@ class _ChatPageState extends State<ChatPage> {
       currentUser = await authProvider.currentUser;
       _tagName =
           (await activityProvider.getTag(args.activityId, room.tag)).tagName;
-      chatProvider.agreeShareSocialMedia(args.activityId, args.peerId);// todo 假裝同意
+      chatProvider.agreeShareSocialMedia(
+          args.activityId, args.peerId); // todo 假裝同意
       initial = true;
     }
   }
@@ -220,51 +217,6 @@ class _ChatPageState extends State<ChatPage> {
       });
     }
   }
-
-  void readLocal() async {
-    // if (authProvider.getUserId()?.isNotEmpty == true) {
-    //   currentUserId = authProvider.getUserId()!;
-    // } else {
-    //   Navigator.of(context).pushAndRemoveUntil(
-    //     MaterialPageRoute(builder: (context) => const MyHomePage(title: "way back home")),
-    //         (Route<dynamic> route) => false,
-    //   );
-    // }
-
-    // if (currentUserId.compareTo(peerId) > 0) {
-    //   groupMembers = '$currentUserId-$peerId';
-    // } else {
-    //   groupMembers = '$peerId-$currentUserId';
-    // }
-
-    // chatProvider.updateDataFirestore(
-    //   FirestoreConstants.userCollectionPath,
-    //   currentUserId,
-    //   {FirestoreConstants.chattingWith: peerId},
-    // );
-  }
-
-  // bool isLastMessageLeft(int index) {
-  //   if ((index > 0 &&
-  //           _chatMessages[index - 1].get(FirestoreConstants.id) ==
-  //               currentUserId) ||
-  //       index == 0) {
-  //     return true;
-  //   } else {
-  //     return false;
-  //   }
-  // }
-  //
-  // bool isLastMessageRight(int index) {
-  //   if ((index > 0 &&
-  //           _chatMessages[index - 1].get(FirestoreConstants.id) !=
-  //               currentUserId) ||
-  //       index == 0) {
-  //     return true;
-  //   } else {
-  //     return false;
-  //   }
-  // }
 
   Widget buildItem(int index, DocumentSnapshot? document) {
     if (document != null) {
@@ -408,38 +360,91 @@ class _ChatPageState extends State<ChatPage> {
                                         ),
                                         Expanded(
                                           child: Align(
-                                            alignment: Alignment.centerRight,
-                                            child: IconButton(
-                                              iconSize: 30,
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .error
-                                                  .withOpacity(0.5),
-                                              icon: Icon(Icons.warning_rounded),
-                                              onPressed: () {
-                                                showDialog(
-                                                    context: context,
-                                                    builder:
-                                                        (BuildContext context) {
-                                                      return AlertDialog(
-                                                        title: Text('請輸入原因'),
-                                                        content: TextField(),
-                                                        actions: [
-                                                          TextButton(
-                                                            onPressed: () {
-                                                              // 串接舉報按鈕
-                                                              Navigator.of(
-                                                                      context)
-                                                                  .pop(); // 关闭对话框
-                                                            },
-                                                            child: Text('确定'),
-                                                          ),
-                                                        ],
-                                                      );
-                                                    });
-                                              },
-                                            ),
-                                          ),
+                                              alignment: Alignment.centerRight,
+                                              child: !_isAlreadyReport
+                                                  ? IconButton(
+                                                      iconSize: 30,
+                                                      color: Theme.of(context)
+                                                          .colorScheme
+                                                          .error
+                                                          .withOpacity(0.5),
+                                                      icon: Icon(Icons
+                                                          .warning_rounded),
+                                                      onPressed: () {
+                                                        showDialog(
+                                                            context: context,
+                                                            builder:
+                                                                (BuildContext
+                                                                    context) {
+                                                              return AlertDialog(
+                                                                title: Text(
+                                                                    '請輸入原因'),
+                                                                content:
+                                                                    TextField(
+                                                                  controller:
+                                                                      reportTextController,
+                                                                ),
+                                                                actions: [
+                                                                  TextButton(
+                                                                    onPressed:
+                                                                        () {
+                                                                      chatProvider.report(
+                                                                          args.activityId,
+                                                                          args.peerId,
+                                                                          "惡意言論",
+                                                                          reportTextController
+                                                                              .text);
+                                                                      reportTextController
+                                                                          .clear();
+                                                                      setState(
+                                                                          () {
+                                                                            _isAlreadyReport = true;
+                                                                        Navigator.of(context)
+                                                                            .pop();
+                                                                      }); // 关闭对话框
+                                                                    },
+                                                                    child: Text(
+                                                                        '确定'),
+                                                                  ),
+                                                                  TextButton(
+                                                                    onPressed:
+                                                                        () {
+                                                                      // 串接舉報按鈕
+                                                                      setState(
+                                                                          () {
+                                                                        Navigator.of(context)
+                                                                            .pop();
+                                                                      }); // 关闭对话框
+                                                                    },
+                                                                    child: Text(
+                                                                        '取消'),
+                                                                  ),
+                                                                ],
+                                                              );
+                                                            });
+                                                      },
+                                                    )
+                                                  : IconButton(
+                                                      onPressed: () {
+                                                        Fluttertoast.showToast(
+                                                            msg: "已舉報",
+                                                            backgroundColor:
+                                                                Theme.of(
+                                                                        context)
+                                                                    .colorScheme
+                                                                    .onSurface,
+                                                            textColor: Theme.of(
+                                                                    context)
+                                                                .colorScheme
+                                                                .onInverseSurface);
+                                                      },
+                                                      icon: Icon(Icons
+                                                          .disabled_by_default),
+                                                      color: Theme.of(context)
+                                                          .colorScheme
+                                                          .onSurface
+                                                          .withOpacity(0.5),
+                                                    )),
                                         ),
                                       ],
                                     ),
@@ -492,79 +497,107 @@ class _ChatPageState extends State<ChatPage> {
                                           } else {
                                             return snapshot.data != null
                                                 ? Row(
-                                                  children: [
-                                                    Expanded(
-                                                      flex: 1,
-                                                      child: Container(
-                                                        decoration: BoxDecoration(
-                                                          color: Theme.of(context)
+                                                    children: [
+                                                      Expanded(
+                                                        flex: 1,
+                                                        child: Container(
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            color: Theme.of(
+                                                                    context)
+                                                                .colorScheme
+                                                                .inversePrimary
+                                                                .withOpacity(
+                                                                    0.5),
+                                                            borderRadius: const BorderRadius
+                                                                .only(
+                                                                topLeft: Radius
+                                                                    .circular(
+                                                                        10),
+                                                                bottomLeft: Radius
+                                                                    .circular(
+                                                                        10)),
+                                                          ),
+                                                          child: Center(
+                                                              child: Text(
+                                                                  "對方已公開")),
+                                                        ),
+                                                      ),
+                                                      Expanded(
+                                                        flex: 2,
+                                                        child: Container(
+                                                          color: Theme.of(
+                                                                  context)
                                                               .colorScheme
-                                                              .inversePrimary
-                                                              .withOpacity(0.5),
-                                                          borderRadius:
-                                                          const BorderRadius.only(topLeft: Radius.circular(10), bottomLeft: Radius.circular(10)),
-                                                        ),
-
-                                                        child: Center(child: Text("對方已公開")),
-                                                      ),
-                                                    ),
-                                                    Expanded(
-                                                      flex: 2,
-                                                      child: Container(
-                                                        color: Theme.of(context)
-                                                            .colorScheme
-                                                            .onInverseSurface,
-                                                        child: Padding(
-                                                          padding: const EdgeInsets.all(10.0),
-                                                          child: ListView
-                                                              .builder(
-                                                                                                                      itemCount: snapshot
-                                                            .data!.length,
-                                                                                                                      itemBuilder:
-                                                            (BuildContext
-                                                                    context,
-                                                                int index) {
-                                                          return Padding(
-                                                            padding: const EdgeInsets.only(bottom: 10),
-                                                            child: Row(
-                                                              children: [
-                                                                IconButton(
-                                                                  icon: const Icon(Icons.add_circle_rounded),
-                                                                  iconSize: 30,
-                                                                  color: Theme.of(context)
-                                                                      .colorScheme
-                                                                      .error
-                                                                      .withOpacity(0.3),
-                                                                  onPressed:(){
-                                                                    // todo launch;
-                                                                  }
-                                                                ),
-                                                                Container(
-                                                                  padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
-                                                                  decoration: BoxDecoration(
-                                                                    color: Theme.of(context)
-                                                                        .colorScheme
-                                                                        .error
-                                                                        .withOpacity(0.3),
-                                                                    borderRadius: BorderRadius.circular(20),
+                                                              .onInverseSurface,
+                                                          child: Padding(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .all(10.0),
+                                                            child: ListView
+                                                                .builder(
+                                                              itemCount:
+                                                                  snapshot.data!
+                                                                      .length,
+                                                              itemBuilder:
+                                                                  (BuildContext
+                                                                          context,
+                                                                      int index) {
+                                                                return Padding(
+                                                                  padding:
+                                                                      const EdgeInsets
+                                                                          .only(
+                                                                          bottom:
+                                                                              10),
+                                                                  child: Row(
+                                                                    children: [
+                                                                      IconButton(
+                                                                          icon: const Icon(Icons
+                                                                              .add_circle_rounded),
+                                                                          iconSize:
+                                                                              30,
+                                                                          color: Theme.of(context)
+                                                                              .colorScheme
+                                                                              .error
+                                                                              .withOpacity(
+                                                                                  0.3),
+                                                                          onPressed:
+                                                                              () {
+                                                                            // todo launch;
+                                                                          }),
+                                                                      Container(
+                                                                        padding: const EdgeInsets
+                                                                            .symmetric(
+                                                                            horizontal:
+                                                                                15,
+                                                                            vertical:
+                                                                                8),
+                                                                        decoration:
+                                                                            BoxDecoration(
+                                                                          color: Theme.of(context)
+                                                                              .colorScheme
+                                                                              .error
+                                                                              .withOpacity(0.3),
+                                                                          borderRadius:
+                                                                              BorderRadius.circular(20),
+                                                                        ),
+                                                                        child: Text(
+                                                                            snapshot.data![index].displayName,
+                                                                            style: const TextStyle(
+                                                                              fontWeight: FontWeight.w700,
+                                                                              fontSize: 15,
+                                                                            )),
+                                                                      ),
+                                                                    ],
                                                                   ),
-                                                                  child: Text(snapshot
-                                                                      .data![index]
-                                                                      .displayName, style: const TextStyle(
-                                                                    fontWeight: FontWeight.w700,
-                                                                    fontSize: 15,
-                                                                  )),
-                                                                ),
-                                                              ],
+                                                                );
+                                                              },
                                                             ),
-                                                          );
-                                                                                                                      },
-                                                                                                                    ),
+                                                          ),
                                                         ),
                                                       ),
-                                                    ),
-                                                  ],
-                                                )
+                                                    ],
+                                                  )
                                                 : Container(
                                                     decoration: BoxDecoration(
                                                       color: Theme.of(context)
@@ -686,8 +719,9 @@ class _ChatPageState extends State<ChatPage> {
                 children: [
                   SizedBox(height: MediaQuery.of(context).padding.top),
                   Container(
+                    height: kToolbarHeight,
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.secondaryContainer,
+                      color: Theme.of(context).colorScheme.surface.withOpacity(0.9),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withOpacity(0.2),
@@ -703,7 +737,6 @@ class _ChatPageState extends State<ChatPage> {
                         Align(
                           alignment: Alignment.center,
                           child: Container(
-                            height: kToolbarHeight,
                             color: Theme.of(context)
                                 .colorScheme
                                 .surface

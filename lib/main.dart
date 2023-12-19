@@ -36,7 +36,7 @@ class MyApp extends StatelessWidget {
               // primary: const Color(0xffA7D073),
               // onPrimary: const Color(0xff1d1c21),
               // secondary: const Color(0xffFFE500),
-              // inversePrimary: const Color(0xFF8EA373),
+              tertiary: const Color(0xffFFE500),
               // surface: const Color(0xffD9EBD0), // secondary: const Color(0xff1d1c21),
               // brightness: MediaQuery.platformBrightnessOf(context),
               brightness: Brightness.light,

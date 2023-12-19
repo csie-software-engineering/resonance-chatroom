@@ -37,6 +37,7 @@ class _ChatPageState extends State<ChatPage> {
   late final User peerUser;
   late final Room room;
   late final String _tagName;
+  late bool _isEnableSocialMedial = false;
 
   late final ChatProvider chatProvider = context.read<ChatProvider>();
   late final AuthProvider authProvider = context.read<AuthProvider>();
@@ -47,7 +48,7 @@ class _ChatPageState extends State<ChatPage> {
       context.read<QuestionProvider>();
 
   final AsyncMemoizer _initalPageMemoization = AsyncMemoizer<void>();
-  final AsyncMemoizer _socialMedialMemoization = AsyncMemoizer<void>();
+  // final AsyncMemoizer _socialMedialMemoization = AsyncMemoizer<void>();
   final TextEditingController textEditingController = TextEditingController();
   final TextEditingController reportTextController = TextEditingController();
   final ScrollController listScrollController = ScrollController();
@@ -160,13 +161,29 @@ class _ChatPageState extends State<ChatPage> {
     });
   }
 
-  Future<List<UserSocialMedia>?> _getPeerSocialMedia() async {
-    if (await chatProvider.getIsAgreeShareSocialMedia(
-        args.activityId, args.peerId)) {
-      return await chatProvider.getOtherSocialMedium(
-          args.activityId, args.peerId);
+  Future<void> enableSocialMedia() async { // 我覺得可以直接寫在 input 那邊
+    if(_isEnableSocialMedial) {
+        Fluttertoast.showToast(msg: "已分享");
+      }else{
+      _isEnableSocialMedial = true;
+      try{
+        await chatProvider.agreeShareSocialMedia(args.activityId, args.peerId);
+      } catch (e){ // todo 應該要抓對應錯誤
+        debugPrint("$e");
+      }
     }
-    return null;
+  }
+
+  Future<List<UserSocialMedia>?> _getPeerSocialMedia() async {
+    List<UserSocialMedia>? peerSocialMedia;
+    try{
+      peerSocialMedia = await chatProvider.getOtherSocialMedium(
+          args.activityId, args.peerId);
+    }catch (e){ // todo 應該要抓對應錯誤，如果是這樣代表對方沒有同意
+      peerSocialMedia = null;
+    } finally {
+      return peerSocialMedia;
+    }
   }
 
   // void _launchURL(String url) async {
@@ -186,14 +203,14 @@ class _ChatPageState extends State<ChatPage> {
 
   void _init() async {
     if (!initial) {
+      // await chatProvider.disagreeShareSocialMedia(args.activityId, args.peerId);
+      _isEnableSocialMedial = await chatProvider.getIsAgreeShareSocialMedia(args.activityId, args.peerId);
       peerUser = await userProvider.getUser(
           userId: args.peerId); // todo 我可以直接載入對方的 social media?
       room = await chatProvider.getRoom(args.activityId, args.peerId);
       currentUser = await authProvider.currentUser;
       _tagName =
           (await activityProvider.getTag(args.activityId, room.tag)).tagName;
-      chatProvider.agreeShareSocialMedia(
-          args.activityId, args.peerId); // todo 假裝同意
       initial = true;
     }
   }
@@ -475,7 +492,7 @@ class _ChatPageState extends State<ChatPage> {
                                   Expanded(
                                     flex: 2,
                                     child: FutureBuilder(
-                                        future: _socialMedialMemoization.runOnce(_getPeerSocialMedia),
+                                        future: _getPeerSocialMedia(),
                                         builder: (context, snapshot) {
                                           if (snapshot.connectionState ==
                                               ConnectionState.waiting) {
@@ -748,7 +765,7 @@ class _ChatPageState extends State<ChatPage> {
                                   color: Theme.of(context)
                                       .colorScheme
                                       .primary
-                                      .withOpacity(0.8),
+                                      .withOpacity(0.7),
                                   borderRadius: const BorderRadius.all(
                                       Radius.circular(16)),
                                   boxShadow: [
@@ -917,7 +934,8 @@ class _ChatPageState extends State<ChatPage> {
                               ),
                               Input(
                                 onSendPressed: onSendMessage,
-                                callback: updateHeight,
+                                nextTopic: updateHeight,
+                                enableSocialMedia: enableSocialMedia,
                               )
                             ],
                           ),

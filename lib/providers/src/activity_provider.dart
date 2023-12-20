@@ -291,7 +291,7 @@ class ActivityProvider {
   }
 
   /// 用標籤取得話題
-  Future<List<Topic>> getTopicByTag(String activityId, String tagId) async {
+  Future<List<Topic>> getTopicsByTag(String activityId, String tagId) async {
     final topicQuery = db
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityId)

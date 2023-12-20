@@ -47,15 +47,18 @@ enum QueueConstants {
 
 enum RoomConstants {
   users,
-  tag,
+  tagId,
+  topicId,
   isEnable;
 
   String get value {
     switch (this) {
       case RoomConstants.users:
         return "userIds";
-      case RoomConstants.tag:
-        return "tag";
+      case RoomConstants.tagId:
+        return "tagId";
+      case RoomConstants.topicId:
+        return "topicId";
       case RoomConstants.isEnable:
         return "isEnable";
       default:

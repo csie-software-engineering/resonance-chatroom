@@ -17,7 +17,6 @@ import '../../widgets/src/activity_card/activity_card.dart';
 import '../../widgets/src/activity_buttons/animated_buttons.dart';
 
 class UserActivityMainPageArguments {
-  // todo
   // final ;
   final String activityId;
 
@@ -261,7 +260,6 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
   }
 
   Future<void> _initActivityContent() async {
-    // todo
     // set _description
     // set _appBarTitle
     // set _currentUser

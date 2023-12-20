@@ -38,6 +38,7 @@ class _ChatPageState extends State<ChatPage> {
   late final Room room;
   late final String _tagName;
   late bool _isEnableSocialMedial = false;
+  late final Map<String, String> _allTopics;
 
   late final ChatProvider chatProvider = context.read<ChatProvider>();
   late final AuthProvider authProvider = context.read<AuthProvider>();
@@ -57,13 +58,14 @@ class _ChatPageState extends State<ChatPage> {
   int _limit = 20;
   int _limitIncrement = 20;
   double _height = 0;
+  String _currentTopic = "";
 
   bool isOn = true;
   bool isLoading = false;
   bool isShowSticker = false;
-  bool _showTopic = false;
   bool initial = false;
   bool _isAlreadyReport = false;
+  bool _enableShowTopic = true;
 
   List<QueryDocumentSnapshot> _chatMessages = [];
 
@@ -94,81 +96,25 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
-  Widget? _subTitle() {
-    if (!_showTopic) {
-      return AnimatedContainer(
-        duration: const Duration(milliseconds: 500),
-        color: Theme.of(context).colorScheme.inversePrimary,
-        child: AnimatedOpacity(
-          opacity: 0,
-          duration: const Duration(milliseconds: 1000),
-        ),
-      );
+  // Widget? _subTitle() {
+  //
+  // }
+
+  Future<void> nextTopic() async {
+    var room =
+        await chatProvider.updateRandomTopic(args.activityId, args.peerId);
+  }
+
+  Future<void> enableSocialMedia() async {
+    // 我覺得可以直接寫在 input 那邊
+    if (_isEnableSocialMedial) {
+      Fluttertoast.showToast(msg: "已分享");
     } else {
-      return AnimatedContainer(
-        curve: Curves.easeIn,
-        duration: const Duration(milliseconds: 500),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.inversePrimary,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              spreadRadius: 2,
-              blurRadius: 2,
-              offset: const Offset(0, 5), // 阴影位置，可以调整阴影的方向
-            ),
-          ],
-        ),
-        child: AnimatedOpacity(
-          opacity: 1,
-          duration: const Duration(milliseconds: 1000),
-          child: Stack(
-            alignment: Alignment.centerRight,
-            children: [
-              Center(
-                child: Text(
-                  "人工智慧在醫療的發展？",
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: Theme.of(context).colorScheme.secondary,
-                    fontWeight: FontWeight.w300,
-                  ),
-                ),
-              ),
-              IconButton(
-                  onPressed: () {
-                    setState(() {
-                      _height = 0;
-                      _showTopic = false;
-                    });
-                  },
-                  icon: Icon(
-                    Icons.arrow_drop_up_outlined,
-                    size: 30,
-                    color: Theme.of(context).colorScheme.secondary,
-                  )),
-            ],
-          ),
-        ),
-      );
-    }
-  }
-
-  void updateHeight() {
-    setState(() {
-      _height = 50;
-      _showTopic = true;
-    });
-  }
-
-  Future<void> enableSocialMedia() async { // 我覺得可以直接寫在 input 那邊
-    if(_isEnableSocialMedial) {
-        Fluttertoast.showToast(msg: "已分享");
-      }else{
       _isEnableSocialMedial = true;
-      try{
+      try {
         await chatProvider.agreeShareSocialMedia(args.activityId, args.peerId);
-      } catch (e){ // todo 應該要抓對應錯誤
+      } catch (e) {
+        // todo 應該要抓對應錯誤
         debugPrint("$e");
       }
     }
@@ -176,10 +122,11 @@ class _ChatPageState extends State<ChatPage> {
 
   Future<List<UserSocialMedia>?> _getPeerSocialMedia() async {
     List<UserSocialMedia>? peerSocialMedia;
-    try{
-      peerSocialMedia = await chatProvider.getOtherSocialMedium(
-          args.activityId, args.peerId);
-    }catch (e){ // todo 應該要抓對應錯誤，如果是這樣代表對方沒有同意
+    try {
+      peerSocialMedia =
+          await chatProvider.getOtherSocialMedium(args.activityId, args.peerId);
+    } catch (e) {
+      // todo 應該要抓對應錯誤，如果是這樣代表對方沒有同意
       peerSocialMedia = null;
     } finally {
       return peerSocialMedia;
@@ -204,13 +151,24 @@ class _ChatPageState extends State<ChatPage> {
   void _init() async {
     if (!initial) {
       // await chatProvider.disagreeShareSocialMedia(args.activityId, args.peerId);
-      _isEnableSocialMedial = await chatProvider.getIsAgreeShareSocialMedia(args.activityId, args.peerId);
+      _isEnableSocialMedial = await chatProvider.getIsAgreeShareSocialMedia(
+          args.activityId, args.peerId);
       peerUser = await userProvider.getUser(
           userId: args.peerId); // todo 我可以直接載入對方的 social media?
       room = await chatProvider.getRoom(args.activityId, args.peerId);
       currentUser = await authProvider.currentUser;
       _tagName =
-          (await activityProvider.getTag(args.activityId, room.tag)).tagName;
+          (await activityProvider.getTag(args.activityId, room.tagId)).tagName;
+      List<Topic> topics =
+          await activityProvider.getTopicsByTag(args.activityId, room.tagId);
+      _allTopics = <String, String>{};
+      topics.forEach((element) {
+        _allTopics[element.uid] = element.topicName;
+      });
+      _currentTopic = _allTopics[room.topicId] ?? "";
+      if (_currentTopic == "") {
+        _enableShowTopic = false;
+      }
       initial = true;
     }
   }
@@ -407,8 +365,10 @@ class _ChatPageState extends State<ChatPage> {
                                                                     onPressed:
                                                                         () {
                                                                       chatProvider.report(
-                                                                          args.activityId,
-                                                                          args.peerId,
+                                                                          args
+                                                                              .activityId,
+                                                                          args
+                                                                              .peerId,
                                                                           "惡意言論",
                                                                           reportTextController
                                                                               .text);
@@ -416,7 +376,8 @@ class _ChatPageState extends State<ChatPage> {
                                                                           .clear();
                                                                       setState(
                                                                           () {
-                                                                            _isAlreadyReport = true;
+                                                                        _isAlreadyReport =
+                                                                            true;
                                                                         Navigator.of(context)
                                                                             .pop();
                                                                       }); // 关闭对话框
@@ -739,7 +700,10 @@ class _ChatPageState extends State<ChatPage> {
                   Container(
                     height: kToolbarHeight,
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surface.withOpacity(0.9),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .surface
+                          .withOpacity(0.9),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withOpacity(0.2),
@@ -762,21 +726,23 @@ class _ChatPageState extends State<ChatPage> {
                             child: Center(
                               child: Container(
                                 decoration: BoxDecoration(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .primary
-                                      .withOpacity(0.7),
-                                  borderRadius: const BorderRadius.all(
-                                      Radius.circular(16)),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.2),
-                                      offset: const Offset(2, 2),
-                                      blurRadius: 2,
-                                      spreadRadius: 1,
-                                    )
-                                  ]
-                                ),
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .primary
+                                        .withOpacity(0.7),
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(16)),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurface
+                                            .withOpacity(0.2),
+                                        offset: const Offset(2, 2),
+                                        blurRadius: 2,
+                                        spreadRadius: 1,
+                                      )
+                                    ]),
                                 padding: const EdgeInsets.symmetric(
                                     vertical: 3, horizontal: 20.0),
                                 child: Text(_tagName,
@@ -825,34 +791,146 @@ class _ChatPageState extends State<ChatPage> {
                         ),
                         Align(
                           alignment: Alignment.centerRight,
-                          child: Container(
-                            child: IconButton(
-                              padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
-                              icon: Icon(isOn
-                                  ? Icons.lightbulb
-                                  : Icons.lightbulb_outline),
-                              color: isOn ? Colors.amber : Colors.white,
-                              onPressed: () {
-                                setState(() {
-                                  isOn = !isOn;
-                                });
-                              },
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 20),
+                            child: Container(
+                              height: 40,
+                              width: 40,
+                              decoration: BoxDecoration(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withOpacity(0.7),
+                                borderRadius: BorderRadius.circular(15),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurface
+                                        .withOpacity(0.2),
+                                    offset: const Offset(2, 2),
+                                    blurRadius: 2,
+                                    spreadRadius: 1,
+                                  )
+                                ],
+                              ),
+                              child: IconButton(
+                                iconSize: 25,
+                                icon: Icon(isOn
+                                    ? Icons.lightbulb
+                                    : Icons.lightbulb_outline),
+                                color: isOn
+                                    ? Colors.amber
+                                    : Theme.of(context).colorScheme.onSurface,
+                                onPressed: () {
+                                  setState(() {
+                                    isOn = !isOn;
+                                  });
+                                },
+                              ),
                             ),
                           ),
                         )
                       ],
                     ),
                   ),
-                  AnimatedContainer(
-                    duration: Duration(milliseconds: 1000),
-                    curve: Curves.easeOutQuint,
-                    height: _height,
-                    width: MediaQuery.of(context).size.width,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surface,
-                    ),
-                    child: _subTitle(),
-                  ),
+                  StreamBuilder<DocumentSnapshot>(
+                      stream: chatProvider.getRoomStream(
+                          args.activityId, args.peerId),
+                      builder: (BuildContext context,
+                          AsyncSnapshot<DocumentSnapshot> snapshot) {
+                        Map<String, dynamic>? room =
+                            snapshot.data?.data() as Map<String, dynamic>;
+                        if (room.isNotEmpty &&
+                            _allTopics[room["topicId"]] != _currentTopic) {
+                          _enableShowTopic = true;
+                          _currentTopic = _allTopics[room["topicId"]]!;
+                          _height = 50;
+                        } else {
+                          if (_enableShowTopic) {
+                            _height = 50;
+                          } else {
+                            _height = 20;
+                          }
+                        }
+                        return GestureDetector(
+                          onTap: () {
+                            if (!_enableShowTopic) {
+                              setState(() {
+                                _enableShowTopic = true;
+                              });
+                            }
+                          },
+                          child: AnimatedContainer(
+                            curve: Curves.easeIn,
+                            height: _height,
+                            duration: const Duration(milliseconds: 500),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onInverseSurface,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  spreadRadius: 2,
+                                  blurRadius: 2,
+                                  offset: const Offset(0, 5), // 阴影位置，可以调整阴影的方向
+                                ),
+                              ],
+                            ),
+                            child: AnimatedOpacity(
+                              opacity: 1,
+                              duration: const Duration(milliseconds: 1000),
+                              child: Stack(
+                                children: [
+                                  Center(
+                                    child: AnimatedSwitcher(
+                                      duration: Duration(milliseconds: 500),
+                                      child: Text(
+                                        key: UniqueKey(),
+                                        _enableShowTopic ? _currentTopic : "",
+                                        style: TextStyle(
+                                          fontSize: 20,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .secondary,
+                                          fontWeight: FontWeight.w300,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  Align(
+                                    alignment: _enableShowTopic
+                                        ? Alignment.centerRight
+                                        : Alignment.center,
+                                    child: _enableShowTopic
+                                        ? IconButton(
+                                            onPressed: () {
+                                              setState(() {
+                                                _enableShowTopic = false;
+                                              });
+                                            },
+                                            icon: Icon(
+                                              Icons.arrow_drop_up_outlined,
+                                              size: 30,
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .secondary,
+                                            ))
+                                        : Icon(
+                                            Icons.arrow_drop_down_outlined,
+                                            size: 20,
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .secondary,
+                                          ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      }),
                   Expanded(
                     child: Stack(
                       children: [
@@ -934,7 +1012,7 @@ class _ChatPageState extends State<ChatPage> {
                               ),
                               Input(
                                 onSendPressed: onSendMessage,
-                                nextTopic: updateHeight,
+                                nextTopic: nextTopic,
                                 enableSocialMedia: enableSocialMedia,
                               )
                             ],

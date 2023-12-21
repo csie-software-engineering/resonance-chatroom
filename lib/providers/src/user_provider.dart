@@ -466,6 +466,38 @@ class UserProvider {
     return activities;
   }
 
+  /// 取得使用者尚未參加的活動資料(僅能取得自己的資料)
+  Future<List<Activity>> getUserNotJoinedActivities({
+    bool? outdated,
+  }) async {
+    final userId = AuthProvider().currentUserId;
+    final userRef = db
+        .collection(FireStoreUserConstants.userCollectionPath.value)
+        .doc(userId);
+    final userActivitiesData = await userRef
+        .collection(FireStoreUserConstants.userJoinedActivityCollectionPath.value)
+        .get();
+
+    final allActivities = await ActivityProvider().getAllActivities();
+    var activities = allActivities
+        .where((aa) => !userActivitiesData.docs
+            .map((e) => FSUserActivity.fromDocument(e).toUserActivity().uid)
+            .contains(aa.uid))
+        .toList();
+
+    if (outdated != null) {
+      return outdated
+          ? activities
+              .where((a) => a.endDate.toEpochTime().isBefore(DateTime.now()))
+              .toList()
+          : activities
+              .where((a) => a.endDate.toEpochTime().isAfter(DateTime.now()))
+              .toList();
+    }
+
+    return activities;
+  }
+
   ///取得使用者活動點數(僅能取得自己的資料)
   Future<int> getUserActivityPoint(String activityId) async{
     final activity = await getUserActivity(activityId);

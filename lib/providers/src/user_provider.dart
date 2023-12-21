@@ -452,4 +452,25 @@ class UserProvider {
 
     return activities;
   }
+
+  ///取得使用者活動點數(僅能取得自己的資料)
+  Future<int> getUserActivityPoint(String activityId) async{
+    final activity = await getUserActivity(activityId);
+    return activity.point;
+  }
+
+  ///增加使用者活動點數
+  Future<void> addUserActivityPoint(String activityId) async{
+    final activity = await getUserActivity(activityId);
+    activity.point++;
+    await updateUserActivity(activity);
+  }
+
+  ///扣除使用者活動點數
+  Future<void> minusUserActivityPoint(String activityId, int val) async{
+    final activity = await getUserActivity(activityId);
+    assert(activity.point >= val, "使用者沒有足夠多的點數");
+    activity.point -= val;
+    await updateUserActivity(activity);
+  }
 }

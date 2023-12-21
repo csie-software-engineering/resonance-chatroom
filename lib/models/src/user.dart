@@ -56,11 +56,13 @@ extension UserSocialMediaExtension on UserSocialMedia {
 
 class UserActivity {
   final String uid;
+  int point;
   final bool isManager;
   List<String> tagIds;
 
   UserActivity({
     required this.uid,
+    this.point = 0,
     required this.isManager,
     this.tagIds = const [],
   });
@@ -72,6 +74,7 @@ class UserActivity {
 extension UserActivityExtension on UserActivity {
   FSUserActivity toFSUserActivity() => FSUserActivity(
         uid: uid,
+        point: point,
         isManager: isManager,
         tagIds: tagIds,
       );

@@ -468,6 +468,7 @@ class UserProvider {
 
   ///扣除使用者活動點數
   Future<void> minusUserActivityPoint(String activityId, int val) async{
+    assert(val > 0, "不能扣除小於1的值");
     final activity = await getUserActivity(activityId);
     assert(activity.point >= val, "使用者沒有足夠多的點數");
     activity.point -= val;

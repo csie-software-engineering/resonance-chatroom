@@ -25,7 +25,7 @@ class WelcomePage extends StatelessWidget {
               ),
               SizedBox(height: MediaQuery.of(context).size.height * 0.03),
               Text(
-                '一個讓你認識新朋友的地方',
+                '一個讓你認識同好的地方',
                 style: TextStyle(
                   fontSize: 16,
                   color: Theme.of(context).colorScheme.secondary,

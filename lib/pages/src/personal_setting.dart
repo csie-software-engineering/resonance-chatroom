@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:resonance_chatroom/pages/routes.dart';
-import 'package:resonance_chatroom/providers/providers.dart';
-import 'package:resonance_chatroom/widgets/widgets.dart';
 
 import '../../models/models.dart';
+import '../../pages/routes.dart';
+import '../../providers/providers.dart';
 
 class PersonalSettingArguments {
   final bool isHost;

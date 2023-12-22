@@ -17,7 +17,6 @@ import '../../widgets/src/activity_card/activity_card.dart';
 import '../../widgets/src/activity_buttons/animated_buttons.dart';
 
 class UserActivityMainPageArguments {
-  // todo
   // final ;
   final String activityId;
 
@@ -86,32 +85,50 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
       if (await chatProvider.isWaiting(args.activityId)) {
         await Future.delayed(const Duration(seconds: 1));
       } else {
-        var peerId = await chatProvider.getChatToUserId(args.activityId);
-        debugPrint("peerId:${peerId ?? "no"}, currentId:${_currentUser.uid}");
-        return peerId;
+        if (startMatching) {
+          var peerId = await chatProvider.getChatToUserId(args.activityId);
+          debugPrint("peerId:${peerId ?? "no"}, currentId:${_currentUser.uid}");
+          return peerId;
+        } else {
+          return null; // 退出
+        }
       }
     }
   }
 
   void matching() async {
     if (startMatching) {
-      await chatProvider.cancelWaiting(args.activityId);
       setState(() {
-        startMatching = false;
         _height = 0;
         timeShowUp = 0;
-        _timer?.cancel();
+        _enableMatch = false;
+        startMatching = false;
+      });
+      await chatProvider.cancelWaiting(args.activityId);
+      Future.delayed(Duration(seconds: 1), () {
+        setState(() {
+          _enableMatch = true;
+          _timer?.cancel();
+        });
       });
     } else {
       setState(() {
-        startMatching = true;
-        _height = 20;
         _timer = Timer.periodic(const Duration(seconds: 1), _onTimerTick);
+        _height = 20;
+        _enableMatch = false;
       });
-
-      var peerId = await chatProvider.getChatToUserId(args.activityId);
+      String? peerId;
+      try {
+        peerId = await chatProvider.getChatToUserId(args.activityId);
+      } catch (e) {
+        debugPrint("$e"); // todo 暫時抓全部
+      }
 
       if (peerId == null) {
+        setState(() {
+          _enableMatch = true;
+          startMatching = true;
+        });
         // 在等待
         peerId = await _matchingChecker();
         if (peerId != null) {
@@ -119,6 +136,7 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
         }
         // peerId == null, 代表我可能主動退出了
       } else {
+        _enableMatch = true;
         _getIntRoom(peerId);
       }
     }
@@ -126,6 +144,7 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
 
   void _getIntRoom(peerId) async {
     startMatching = false;
+    timeShowUp = 0;
     _timer?.cancel();
     setState(() {
       _height = 0;
@@ -241,7 +260,6 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
   }
 
   Future<void> _initActivityContent() async {
-    // todo
     // set _description
     // set _appBarTitle
     // set _currentUser

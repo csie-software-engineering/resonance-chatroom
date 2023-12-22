@@ -296,7 +296,7 @@ class AnimatedButtonsState extends State<AnimatedButtons>
                                     Container(
                                       height: 230,
                                       width: width,
-                                      child: Tags(
+                                      child: TagsWidget(
                                           tagList: widget.currentActivityTags,
                                           tagSelectedTmp: _tagTmp),
                                     )

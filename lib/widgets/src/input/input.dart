@@ -10,7 +10,7 @@ class Input extends StatefulWidget {
   const Input({
     super.key,
     this.onAttachmentPressed,
-    required this.onSendPressed, required this.callback,
+    required this.onSendPressed, required this.nextTopic, required this.enableSocialMedia,
   });
 
   final void Function(String, MessageType) onSendPressed; // 暫時先用 string 塞著
@@ -22,7 +22,8 @@ class Input extends StatefulWidget {
 
   // final bool? isAttachmentUploading;
 
-  final Function() callback;
+  final Function() nextTopic;
+  final Function() enableSocialMedia;
 
   /// See [AttachmentButton.onPressed].
   final VoidCallback? onAttachmentPressed;
@@ -60,6 +61,7 @@ class _InputState extends State<Input> {
   );
 
   bool _sendButtonVisible = false;
+  bool _isFocus = false;
   late TextEditingController _textController;
 
   @override
@@ -113,36 +115,55 @@ class _InputState extends State<Input> {
       query.padding.right,
       query.viewInsets.bottom + query.padding.bottom,
     ); // isMobile
-    const textPadding = EdgeInsets.fromLTRB(0, 20, 0, 20);
+    const textPadding = EdgeInsets.fromLTRB(20, 20, 0, 20);
 
     return Focus(
-      autofocus: !widget.options.autofocus,
+      onFocusChange: (hasFocus){
+        setState(() {
+          _isFocus = hasFocus;
+        });
+      },
+      // autofocus: !widget.options.autofocus,
       child: Padding(
         padding: EdgeInsets.zero,
         child: Material(
           borderRadius: const BorderRadius.vertical(
             top: Radius.circular(20),
           ),
-          color: Theme.of(context).colorScheme.surface,
+          color: Theme.of(context).colorScheme.surface.withOpacity(0.9),
           surfaceTintColor: Theme.of(context).colorScheme.onPrimary,
-          elevation: 0,
+          elevation: 10,
           child: Container(
             padding: safeAreaInsets,
             child: Row(
               textDirection: TextDirection.ltr,
               children: [
-                IconButton(
+                !_isFocus ? Padding(
+                  padding: const EdgeInsets.only(left: 15),
+                  child: IconButton(
+                    // Next
+                    color: Theme.of(context).colorScheme.primary.withOpacity(0.8),
+                    icon: const Icon(Icons.next_plan),
+                    tooltip: "換話題",
+                    onPressed: () {
+                      widget.nextTopic();
+                    },
+                    iconSize: 30,
+                    splashRadius: 1,
+                  ),
+                ) : const SizedBox(),
+                !_isFocus ? IconButton(
                   // Next
-                  color: Theme.of(context).colorScheme.primary,
-                  icon: const Icon(Icons.next_plan),
-                  tooltip: "換話題",
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
+                  icon: const Icon(Icons.add_circle_rounded),
+                  tooltip: "同意分享社群媒體",
                   onPressed: () {
-                    widget.callback();
+                    widget.enableSocialMedia();
                   },
                   iconSize: 30,
                   splashRadius: 1,
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
-                ),
+                  padding: const EdgeInsets.only(left: 10, right: 0),
+                ) : const SizedBox(),
                 Expanded(
                   child: Padding(
                     padding: textPadding,
@@ -154,10 +175,10 @@ class _InputState extends State<Input> {
                         autofocus: widget.options.autofocus,
                         enableSuggestions: widget.options.enableSuggestions,
                         controller: _textController,
-                        cursorColor: Theme.of(context).colorScheme.primary,
+                        cursorColor: Theme.of(context).colorScheme.primary.withOpacity(0.9),
                         decoration: InputDecoration(
                           filled: true,
-                          fillColor: Theme.of(context).colorScheme.secondary.withOpacity(0.2),
+                          fillColor: Theme.of(context).colorScheme.secondary.withOpacity(0.1),
                           border: InputBorder.none,
                           hintStyle: TextStyle(
                             fontSize: 16,
@@ -180,7 +201,7 @@ class _InputState extends State<Input> {
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
                           height: 1.5,
-                          color: Theme.of(context).colorScheme.primary,
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                         textCapitalization: TextCapitalization.sentences,
                       ),

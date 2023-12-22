@@ -44,18 +44,18 @@ class Event {
 //   Tag.construct(this.tagdata) {}
 // }
 
-class Topic {
-  late String topicdata;
-  late String questiondata;
-  late List<String> choices;
-  Topic(this.topicdata, this.questiondata, this.choices);
-  // 使用一個無參數的建構式，並指派預設值給屬性
-  Topic.empty() {
-    topicdata = "";
-    questiondata = "";
-    choices = [];
-  }
-}
+// class Topic {
+//   late String topicdata;
+//   late String questiondata;
+//   late List<String> choices;
+//   Topic(this.topicdata, this.questiondata, this.choices);
+//   // 使用一個無參數的建構式，並指派預設值給屬性
+//   Topic.empty() {
+//     topicdata = "";
+//     questiondata = "";
+//     choices = [];
+//   }
+// }
 
 class HostActivitySetPage extends StatefulWidget {
   const HostActivitySetPage({Key? key}) : super(key: key);

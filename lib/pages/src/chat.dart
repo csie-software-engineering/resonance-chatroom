@@ -166,7 +166,7 @@ class _ChatPageState extends State<ChatPage> {
     listScrollController.addListener(_scrollListener);
   }
 
-  void _init() async {
+  Future<void> _init() async {
     if (!initial) {
       // await chatProvider.disagreeShareSocialMedia(args.activityId, args.peerId);
       _isEnableSocialMedial = await chatProvider.getIsAgreeShareSocialMedia(
@@ -177,6 +177,7 @@ class _ChatPageState extends State<ChatPage> {
       currentUser = await authProvider.currentUser;
       _tagName =
           (await activityProvider.getTag(args.activityId, room.tagId)).tagName;
+      debugPrint("tagName:$_tagName");
       List<Topic> topics =
           await activityProvider.getTopicsByTag(args.activityId, room.tagId);
       _allTopics = <String, String>{};
@@ -189,6 +190,7 @@ class _ChatPageState extends State<ChatPage> {
       }
       initial = true;
     }
+    debugPrint("init_over");
   }
 
   _scrollListener() {
@@ -711,6 +713,7 @@ class _ChatPageState extends State<ChatPage> {
             // 如果 Future 發生錯誤，返回錯誤 UI
             return Text('Error: ${snapshot.error}');
           } else {
+            debugPrint("alltopics:${_allTopics.length}");
             return Scaffold(
               body: Column(
                 children: [
@@ -851,11 +854,9 @@ class _ChatPageState extends State<ChatPage> {
                                     setState(() {
                                       isOn = false;
                                     });
-                                    debugPrint("build1");
                                     showDialog(
                                         context: context,
                                         builder: (BuildContext context) {
-                                          debugPrint("build2");
                                           _questionAnswers = List.generate(
                                               _currentQuestion!.choices.length,
                                               (index) => false);
@@ -875,13 +876,16 @@ class _ChatPageState extends State<ChatPage> {
                                                 onPressed: () async {
                                                   Navigator.of(context).pop();
                                                   // todo 不知道 choice 要傳什麼
-                                                  String choice = "";
-                                                  _questionAnswers!.map((boolValue){
-                                                    choice += boolValue.toString();
-                                                  });
+                                                  String? choice = "";
+
+                                                  for(int i = 0; i < _questionAnswers!.length; i++){
+                                                    if(_questionAnswers![i]) choice = _currentQuestion!.choices[i];
+                                                  }
+
                                                   // todo 抓錯誤
                                                   try {
-                                                    await questionProvider.userAnswer(args.activityId, _currentQuestion!.uid, choice);
+                                                    debugPrint("choice: ${choice}");
+                                                    await questionProvider.userAnswer(args.activityId, _currentQuestion!.uid, choice!);
                                                   }
                                                   catch (e) {
                                                     debugPrint("answerQuesitonError:$e");
@@ -907,7 +911,8 @@ class _ChatPageState extends State<ChatPage> {
                       ],
                     ),
                   ),
-                  StreamBuilder<DocumentSnapshot>(
+                  _allTopics.isEmpty ? const SizedBox()
+                      : StreamBuilder<DocumentSnapshot>(
                       stream: chatProvider.getRoomStream(
                           args.activityId, args.peerId),
                       builder: (BuildContext context,

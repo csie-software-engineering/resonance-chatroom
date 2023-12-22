@@ -4,6 +4,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:resonance_chatroom/pages/routes.dart';
+import 'package:resonance_chatroom/pages/src/user_activity_main_page.dart';
 import 'package:resonance_chatroom/utils/src/time.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
@@ -324,10 +325,7 @@ class RoomCard extends StatelessWidget {
     return InkWell(
       onTap: () {
         // todo
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(),
-        // );
+        Navigator.of(context).pushNamed(UserActivityMainPage.routeName, arguments: UserActivityMainPageArguments(activityId: activityId));
       },
       child: Card(
         elevation: 4.0,

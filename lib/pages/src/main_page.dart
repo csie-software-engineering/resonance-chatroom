@@ -3,13 +3,11 @@ import 'dart:convert';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:resonance_chatroom/pages/routes.dart';
-import 'package:resonance_chatroom/pages/src/user_activity_main_page.dart';
-import 'package:resonance_chatroom/utils/src/time.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
 
-import '../../providers/providers.dart';
 import '../../models/models.dart';
+import '../../providers/providers.dart';
+import '../../utils/utils.dart';
+import '../routes.dart';
 
 class MainPageArguments {
   final bool isHost;
@@ -134,49 +132,6 @@ class _MainPageState extends State<MainPage> {
       },
     );
   }
-
-  // void _showProfileDialog(BuildContext context, User user) {
-  //   showDialog(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return AlertDialog(
-  //         title: const Text(
-  //           '使用者資訊',
-  //           textAlign: TextAlign.center,
-  //         ),
-  //         content: Column(
-  //           mainAxisAlignment: MainAxisAlignment.center,
-  //           mainAxisSize: MainAxisSize.min,
-  //           children: [
-  //             CircleAvatar(
-  //               foregroundImage:
-  //                   user.photoUrl != null ? NetworkImage(user.photoUrl!) : null,
-  //               backgroundImage: const AssetImage('lib/assets/user.png'),
-  //               radius: MediaQuery.of(context).size.width * 0.1,
-  //             ),
-  //             SizedBox(height: MediaQuery.of(context).size.height * 0.01),
-  //             Text(
-  //               'NickName : ${user.displayName}',
-  //               textAlign: TextAlign.center,
-  //             ),
-  //             SizedBox(height: MediaQuery.of(context).size.height * 0.01),
-  //             Text(
-  //               'Email : ${user.email}',
-  //               textAlign: TextAlign.center,
-  //             ),
-  //             SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-  //             ElevatedButton(
-  //               onPressed: () {
-  //                 Navigator.of(context).pop();
-  //               },
-  //               child: const Text('關閉'),
-  //             ),
-  //           ],
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
 
   void _joinActivity(BuildContext context, User user) {
     showDialog(
@@ -381,77 +336,3 @@ class RoomCard extends StatelessWidget {
     );
   }
 }
-
-// class RoomDetailsScreen extends StatelessWidget {
-//   final String roomName;
-
-//   const RoomDetailsScreen({super.key, required this.roomName});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text(
-//           roomName,
-//           style: const TextStyle(
-//             fontSize: 24.0,
-//             fontWeight: FontWeight.bold,
-//             letterSpacing: 1.2,
-//             color: Colors.white,
-//           ),
-//         ),
-//         centerTitle: true,
-//         backgroundColor: const Color(0xFF6BC1FF),
-//       ),
-//       body: const ChatRoom(),
-//     );
-//   }
-// }
-
-// class ChatRoom extends StatelessWidget {
-//   const ChatRoom({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return const Center(
-//       child: Text(
-//         'Your chat room goes here.',
-//         style: TextStyle(
-//           color: Colors.white,
-//         ),
-//       ),
-//     );
-//   }
-// }
-
-// class SettingsScreen extends StatelessWidget {
-//   const SettingsScreen({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: const Text(
-//           '設置',
-//           style: TextStyle(
-//             fontSize: 24.0,
-//             fontWeight: FontWeight.bold,
-//             letterSpacing: 1.2,
-//             color: Colors.white,
-//           ),
-//         ),
-//         centerTitle: true,
-//         backgroundColor: Colors.amber,
-//       ),
-//       body: const Center(
-//         child: Text(
-//           '這是設置頁面',
-//           style: TextStyle(
-//             fontSize: 20.0,
-//             color: Colors.black,
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }

@@ -129,7 +129,7 @@ class _ChatPageState extends State<ChatPage> {
     // todo 抓錯誤
     try{
       _currentQuestion =
-      await activityProvider.getQuestion(args.activityId, _previousTopicId);
+      await activityProvider.getQuestionByTopic(args.activityId, _previousTopicId);
       setState(() {
         isOn = true;
       });

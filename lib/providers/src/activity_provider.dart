@@ -393,7 +393,7 @@ class ActivityProvider {
   }
 
   /// 修改問卷題目(若活動已經開始，則不可修改)
-  Future<Question> editQuestion(
+  Future<void> editQuestion(
       String activityId,
       String questionId,
       Question questionData,
@@ -416,8 +416,6 @@ class ActivityProvider {
     await questionDoc.update({
       QuestionConstants.questionName.value: questionData.questionName,
       QuestionConstants.choices.value: questionData.choices});
-
-    return await getQuestion(activityId, questionId);
   }
 
   /// 用問券ID取得問卷

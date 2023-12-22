@@ -9,11 +9,10 @@ class WelcomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+        backgroundColor: Theme.of(context).colorScheme.background,
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
                 '共鳴聚會',

@@ -44,7 +44,7 @@ class _MainPageState extends State<MainPage> {
           appBar: AppBar(
               toolbarHeight: MediaQuery.of(context).size.height * 0.1,
               title: Text(
-                args.isHost ? '主辦的活動' : '參加的活動',
+                args.isHost ? '舉辦的活動' : '參加的活動',
                 style: TextStyle(
                   fontSize: 28.0,
                   fontWeight: FontWeight.bold,
@@ -75,48 +75,51 @@ class _MainPageState extends State<MainPage> {
                   ),
                 ),
               )),
-          body: FutureBuilder<List<UserActivity>>(
-            future: context
-                .read<UserProvider>()
-                .getUserActivities(isManager: args.isHost),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              if (snapshot.hasError) {
-                return Text('Error: ${snapshot.error}');
-              }
-              final userActivities = snapshot.requireData;
-              return userActivities.isNotEmpty
-                  ? CarouselSlider.builder(
-                      itemCount: userActivities.length,
-                      options: CarouselOptions(
-                        height: double.infinity,
-                        enlargeCenterPage: true,
-                        enableInfiniteScroll: true,
-                        initialPage: 0,
-                        viewportFraction: 0.8,
-                      ),
-                      itemBuilder: (context, index, realIndex) {
-                        int currentUsers = index * 10;
-                        return RoomCard(
-                          activityId: userActivities[index].uid,
-                          currentUsers: currentUsers,
-                        );
-                      },
-                    )
-                  : Center(
-                      child: Text(
-                        '目前沒有活動',
-                        style: TextStyle(
-                          fontSize: 24.0,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1.2,
-                          color: Theme.of(context).colorScheme.primary,
+          body: Container(
+            color: Theme.of(context).colorScheme.background,
+            child: FutureBuilder<List<UserActivity>>(
+              future: context
+                  .read<UserProvider>()
+                  .getUserActivities(isManager: args.isHost),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                }
+                final userActivities = snapshot.requireData;
+                return userActivities.isNotEmpty
+                    ? CarouselSlider.builder(
+                        itemCount: userActivities.length,
+                        options: CarouselOptions(
+                          height: double.infinity,
+                          enlargeCenterPage: true,
+                          enableInfiniteScroll: true,
+                          initialPage: 0,
+                          viewportFraction: 0.8,
                         ),
-                      ),
-                    );
-            },
+                        itemBuilder: (context, index, realIndex) {
+                          int currentUsers = index * 10;
+                          return RoomCard(
+                            activityId: userActivities[index].uid,
+                            currentUsers: currentUsers,
+                          );
+                        },
+                      )
+                    : Center(
+                        child: Text(
+                          '目前沒有${args.isHost ? '舉辦' : '參加'}活動',
+                          style: TextStyle(
+                            fontSize: 24.0,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.2,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                      );
+              },
+            ),
           ),
           floatingActionButton: FloatingActionButton(
             onPressed: () {

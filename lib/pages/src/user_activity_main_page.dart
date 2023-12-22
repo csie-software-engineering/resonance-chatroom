@@ -120,7 +120,7 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
       } catch (e) {
         debugPrint("$e"); // todo 暫時抓全部
       }
-
+      debugPrint("peerId1:${peerId}");
       if (peerId == null) {
         setState(() {
           _enableMatch = true;
@@ -128,6 +128,7 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
         });
         // 在等待
         peerId = await _matchingChecker();
+        debugPrint("peerID2:${peerId}");
         if (peerId != null) {
           _getIntRoom(peerId);
         }

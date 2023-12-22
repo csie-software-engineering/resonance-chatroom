@@ -4,6 +4,7 @@ import 'package:resonance_chatroom/utils/src/time.dart';
 import '../../constants/constants.dart';
 import '../../models/models.dart';
 import '../../providers/providers.dart';
+import '../../models/src/firestore/fs_user.dart';
 
 class UserProvider {
   final FirebaseFirestore db;
@@ -55,7 +56,7 @@ class UserProvider {
     return await getUser(
       userId: user.uid,
       loadSocial: addSocial,
-      loadActivity: addActivity,
+      loadActivityWithHosted: addActivity,
     );
   }
 
@@ -95,16 +96,17 @@ class UserProvider {
 
     assert((await userRef.get()).exists, "使用者不存在");
 
-    final activityRef = userRef
-        .collection(FireStoreUserConstants.userActivityCollectionPath.value)
-        .doc(activity.uid);
+    final collection = activity.isManager
+        ? FireStoreUserConstants.userHostedActivityCollectionPath.value
+        : FireStoreUserConstants.userJoinedActivityCollectionPath.value;
+    final activityRef = userRef.collection(collection).doc(activity.uid);
 
     final fsUserActivity = activity.toFSUserActivity();
     transaction != null
         ? transaction.set(activityRef, fsUserActivity.toJson())
         : await activityRef.set(fsUserActivity.toJson());
 
-    return await getUserActivity(activity.uid);
+    return await getUserActivity(activity.uid, isManager: activity.isManager);
   }
 
   /// 刪除(停用)使用者資料(僅能停用自己的資料)
@@ -141,7 +143,10 @@ class UserProvider {
   }
 
   /// 刪除使用者活動資料(僅能刪除自己的資料)
-  Future<void> removeUserActivity(String activityId) async {
+  Future<void> removeUserActivity(
+    String activityId, {
+    required bool isManager,
+  }) async {
     final userId = AuthProvider().currentUserId;
     final userRef = db
         .collection(FireStoreUserConstants.userCollectionPath.value)
@@ -151,11 +156,12 @@ class UserProvider {
     assert(userData.exists, "使用者不存在");
     assert(userData.get(FSUserConstants.isEnabled.value), "使用者已被停用");
 
-    final activityRef = userRef
-        .collection(FireStoreUserConstants.userActivityCollectionPath.value)
-        .doc(activityId);
+    final collection = isManager
+        ? FireStoreUserConstants.userHostedActivityCollectionPath.value
+        : FireStoreUserConstants.userJoinedActivityCollectionPath.value;
+    final activityRef = userRef.collection(collection).doc(activityId);
 
-    assert((await activityRef.get()).exists, "使用者未參加該活動");
+    assert((await activityRef.get()).exists, "使用者未參加/舉辦該活動");
     await activityRef.delete();
   }
 
@@ -207,7 +213,7 @@ class UserProvider {
     return await getUser(
       userId: user.uid,
       loadSocial: updateSocial,
-      loadActivity: updateActivity,
+      loadActivityWithHosted: updateActivity,
     );
   }
 
@@ -254,9 +260,10 @@ class UserProvider {
     assert(userData.exists, "使用者不存在");
     assert(userData.get(FSUserConstants.isEnabled.value), "使用者已被停用");
 
-    final activityRef = userRef
-        .collection(FireStoreUserConstants.userActivityCollectionPath.value)
-        .doc(activity.uid);
+    final collection = activity.isManager
+        ? FireStoreUserConstants.userHostedActivityCollectionPath.value
+        : FireStoreUserConstants.userJoinedActivityCollectionPath.value;
+    final activityRef = userRef.collection(collection).doc(activity.uid);
 
     assert((await activityRef.get()).exists, "使用者未參加該活動");
 
@@ -265,7 +272,7 @@ class UserProvider {
         ? transaction.update(activityRef, fsUserActivity.toJson())
         : await activityRef.update(fsUserActivity.toJson());
 
-    return await getUserActivity(activity.uid);
+    return await getUserActivity(activity.uid, isManager: activity.isManager);
   }
 
   /// 修改使用者活動標籤資料(僅能修改自己的資料)
@@ -283,7 +290,8 @@ class UserProvider {
     assert(userData.get(FSUserConstants.isEnabled.value), "使用者已被停用");
 
     final activityRef = userRef
-        .collection(FireStoreUserConstants.userActivityCollectionPath.value)
+        .collection(
+            FireStoreUserConstants.userJoinedActivityCollectionPath.value)
         .doc(activityId);
 
     assert((await activityRef.get()).exists, "使用者未參加該活動");
@@ -292,7 +300,7 @@ class UserProvider {
       FSUserActivityConstants.tagIds.value: tagIds,
     });
 
-    return await getUser(userId: userId, loadActivity: true);
+    return await getUser(userId: userId, loadActivityWithHosted: true);
   }
 
   /// 取得使用者資料
@@ -301,11 +309,11 @@ class UserProvider {
   ///
   /// [loadSocial] 是否載入社群媒體資料
   ///
-  /// [loadActivity] 是否載入活動及標籤資料
+  /// [loadActivityWithHosted] null => 不載入活動資料，true => 載入舉辦活動資料，false => 載入參加活動資料
   Future<User> getUser({
     String? userId,
     bool loadSocial = false,
-    bool loadActivity = false,
+    bool? loadActivityWithHosted,
   }) async {
     userId ??= AuthProvider().currentUserId;
     final userRef = db
@@ -322,8 +330,12 @@ class UserProvider {
       user.socialMedia.addAll(await getUserSocialMedium(userId));
     }
 
-    if (loadActivity) {
-      user.activities.addAll(await getUserActivities());
+    if (loadActivityWithHosted != null) {
+      if (loadActivityWithHosted) {
+        user.activities.addAll(await getUserActivities(isManager: true));
+      } else {
+        user.activities.addAll(await getUserActivities(isManager: false));
+      }
     }
 
     return user;
@@ -382,7 +394,10 @@ class UserProvider {
   }
 
   /// 取得使用者活動資料(僅能取得自己的資料)
-  Future<UserActivity> getUserActivity(String activityId) async {
+  Future<UserActivity> getUserActivity(
+    String activityId, {
+    required bool isManager,
+  }) async {
     final userId = AuthProvider().currentUserId;
     final userRef = db
         .collection(FireStoreUserConstants.userCollectionPath.value)
@@ -392,12 +407,13 @@ class UserProvider {
     assert(userData.exists, "使用者不存在");
     assert(userData.get(FSUserConstants.isEnabled.value), "使用者已被停用");
 
-    final userActivityData = await userRef
-        .collection(FireStoreUserConstants.userActivityCollectionPath.value)
-        .doc(activityId)
-        .get();
+    final collection = isManager
+        ? FireStoreUserConstants.userHostedActivityCollectionPath.value
+        : FireStoreUserConstants.userJoinedActivityCollectionPath.value;
+    final userActivityData =
+        await userRef.collection(collection).doc(activityId).get();
 
-    assert(userActivityData.exists, "使用者未參加該活動");
+    assert(userActivityData.exists, "使用者未參加/舉辦該活動");
     final fsUserActivity = FSUserActivity.fromDocument(userActivityData);
     final userActivity = fsUserActivity.toUserActivity();
 
@@ -405,7 +421,10 @@ class UserProvider {
   }
 
   /// 取得使用者所有活動資料(僅能取得自己的資料)
-  Future<List<UserActivity>> getUserActivities({bool? isManager, bool? outdated}) async {
+  Future<List<UserActivity>> getUserActivities({
+    required bool isManager,
+    bool? outdated,
+  }) async {
     final userId = AuthProvider().currentUserId;
     final userRef = db
         .collection(FireStoreUserConstants.userCollectionPath.value)
@@ -415,20 +434,14 @@ class UserProvider {
     assert(userData.exists, "使用者不存在");
     assert(userData.get(FSUserConstants.isEnabled.value), "使用者已被停用");
 
-    final userActivityRef = userRef
-        .collection(FireStoreUserConstants.userActivityCollectionPath.value);
+    final collection = isManager
+        ? FireStoreUserConstants.userHostedActivityCollectionPath.value
+        : FireStoreUserConstants.userJoinedActivityCollectionPath.value;
+    final userActivitiesData = await userRef.collection(collection).get();
 
-    final userActivityData = isManager != null
-        ? await userActivityRef
-            .where(FSUserActivityConstants.isManager.value, isEqualTo: isManager)
-            .get()
-        : await userActivityRef.get();
-
-    var activities = userActivityData.docs.map((e) {
+    var activities = userActivitiesData.docs.map((e) {
       final fsUserActivity = FSUserActivity.fromDocument(e);
-      final userActivity = fsUserActivity.toUserActivity();
-
-      return userActivity;
+      return fsUserActivity.toUserActivity();
     }).toList();
 
     if (outdated != null) {
@@ -453,9 +466,41 @@ class UserProvider {
     return activities;
   }
 
+  /// 取得使用者尚未參加的活動資料(僅能取得自己的資料)
+  Future<List<Activity>> getUserNotJoinedActivities({
+    bool? outdated,
+  }) async {
+    final userId = AuthProvider().currentUserId;
+    final userRef = db
+        .collection(FireStoreUserConstants.userCollectionPath.value)
+        .doc(userId);
+    final userActivitiesData = await userRef
+        .collection(FireStoreUserConstants.userJoinedActivityCollectionPath.value)
+        .get();
+
+    final allActivities = await ActivityProvider().getAllActivities();
+    var activities = allActivities
+        .where((aa) => !userActivitiesData.docs
+            .map((e) => FSUserActivity.fromDocument(e).toUserActivity().uid)
+            .contains(aa.uid))
+        .toList();
+
+    if (outdated != null) {
+      return outdated
+          ? activities
+              .where((a) => a.endDate.toEpochTime().isBefore(DateTime.now()))
+              .toList()
+          : activities
+              .where((a) => a.endDate.toEpochTime().isAfter(DateTime.now()))
+              .toList();
+    }
+
+    return activities;
+  }
+
   ///取得使用者活動點數(僅能取得自己的資料)
   Future<int> getUserActivityPoint(String activityId) async{
-    final activity = await getUserActivity(activityId);
+    final activity = await getUserActivity(activityId, isManager: false);
     return activity.point;
   }
 
@@ -471,7 +516,7 @@ class UserProvider {
     assert(userData.get(FSUserConstants.isEnabled.value), "使用者已被停用");
 
     final userActivityRef = userRef
-        .collection(FireStoreUserConstants.userActivityCollectionPath.value)
+        .collection(FireStoreUserConstants.userJoinedActivityCollectionPath.value)
         .doc(activityId);
 
     assert((await userActivityRef.get()).exists, "使用者未參加該活動");
@@ -494,7 +539,7 @@ class UserProvider {
     assert(userData.get(FSUserConstants.isEnabled.value), "使用者已被停用");
 
     final userActivityRef = userRef
-        .collection(FireStoreUserConstants.userActivityCollectionPath.value)
+        .collection(FireStoreUserConstants.userJoinedActivityCollectionPath.value)
         .doc(activityId);
 
     final activity = await userActivityRef.get();

@@ -1,7 +1,8 @@
 enum FireStoreUserConstants {
   userCollectionPath,
   userSocialMediaCollectionPath,
-  userActivityCollectionPath;
+  userHostedActivityCollectionPath,
+  userJoinedActivityCollectionPath;
 
   String get value {
     switch (this) {
@@ -9,8 +10,10 @@ enum FireStoreUserConstants {
         return "users";
       case FireStoreUserConstants.userSocialMediaCollectionPath:
         return "userSocialMedias";
-      case FireStoreUserConstants.userActivityCollectionPath:
-        return "userActivities";
+      case FireStoreUserConstants.userHostedActivityCollectionPath:
+        return "userHostedActivities";
+      case FireStoreUserConstants.userJoinedActivityCollectionPath:
+        return "userJoinedActivities";
       default:
         throw Exception("Not found value for FireStoreUserConstants");
     }

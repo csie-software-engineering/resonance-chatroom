@@ -154,7 +154,7 @@ class _LoginPageState extends State<LoginPage> {
                       actions: [
                         TextButton(
                           onPressed: () {
-                            Navigator.of(context).pop();
+                            Navigator.of(context).maybePop();
                           },
                           child: const Text('取消'),
                         ),
@@ -173,7 +173,7 @@ class _LoginPageState extends State<LoginPage> {
                                 );
                               });
                             });
-                            Navigator.of(context).pop();
+                            Navigator.of(context).maybePop();
                           },
                           child: const Text('確定'),
                         ),
@@ -265,7 +265,7 @@ class _SetIsHostWidgetState extends State<_SetIsHostWidget> {
             ),
             const SizedBox(width: 10),
             Text(
-              '我是舉辦者',
+              '我是主辦方',
               style: TextStyle(
                 fontSize: MediaQuery.of(context).size.width * 0.05,
                 color: Colors.blue[800],

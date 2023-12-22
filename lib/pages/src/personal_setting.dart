@@ -96,7 +96,7 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
                     SizedBox(
                       width: MediaQuery.of(context).size.width * 0.55,
                       child: Text(
-                        args.isHost ? '舉辦者' : '參加者',
+                        args.isHost ? '主辦方' : '參加者',
                         textAlign: TextAlign.center,
                       ),
                     ),
@@ -185,7 +185,7 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
                         builder: (_) => AlertDialog(
                           title: const Text('確認身份切換'),
                           content:
-                              Text('確定要切換成${args.isHost ? '參加者' : '舉辦者'}身份嗎？'),
+                              Text('確定要切換成${args.isHost ? '參加者' : '主辦方'}角色嗎？'),
                           actions: [
                             FilledButton.tonal(
                               style: ButtonStyle(
@@ -195,7 +195,7 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
                                 ),
                               ),
                               onPressed: () {
-                                Navigator.of(context).pop();
+                                Navigator.of(context).maybePop();
                               },
                               child: Text(
                                 '取消',
@@ -268,7 +268,7 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
                                 ),
                               ),
                               onPressed: () {
-                                Navigator.of(context).pop();
+                                Navigator.of(context).maybePop();
                               },
                               child: Text(
                                 '取消',

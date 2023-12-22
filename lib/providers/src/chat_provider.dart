@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../models/models.dart';
@@ -182,7 +184,7 @@ class ChatProvider {
   Future<Room?> _createOrEnableRoom(
     String activityId,
     String peerId,
-    String tag, {
+    String tagId, {
     Transaction? transaction,
   }) async {
     final roomDataRef = db
@@ -199,16 +201,14 @@ class ChatProvider {
       transaction == null
           ? roomDataRef.update({
               RoomConstants.isEnable.value: true,
-              RoomConstants.tag.value: tag,
+              RoomConstants.tagId.value: tagId,
             })
           : transaction.update(roomDataRef, {
               RoomConstants.isEnable.value: true,
-              RoomConstants.tag.value: tag,
+              RoomConstants.tagId.value: tagId,
             });
     } else {
       final room = Room(
-        tag: tag,
-        isEnable: true,
         users: [
           RoomUser(
             id: AuthProvider().currentUserId,
@@ -219,6 +219,9 @@ class ChatProvider {
             shareSocialMedia: false,
           ),
         ],
+        tagId: tagId,
+        topicId: (await _getRandomTopicsByTagId(activityId, tagId))?.uid,
+        isEnable: true,
       );
 
       transaction == null
@@ -269,6 +272,35 @@ class ChatProvider {
     return room;
   }
 
+  /// 取得即時房間資訊
+  Stream<DocumentSnapshot<Map<String, dynamic>>> getRoomStream(
+    String activityId,
+    String peerId,
+  ) =>
+      db
+          .collection(FirestoreConstants.activityCollectionPath.value)
+          .doc(activityId)
+          .collection(FirestoreConstants.roomCollectionPath.value)
+          .doc(_getRoomId([AuthProvider().currentUserId, peerId]))
+          .snapshots();
+
+  /// 更新房間資訊
+  Future<Room> updateRoom(
+    String activityId,
+    String peerId,
+    Room room,
+  ) async {
+    final curUser = AuthProvider().currentUserId;
+    final roomRef = db
+        .collection(FirestoreConstants.activityCollectionPath.value)
+        .doc(activityId)
+        .collection(FirestoreConstants.roomCollectionPath.value)
+        .doc(_getRoomId([curUser, peerId]));
+
+    await roomRef.update(room.toJson());
+    return await getRoom(activityId, peerId);
+  }
+
   /// 傳遞訊息
   Future<void> sendMessage(
     String activityId,
@@ -298,6 +330,29 @@ class ChatProvider {
         .collection(FirestoreConstants.messageCollectionPath.value)
         .doc(curTime)
         .set(messageData.toJson());
+  }
+
+  /// 隨機取得某標籤的話題
+  Future<Topic?> _getRandomTopicsByTagId(
+    String activityId,
+    String tagId,
+  ) async {
+    final topics = await ActivityProvider().getTopicsByTag(activityId, tagId);
+
+    if (topics.isEmpty) return null;
+    return topics[Random().nextInt(topics.length)];
+  }
+
+  /// 隨機更新房間的話題
+  Future<Room> updateRandomTopic(
+    String activityId,
+    String peerId,
+  ) async {
+    final room = await getRoom(activityId, peerId);
+    assert(room.isEnable, '房間已關閉');
+    room.topicId = (await _getRandomTopicsByTagId(activityId, room.tagId))?.uid;
+
+    return await updateRoom(activityId, peerId, room);
   }
 
   /// 取得是否同意分享社群媒體
@@ -405,6 +460,7 @@ class ChatProvider {
     return rooms;
   }
 
+  /// 檢舉
   Future<void> report(
     String activityId,
     String peerId,

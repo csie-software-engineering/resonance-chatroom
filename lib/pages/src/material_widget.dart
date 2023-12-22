@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:resonance_chatroom/pages/src/welcome_page.dart';
 
 import '../../constants/constants.dart';
 import '../../providers/providers.dart';
@@ -24,7 +25,9 @@ class MaterialWidget extends StatelessWidget {
                   ? Colors.pink
                   :  const Color(0xffA7D073),
             ),
-            initialRoute: LoginPage.routeName,
+            initialRoute: (true || instance.getBool('isHost') == null)
+                ? WelcomePage.routeName
+                : LoginPage.routeName,
             routes: routes,
             debugShowCheckedModeBanner: false,
           );

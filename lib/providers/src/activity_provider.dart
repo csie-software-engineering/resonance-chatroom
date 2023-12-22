@@ -109,6 +109,51 @@ class ActivityProvider {
     await documentReference.update({ActivityConstants.isEnabled.value: false});
   }
 
+  Future<bool> _checkActivityAlive(String activityId)async{
+    final documentReference = db
+        .collection(FirestoreConstants.activityCollectionPath.value)
+        .doc(activityId);
+
+    final activityData = await documentReference.get();
+    if(activityData.exists) {
+      return false;
+    }
+    if (Activity.fromDocument(activityData).isEnabled) {
+      return false;
+    }
+    return true;
+  }
+
+  Future<bool> _checkTagAlive(String tagId)async{
+    final documentReference = db
+        .collection(FirestoreConstants.activityCollectionPath.value)
+        .doc(activityId);
+
+    final activityData = await documentReference.get();
+    if(activityData.exists) {
+      return false;
+    }
+    if (Activity.fromDocument(activityData).isEnabled) {
+      return false;
+    }
+    return true;
+  }
+  //todo
+  Future<bool> _checkTagAlive(String tagId)async{
+    final documentReference = db
+        .collection(FirestoreConstants.activityCollectionPath.value)
+        .doc(activityId);
+
+    final activityData = await documentReference.get();
+    if(activityData.exists) {
+      return false;
+    }
+    if (Activity.fromDocument(activityData).isEnabled) {
+      return false;
+    }
+    return true;
+  }
+
   /// 查詢是否為主辦方
   Future<bool> _isHost(String activityId, {String? userId}) async {
     userId ??= AuthProvider().currentUserId;

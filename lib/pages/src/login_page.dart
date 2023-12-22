@@ -247,9 +247,9 @@ class _SetIsHostWidgetState extends State<_SetIsHostWidget> {
               context.read<SharedPreferenceProvider>().setIsHost(isHost);
             }),
             activeColor: Colors.transparent,
-            activeTrackColor: Colors.red,
+            activeTrackColor: Colors.pink,
             inactiveThumbColor: Colors.transparent,
-            inactiveTrackColor: Colors.green,
+            inactiveTrackColor: const Color(0xffA7D073),
             trackOutlineWidth: MaterialStateProperty.all(0.5),
             trackOutlineColor: MaterialStateProperty.all(Colors.black),
 

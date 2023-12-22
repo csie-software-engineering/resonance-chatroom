@@ -38,10 +38,7 @@ class _LoginPageState extends State<LoginPage> {
 
     return Scaffold(
       body: Container(
-        alignment: Alignment.center,
-        height: MediaQuery.of(context).size.height,
-        width: MediaQuery.of(context).size.width,
-        color: Theme.of(context).colorScheme.secondaryContainer,
+        color: Theme.of(context).colorScheme.background,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -60,7 +57,7 @@ class _LoginPageState extends State<LoginPage> {
             SizedBox(
               width: MediaQuery.of(context).size.width * 0.7,
               height: MediaQuery.of(context).size.height * 0.08,
-              child: ElevatedButton(
+              child: FloatingActionButton.extended(
                 onPressed: () {
                   context.read<AuthProvider>().signInWithGoogle().then((_) {
                     pref.then((instance) {
@@ -73,7 +70,7 @@ class _LoginPageState extends State<LoginPage> {
                     });
                   });
                 },
-                child: Row(
+                label: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Image.asset(
@@ -86,6 +83,7 @@ class _LoginPageState extends State<LoginPage> {
                       '使用 Google 登入',
                       style: TextStyle(
                         fontSize: MediaQuery.of(context).size.width * 0.05,
+                        color: Theme.of(context).colorScheme.tertiary,
                       ),
                     ),
                   ],
@@ -96,7 +94,7 @@ class _LoginPageState extends State<LoginPage> {
             SizedBox(
               width: MediaQuery.of(context).size.width * 0.7,
               height: MediaQuery.of(context).size.height * 0.08,
-              child: ElevatedButton(
+              child: FloatingActionButton.extended(
                 onPressed: () {
                   context.read<AuthProvider>().signInWithFacebook().then((_) {
                     pref.then((instance) {
@@ -109,7 +107,7 @@ class _LoginPageState extends State<LoginPage> {
                     });
                   });
                 },
-                child: Row(
+                label: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Image.asset(
@@ -122,6 +120,7 @@ class _LoginPageState extends State<LoginPage> {
                       '使用 Facebook 登入',
                       style: TextStyle(
                         fontSize: MediaQuery.of(context).size.width * 0.05,
+                        color: Theme.of(context).colorScheme.tertiary,
                       ),
                     ),
                   ],
@@ -144,7 +143,7 @@ class _LoginPageState extends State<LoginPage> {
             SizedBox(
               width: MediaQuery.of(context).size.width * 0.7,
               height: MediaQuery.of(context).size.height * 0.08,
-              child: ElevatedButton(
+              child: FloatingActionButton.extended(
                 onPressed: () {
                   showDialog(
                     context: context,
@@ -182,10 +181,11 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   );
                 },
-                child: Text(
-                  '以匿名身分繼續',
+                label: Text(
+                  '以匿名身份繼續',
                   style: TextStyle(
                     fontSize: MediaQuery.of(context).size.width * 0.05,
+                    color: Theme.of(context).colorScheme.secondary,
                   ),
                 ),
               ),
@@ -226,49 +226,53 @@ class _SetIsHostWidgetState extends State<_SetIsHostWidget> {
   Widget build(BuildContext context) {
     bool isHost = widget.pref.getBool('isHost') ?? false;
 
-    return SizedBox(
-      height: MediaQuery.of(context).size.height * 0.1,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Text(
-            '我是參與者',
-            style: TextStyle(
-              fontSize: MediaQuery.of(context).size.width * 0.05,
-              color: Colors.green[800],
-            ),
-          ),
-          const SizedBox(width: 10),
-          Switch.adaptive(
-            value: isHost,
-            onChanged: (value) => setState(() {
-              debugPrint(value.toString());
-              isHost = value;
-              context.read<SharedPreferenceProvider>().setIsHost(isHost);
-            }),
-            activeColor: Colors.transparent,
-            activeTrackColor: Colors.lightBlue,
-            inactiveThumbColor: Colors.transparent,
-            inactiveTrackColor: Colors.lightGreen,
-            trackOutlineWidth: MaterialStateProperty.all(0.5),
-            trackOutlineColor: MaterialStateProperty.all(Colors.black),
-            thumbIcon: MaterialStateProperty.all(
-              Icon(
-                Icons.person,
-                color: isHost ? Colors.blue[900] : Colors.green[900],
+    return GestureDetector(
+      onTap: () => ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('之後可隨時切換角色'))),
+      child: SizedBox(
+        height: MediaQuery.of(context).size.height * 0.1,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              '我是參加者',
+              style: TextStyle(
+                fontSize: MediaQuery.of(context).size.width * 0.05,
+                color: Colors.green[800],
               ),
             ),
-          ),
-          const SizedBox(width: 10),
-          Text(
-            '我是主辦者',
-            style: TextStyle(
-              fontSize: MediaQuery.of(context).size.width * 0.05,
-              color: Colors.blue[800],
+            const SizedBox(width: 10),
+            Switch.adaptive(
+              value: isHost,
+              onChanged: (value) => setState(() {
+                debugPrint(value.toString());
+                isHost = value;
+                context.read<SharedPreferenceProvider>().setIsHost(isHost);
+              }),
+              activeColor: Colors.transparent,
+              activeTrackColor: Colors.lightBlue,
+              inactiveThumbColor: Colors.transparent,
+              inactiveTrackColor: Colors.lightGreen,
+              trackOutlineWidth: MaterialStateProperty.all(0.5),
+              trackOutlineColor: MaterialStateProperty.all(Colors.black),
+              thumbIcon: MaterialStateProperty.all(
+                Icon(
+                  Icons.person,
+                  color: isHost ? Colors.blue[900] : Colors.green[900],
+                ),
+              ),
             ),
-          ),
-        ],
+            const SizedBox(width: 10),
+            Text(
+              '我是舉辦者',
+              style: TextStyle(
+                fontSize: MediaQuery.of(context).size.width * 0.05,
+                color: Colors.blue[800],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

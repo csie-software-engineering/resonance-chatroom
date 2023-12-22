@@ -2,17 +2,14 @@ import 'dart:async';
 import 'dart:isolate';
 
 // import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:async/async.dart';
-import 'package:resonance_chatroom/utils/src/base64.dart';
-import 'package:resonance_chatroom/utils/src/time.dart';
 
-import '../../models/models.dart';
-import '../../providers/providers.dart';
 import '../routes.dart';
+import '../../models/models.dart';
+import '../../utils/utils.dart';
+import '../../providers/providers.dart';
 import '../../widgets/src/activity_card/activity_card.dart';
 import '../../widgets/src/activity_buttons/animated_buttons.dart';
 
@@ -266,7 +263,7 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
     // set _currentUserActivity
 
     _currentUser = await authProvider.currentUser;
-    _currentUserActivity = await userProvider.getUserActivity(args.activityId);
+    _currentUserActivity = await userProvider.getUserActivity(args.activityId, isManager: false);
     var getActivity = await activityProvider.getActivity(args.activityId);
 
     if (getActivity != null) {

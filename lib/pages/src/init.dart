@@ -1,19 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:resonance_chatroom/pages/src/user_activity_main_page.dart';
-import 'package:resonance_chatroom/utils/src/base64.dart';
-import 'package:resonance_chatroom/utils/src/time.dart';
 
+import '../../utils/utils.dart';
 import '../../models/models.dart';
 import '../../providers/providers.dart';
 import '../routes.dart';
 
 class InitPageArguments {
   final String title;
-  final User curUser;
 
-  InitPageArguments({required this.title, required this.curUser});
+  InitPageArguments({required this.title});
 }
 
 class InitPage extends StatefulWidget {
@@ -39,6 +35,46 @@ class _InitPageState extends State<InitPage> {
       ModalRoute.of(context)!.settings.arguments as InitPageArguments;
 
   Future<void> _incrementCounter() async {
+    // final image = (await pickImageToBase64())!;
+    // final acts = [
+    //   Activity(
+    //     activityName: '城市規劃',
+    //     activityInfo: '城市大規劃',
+    //     startDate: DateTime(2024, 1, 1).toEpochString(),
+    //     endDate: DateTime(2024, 1, 15).toEpochString(),
+    //     activityPhoto: image,
+    //   ),
+    //   Activity(
+    //     activityName: '城市比賽',
+    //     activityInfo: '城市大比賽',
+    //     startDate: DateTime(2024, 1, 1).toEpochString(),
+    //     endDate: DateTime(2024, 2, 15).toEpochString(),
+    //     activityPhoto: image,
+    //   ),
+    //   Activity(
+    //     activityName: '程式比賽',
+    //     activityInfo: '程式大比賽',
+    //     startDate: DateTime(2024, 12, 1).toEpochString(),
+    //     endDate: DateTime(2024, 12, 20).toEpochString(),
+    //     activityPhoto: image,
+    //   ),
+    // ];
+
+    // final acts = [
+    //   UserActivity(uid: "20231218-1554-8234-8689-194348ce6093", isManager: false),
+    //   UserActivity(uid: "20231218-1554-8a34-9635-ed255f5df37a", isManager: false),
+    //   UserActivity(uid: "20231218-1554-8f34-b658-2c026462fb1d", isManager: false),
+    // ];
+
+    // await Future.wait(acts.map((act) async {
+    //   await activityProvider.setNewActivity(act);
+    //   // await userProvider.addUserActivity(act);
+    // }));
+
+    setState(() {
+      _counter++;
+      Navigator.of(context).pushNamed(MainPage.routeName,
+          arguments: MainPageArguments(isHost: false));
     // 登入完抓資料
     // 這邊的邏輯應該是點選哪一個活動就獲得哪一個 id, displayname
     // final image = await ImagePicker().pickImage(source: ImageSource.gallery);
@@ -92,13 +128,6 @@ class _InitPageState extends State<InitPage> {
           arguments: UserActivityMainPageArguments(
               activityId: "20231218-0118-8038-a440-9cfda5307c72"));
     });
-    // await activityProvider.DeleteActivity(
-    //     "20231214-1925-8500-9785-21d5e8c0c78e", "ownerid");
-  }
-
-  @override
-  void initState() {
-    super.initState();
   }
 
   @override
@@ -116,7 +145,7 @@ class _InitPageState extends State<InitPage> {
             //     "displayName: ${args["activities"][0].displayName}"
             // ),
             Text(
-              '${args.curUser.uid} $_counter',
+              '$_counter',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
           ],

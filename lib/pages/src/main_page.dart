@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -93,17 +91,15 @@ class _MainPageState extends State<MainPage> {
                     ? CarouselSlider.builder(
                         itemCount: userActivities.length,
                         options: CarouselOptions(
-                          height: double.infinity,
+                          height: MediaQuery.of(context).size.height,
                           enlargeCenterPage: true,
-                          enableInfiniteScroll: true,
                           initialPage: 0,
                           viewportFraction: 0.8,
                         ),
                         itemBuilder: (context, index, realIndex) {
-                          int currentUsers = index * 10;
                           return RoomCard(
+                            isHost: args.isHost,
                             activityId: userActivities[index].uid,
-                            currentUsers: currentUsers,
                           );
                         },
                       )
@@ -185,7 +181,7 @@ class _MainPageState extends State<MainPage> {
                                     TextButton(
                                       child: const Text('取消'),
                                       onPressed: () =>
-                                          Navigator.of(context).pop(),
+                                          Navigator.of(context).maybePop(),
                                     ),
                                     TextButton(
                                       child: const Text('加入'),
@@ -196,9 +192,10 @@ class _MainPageState extends State<MainPage> {
                                               uid: activity.uid,
                                               isManager: false,
                                             ))
-                                            .then((_) => setState(() {}));
-                                        Navigator.of(context).pop();
-                                        Navigator.of(context).maybePop();
+                                            .then((_) => setState(() {
+                                                  Navigator.of(context)
+                                                      .maybePop();
+                                                }));
                                       },
                                     ),
                                   ],
@@ -214,7 +211,7 @@ class _MainPageState extends State<MainPage> {
                 actions: [
                   ElevatedButton(
                     onPressed: () {
-                      Navigator.of(context).pop();
+                      Navigator.of(context).maybePop();
                     },
                     child: const Text('關閉'),
                   ),
@@ -274,68 +271,94 @@ class _MainPageState extends State<MainPage> {
 // }
 
 class RoomCard extends StatelessWidget {
+  final bool isHost;
   final String activityId;
-  final int currentUsers;
 
   const RoomCard({
     super.key,
+    required this.isHost,
     required this.activityId,
-    required this.currentUsers,
   });
 
   @override
-  Widget build(BuildContext context) {
-    late final activityProvider = context.read<ActivityProvider>();
-    return InkWell(
-      onTap: () {
-        // todo
-        Navigator.of(context).pushNamed(UserActivityMainPage.routeName,
-            arguments: UserActivityMainPageArguments(
-                activityId: activityId, isPreview: false));
-      },
-      child: Card(
+  Widget build(BuildContext context) => Card(
         elevation: 4.0,
         child: SizedBox(
           height: 100.0,
           child: FutureBuilder<Activity>(
-            future: activityProvider.getActivity(activityId),
+            future: context.read<ActivityProvider>().getActivity(activityId),
             builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                final activity = snapshot.data!;
-                return Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    Image.memory(
-                      base64Decode(activity.activityPhoto),
-                      fit: BoxFit.cover,
-                    ),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const SizedBox(height: 8.0),
-                        Text(
-                          activityId,
-                          style: const TextStyle(
-                              fontSize: 18.0, color: Colors.white),
-                        ),
-                        const SizedBox(height: 4.0),
-                        Text(
-                          'Current Users: $currentUsers',
-                          style: const TextStyle(
-                              fontSize: 14.0, color: Colors.white),
-                        ),
-                      ],
-                    ),
-                  ],
-                );
-              } else if (snapshot.hasError) {
-                return Text('Error: ${snapshot.error}');
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
               }
-              return const Center(child: CircularProgressIndicator());
+
+              final activity = snapshot.data!;
+              return InkWell(
+                onTap: () {
+                  if (activity.isEnabled) {
+                    Navigator.of(context).pushNamed(
+                      UserActivityMainPage.routeName,
+                      arguments: UserActivityMainPageArguments(
+                        activityId: activityId,
+                      ),
+                    );
+                    Navigator.of(context).pushNamed(
+                      UserActivityMainPage.routeName,
+                      arguments: UserActivityMainPageArguments(
+                        activityId: activityId, 
+                        isPreview: false,
+                      ),
+                    );
+                  } else {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('發生錯誤'),
+                        content: const Text(
+                            '活動可能已經取消或發生錯誤\n長按活動可以刪除該活動\n若有疑問請聯繫主辦方'),
+                        actions: [
+                          TextButton(
+                            child: const Text('了解'),
+                            onPressed: () => Navigator.of(context).maybePop(),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                },
+                onLongPress: () => isHost
+                    ? ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('主辦方無法刪除活動')))
+                    : showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text('刪除活動'),
+                          content: const Text('是否要刪除該活動？'),
+                          actions: [
+                            TextButton(
+                              child: const Text('取消'),
+                              onPressed: () => Navigator.of(context).maybePop(),
+                            ),
+                            TextButton(
+                              child: const Text('刪除'),
+                              onPressed: () {
+                                context.read<UserProvider>().removeUserActivity(
+                                    activityId,
+                                    isManager: false);
+                                Navigator.of(context).maybePop();
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                child: Image.memory(
+                  base64ToImage(activity.activityPhoto),
+                  fit: BoxFit.contain,
+                  opacity: AlwaysStoppedAnimation(activity.isEnabled ? 1 : 0.5),
+                ),
+              );
             },
           ),
         ),
-      ),
-    );
-  }
+      );
 }

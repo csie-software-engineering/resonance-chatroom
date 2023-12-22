@@ -452,4 +452,57 @@ class UserProvider {
 
     return activities;
   }
+
+  ///取得使用者活動點數(僅能取得自己的資料)
+  Future<int> getUserActivityPoint(String activityId) async{
+    final activity = await getUserActivity(activityId);
+    return activity.point;
+  }
+
+  ///增加使用者活動點數
+  Future<void> addUserActivityPoint(String activityId) async{
+    final userId = AuthProvider().currentUserId;
+    final userRef = db
+        .collection(FireStoreUserConstants.userCollectionPath.value)
+        .doc(userId);
+
+    final userData = await userRef.get();
+    assert(userData.exists, "使用者不存在");
+    assert(userData.get(FSUserConstants.isEnabled.value), "使用者已被停用");
+
+    final userActivityRef = userRef
+        .collection(FireStoreUserConstants.userActivityCollectionPath.value)
+        .doc(activityId);
+
+    assert((await userActivityRef.get()).exists, "使用者未參加該活動");
+
+    await userActivityRef.update({
+      FSUserActivityConstants.point.value: FieldValue.increment(1),
+    });
+  }
+
+  ///扣除使用者活動點數
+  Future<void> minusUserActivityPoint(String activityId, int val) async{
+    assert(val > 0, "不能扣除小於1的值");
+    final userId = AuthProvider().currentUserId;
+    final userRef = db
+        .collection(FireStoreUserConstants.userCollectionPath.value)
+        .doc(userId);
+
+    final userData = await userRef.get();
+    assert(userData.exists, "使用者不存在");
+    assert(userData.get(FSUserConstants.isEnabled.value), "使用者已被停用");
+
+    final userActivityRef = userRef
+        .collection(FireStoreUserConstants.userActivityCollectionPath.value)
+        .doc(activityId);
+
+    final activity = await userActivityRef.get();
+    assert(activity.exists, "使用者未參加該活動");
+    assert(activity.get(FSUserActivityConstants.point.value) >= val, "使用者沒有足夠多的點數");
+
+    await userActivityRef.update({
+      FSUserActivityConstants.point.value: FieldValue.increment(-val),
+    });
+  }
 }

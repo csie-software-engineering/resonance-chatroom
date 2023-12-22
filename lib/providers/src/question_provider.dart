@@ -50,6 +50,7 @@ class QuestionProvider {
       ReplyConstants.email.value: email,
       ReplyConstants.choice.value: choice,
     });
+    await UserProvider().addUserActivityPoint(activityId);
   }
 
   Future<List<int>> getReplyResult(

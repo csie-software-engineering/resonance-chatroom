@@ -22,7 +22,9 @@ class ActivityProvider {
   /// 設置新活動
   Future<Activity> setNewActivity(Activity activityData) async {
     assert(activityData.startDate.toEpochTime().isAfter(DateTime.now()),
-        '活動開始時間需要在現在之後');
+    '活動開始時間需要在現在之後');
+    assert(activityData.endDate.toEpochTime().isAfter(activityData.startDate.toEpochTime()),
+    '活動結束時間需要在開始之間之後');
 
     activityData.uid = generateUuid();
     final documentReference = db
@@ -167,9 +169,9 @@ class ActivityProvider {
 
   /// 新增標籤
   Future<Tag> addNewTag(
-    String activityId,
-    String tagName,
-  ) async {
+      String activityId,
+      String tagName,
+      ) async {
     assert(await _isManager(activityId), '你不是管理者');
 
     final tagData = Tag(activityId: activityId, tagName: tagName);
@@ -304,10 +306,10 @@ class ActivityProvider {
 
   /// 編輯話題
   Future<void> editTopic(
-    String activityId,
-    String topicId,
-    String topicName,
-  ) async {
+      String activityId,
+      String topicId,
+      String topicName,
+      ) async {
     assert(await _isManager(activityId), '你不是管理者');
 
     final topicDoc = db
@@ -321,13 +323,13 @@ class ActivityProvider {
 
   /// 新增問卷題目
   Future<Question> addNewQuestion(
-    String activityId,
-    Question questionData,
-  ) async {
+      String activityId,
+      Question questionData,
+      ) async {
     assert(await _isManager(activityId), '你不是管理者');
     assert(
-      questionData.choices.toSet().length == questionData.choices.length,
-      'There are two same choices',
+    questionData.choices.toSet().length == questionData.choices.length,
+    'There are two same choices',
     );
 
     final existQuestion = db
@@ -335,7 +337,7 @@ class ActivityProvider {
         .doc(activityId)
         .collection(FirestoreConstants.questionCollectionPath.value)
         .where(QuestionConstants.topicId.value,
-            isEqualTo: questionData.topicId);
+        isEqualTo: questionData.topicId);
 
     assert((await existQuestion.count().get()).count == 0, '該話題已經有問卷');
 
@@ -353,10 +355,10 @@ class ActivityProvider {
 
   /// 修改問卷選項(若活動已經開始，則不可修改)
   Future<void> editQuestionChoices(
-    String activityId,
-    String questionId,
-    List<String> choices,
-  ) async {
+      String activityId,
+      String questionId,
+      List<String> choices,
+      ) async {
     assert(await _isManager(activityId), '你不是管理者');
 
     final questionDoc = db
@@ -370,7 +372,7 @@ class ActivityProvider {
 
     final activityData = await getActivity(activityId);
     assert(
-        activityData.startDate.toEpochTime().isAfter(DateTime.now()), '活動已經開始');
+    activityData.startDate.toEpochTime().isAfter(DateTime.now()), '活動已經開始');
 
     await db.runTransaction((transaction) async {
       transaction
@@ -389,10 +391,10 @@ class ActivityProvider {
 
   /// 修改問卷題目(若活動已經開始，則不可修改)
   Future<Question> editQuestion(
-    String activityId,
-    String questionId,
-    Question questionData,
-  ) async {
+      String activityId,
+      String questionId,
+      Question questionData,
+      ) async {
     assert(await _isManager(activityId), '你不是管理者');
 
     DocumentReference questionDoc = db
@@ -404,7 +406,7 @@ class ActivityProvider {
     assert((await questionDoc.get()).exists, '問卷不存在');
     final activityData = await getActivity(activityId);
     assert(
-        activityData.startDate.toEpochTime().isAfter(DateTime.now()), '活動已經開始');
+    activityData.startDate.toEpochTime().isAfter(DateTime.now()), '活動已經開始');
 
     await questionDoc.update(
         {QuestionConstants.questionName.value: questionData.questionName});
@@ -427,14 +429,14 @@ class ActivityProvider {
 
   /// 刪除話題與問卷問題
   Future<void> deleteTopicAndQuestion(
-    String activityId,
-    String topicId,
-  ) async {
+      String activityId,
+      String topicId,
+      ) async {
     assert(await _isManager(activityId), '你不是管理者');
 
     final activityData = await getActivity(activityId);
     assert(
-        activityData.startDate.toEpochTime().isAfter(DateTime.now()), '活動已經開始');
+    activityData.startDate.toEpochTime().isAfter(DateTime.now()), '活動已經開始');
 
     final topicDoc = db
         .collection(FirestoreConstants.activityCollectionPath.value)

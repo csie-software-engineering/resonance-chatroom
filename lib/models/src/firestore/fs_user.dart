@@ -92,17 +92,20 @@ extension FSUserSocialMediaExtension on FSUserSocialMedia {
 
 class FSUserActivity {
   final String uid;
+  final int point;
   final bool isManager;
   final List<String> tagIds;
 
   const FSUserActivity({
     required this.uid,
+    required this.point,
     required this.isManager,
     required this.tagIds,
   });
 
   Map<String, dynamic> toJson() => {
         FSUserActivityConstants.uid.value: uid,
+        FSUserActivityConstants.point.value: point,
         FSUserActivityConstants.isManager.value: isManager,
         FSUserActivityConstants.tagIds.value: tagIds,
       };
@@ -112,6 +115,7 @@ class FSUserActivity {
   ) =>
       FSUserActivity(
         uid: doc.get(FSUserActivityConstants.uid.value),
+        point: doc.get(FSUserActivityConstants.point.value),
         isManager: doc.get(FSUserActivityConstants.isManager.value),
         tagIds:
             List<String>.from(doc.get(FSUserActivityConstants.tagIds.value)),
@@ -124,6 +128,7 @@ class FSUserActivity {
 extension FSUserActivityExtension on FSUserActivity {
   UserActivity toUserActivity() => UserActivity(
         uid: uid,
+        point: point,
         isManager: isManager,
         tagIds: tagIds,
       );

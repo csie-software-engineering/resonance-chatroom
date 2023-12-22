@@ -60,6 +60,7 @@ enum FSUserSocialMediaConstants {
 
 enum FSUserActivityConstants {
   uid,
+  point,
   isManager,
   tagIds;
 
@@ -67,6 +68,8 @@ enum FSUserActivityConstants {
     switch (this) {
       case FSUserActivityConstants.uid:
         return "uid";
+      case FSUserActivityConstants.point:
+        return "point";
       case FSUserActivityConstants.isManager:
         return "isManager";
       case FSUserActivityConstants.tagIds:

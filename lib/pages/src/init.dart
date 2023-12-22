@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -31,14 +30,15 @@ class _InitPageState extends State<InitPage> {
   late final ChatProvider chatProvider = context.read<ChatProvider>();
   late final AuthProvider authProvider = context.read<AuthProvider>();
   late final UserProvider userProvider = context.read<UserProvider>();
-  late final ActivityProvider activityProvider = context.read<ActivityProvider>();
-  late final QuestionProvider questionProvider = context.read<QuestionProvider>();
+  late final ActivityProvider activityProvider =
+      context.read<ActivityProvider>();
+  late final QuestionProvider questionProvider =
+      context.read<QuestionProvider>();
 
   late final InitPageArguments args =
       ModalRoute.of(context)!.settings.arguments as InitPageArguments;
 
   Future<void> _incrementCounter() async {
-
     // 登入完抓資料
     // 這邊的邏輯應該是點選哪一個活動就獲得哪一個 id, displayname
     // final image = await ImagePicker().pickImage(source: ImageSource.gallery);
@@ -57,7 +57,7 @@ class _InitPageState extends State<InitPage> {
     // //
     // var act = UserActivity(
     //     uid: "20231218-0118-8038-a440-9cfda5307c72", isManager: false);
-    //
+    // //
     // await userProvider.addUserActivity(act);
     // await userProvider.addUserSocialMedia(UserSocialMedia(displayName: "Discord", linkUrl: "Discord:123"));
     // await userProvider.addUserSocialMedia(UserSocialMedia(displayName: "wechat", linkUrl: "wechat:123"));
@@ -67,12 +67,30 @@ class _InitPageState extends State<InitPage> {
     // await activityProvider.addNewTag(activityId, "很好");
     // await activityProvider.addNewTag(activityId, "非常好");
     // await activityProvider.addNewTag(activityId, "很好非常好");
+
+    // var tagId = "20231218-0118-8d40-b813-9888d47a10a3";
+    // var activityId = "20231218-0118-8038-a440-9cfda5307c72";
+    // var topicId = "20231220-0610-8715-b315-968b7f782f3f";
     //
+    // await activityProvider.addNewTopic(activityId, Topic(activityId: activityId, tagId: tagId, topicName: "早上好台灣，你有冰淇林嗎?"));
+    // await activityProvider.addNewTopic(activityId, Topic(activityId: activityId, tagId: tagId, topicName: "你會去看素肚與雞琴酒嗎?"));
+    // await activityProvider.addNewTopic(activityId, Topic(activityId: activityId, tagId: tagId, topicName: "你知兩個禮拜以後有什麼嗎?"));
+    //
+
+    // await activityProvider.addNewQuestion(
+    //     activityId,
+    //     Question(
+    //         activityId: activityId,
+    //         tagId: tagId,
+    //         topicId: topicId,
+    //         questionName: "你喜歡哪一種冰期零",
+    //         choices: <String>["草莓", "巧克力", "香草", "素肚"]));
+
     setState(() {
       _counter++;
       Navigator.of(context).pushNamed(UserActivityMainPage.routeName,
-          arguments: UserActivityMainPageArguments(activityId: "20231218-0118-8038-a440-9cfda5307c72"));
-
+          arguments: UserActivityMainPageArguments(
+              activityId: "20231218-0118-8038-a440-9cfda5307c72"));
     });
     // await activityProvider.DeleteActivity(
     //     "20231214-1925-8500-9785-21d5e8c0c78e", "ownerid");
@@ -105,7 +123,7 @@ class _InitPageState extends State<InitPage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: (){
+        onPressed: () {
           _incrementCounter();
         },
         tooltip: 'Increment',

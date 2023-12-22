@@ -1,17 +1,17 @@
 import '../../../models/src/activities.dart';
 import 'package:flutter/material.dart';
 
-class Tags extends StatefulWidget {
-  const Tags({super.key, required this.tagList, required this.tagSelectedTmp});
+class TagsWidget extends StatefulWidget {
+  const TagsWidget({super.key, required this.tagList, required this.tagSelectedTmp});
 
   final List<Tag> tagList;
   final List<bool> tagSelectedTmp;
 
   @override
-  State<Tags> createState() => _TagsState();
+  State<TagsWidget> createState() => _TagsState();
 }
 
-class _TagsState extends State<Tags> {
+class _TagsState extends State<TagsWidget> {
 
   @override
   Widget build(BuildContext context) {

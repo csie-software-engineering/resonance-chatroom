@@ -4,6 +4,7 @@ import 'package:async/async.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+
 // import 'package:url_launcher/url_launcher.dart';
 import 'package:provider/provider.dart';
 import 'package:resonance_chatroom/models/models.dart';
@@ -11,6 +12,7 @@ import 'package:resonance_chatroom/pages/src/user_activity_main_page.dart';
 import 'package:resonance_chatroom/widgets/widgets.dart';
 import 'package:resonance_chatroom/providers/providers.dart';
 
+import '../../widgets/src/chat_components/questionDialog.dart';
 import '../../constants/src/firestore_constants.dart';
 
 class ChatPageArguments {
@@ -49,6 +51,7 @@ class _ChatPageState extends State<ChatPage> {
       context.read<QuestionProvider>();
 
   final AsyncMemoizer _initalPageMemoization = AsyncMemoizer<void>();
+
   // final AsyncMemoizer _socialMedialMemoization = AsyncMemoizer<void>();
   final TextEditingController textEditingController = TextEditingController();
   final TextEditingController reportTextController = TextEditingController();
@@ -58,9 +61,12 @@ class _ChatPageState extends State<ChatPage> {
   int _limit = 20;
   int _limitIncrement = 20;
   double _height = 0;
-  String _currentTopic = "";
+  String _currentTopicId = "";
+  String _previousTopicId = "";
+  Question? _currentQuestion;
+  List<bool>? _questionAnswers;
 
-  bool isOn = true;
+  bool isOn = false;
   bool isLoading = false;
   bool isShowSticker = false;
   bool initial = false;
@@ -101,8 +107,7 @@ class _ChatPageState extends State<ChatPage> {
   // }
 
   Future<void> nextTopic() async {
-    var room =
-        await chatProvider.updateRandomTopic(args.activityId, args.peerId);
+    await chatProvider.updateRandomTopic(args.activityId, args.peerId);
   }
 
   Future<void> enableSocialMedia() async {
@@ -117,6 +122,19 @@ class _ChatPageState extends State<ChatPage> {
         // todo 應該要抓對應錯誤
         debugPrint("$e");
       }
+    }
+  }
+
+  void _newQuestion() async {
+    // todo 抓錯誤
+    try{
+      _currentQuestion =
+      await activityProvider.getQuestion(args.activityId, _previousTopicId);
+      setState(() {
+        isOn = true;
+      });
+    } catch (e) {
+      debugPrint("getNewQuestionError:$e");
     }
   }
 
@@ -165,8 +183,8 @@ class _ChatPageState extends State<ChatPage> {
       topics.forEach((element) {
         _allTopics[element.uid] = element.topicName;
       });
-      _currentTopic = _allTopics[room.topicId] ?? "";
-      if (_currentTopic == "") {
+      _currentTopicId = room.topicId ?? "";
+      if (_currentTopicId == "") {
         _enableShowTopic = false;
       }
       initial = true;
@@ -285,8 +303,8 @@ class _ChatPageState extends State<ChatPage> {
                                               width: 80,
                                               child: CircleAvatar(
                                                 child: Image.network(
-                                                  peerUser.photoUrl ??
-                                                      "空照片", // 會是一個 url 載入使用者的頭貼
+                                                  peerUser.photoUrl ?? "空照片",
+                                                  // 會是一個 url 載入使用者的頭貼
                                                   loadingBuilder:
                                                       (BuildContext context,
                                                           Widget child,
@@ -770,17 +788,23 @@ class _ChatPageState extends State<ChatPage> {
                                       actions: [
                                         TextButton(
                                           child: Text("確定"),
-                                          onPressed: () {
-                                            chatProvider.leaveRoom(
-                                                args.activityId,
-                                                args.peerId); // todo 如果對方已經離開則這個就會 assert
-                                            setState(() {
-                                              Navigator.popUntil(
-                                                  context,
-                                                  ModalRoute.withName(
-                                                      UserActivityMainPage
-                                                          .routeName));
-                                            });
+                                          onPressed: () async {
+                                            // todo 抓錯誤
+                                            try{
+                                              await chatProvider.leaveRoom(
+                                                  args.activityId,
+                                                  args.peerId);
+                                            } catch (e) {
+                                              debugPrint("leaveRoomError:$e");
+                                            } finally {
+                                              setState(() {
+                                                Navigator.popUntil(
+                                                    context,
+                                                    ModalRoute.withName(
+                                                        UserActivityMainPage
+                                                            .routeName));
+                                              });
+                                            }
                                           },
                                         )
                                       ],
@@ -823,9 +847,58 @@ class _ChatPageState extends State<ChatPage> {
                                     ? Colors.amber
                                     : Theme.of(context).colorScheme.onSurface,
                                 onPressed: () {
-                                  setState(() {
-                                    isOn = !isOn;
-                                  });
+                                  if (isOn && _currentQuestion != null) {
+                                    setState(() {
+                                      isOn = false;
+                                    });
+                                    debugPrint("build1");
+                                    showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          debugPrint("build2");
+                                          _questionAnswers = List.generate(
+                                              _currentQuestion!.choices.length,
+                                              (index) => false);
+                                          return AlertDialog(
+                                            title: Text(
+                                                _currentQuestion!.questionName),
+                                            content: Container(
+                                              width: 230,
+                                              height: 200,
+                                              child: QuestionDialog(
+                                                questionAnswers: _questionAnswers!,
+                                                currentQuestion: _currentQuestion!,
+                                              ),
+                                            ),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () async {
+                                                  Navigator.of(context).pop();
+                                                  // todo 不知道 choice 要傳什麼
+                                                  String choice = "";
+                                                  _questionAnswers!.map((boolValue){
+                                                    choice += boolValue.toString();
+                                                  });
+                                                  // todo 抓錯誤
+                                                  try {
+                                                    await questionProvider.userAnswer(args.activityId, _currentQuestion!.uid, choice);
+                                                  }
+                                                  catch (e) {
+                                                    debugPrint("answerQuesitonError:$e");
+                                                  }
+                                                },
+                                                child: Text('確定'),
+                                              ),
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.of(context).pop();
+                                                },
+                                                child: Text('算了'),
+                                              ),
+                                            ],
+                                          );
+                                        });
+                                  }
                                 },
                               ),
                             ),
@@ -840,12 +913,15 @@ class _ChatPageState extends State<ChatPage> {
                       builder: (BuildContext context,
                           AsyncSnapshot<DocumentSnapshot> snapshot) {
                         Map<String, dynamic>? room =
-                            snapshot.data?.data() as Map<String, dynamic>;
-                        if (room.isNotEmpty &&
-                            _allTopics[room["topicId"]] != _currentTopic) {
+                            snapshot.data?.data() as Map<String, dynamic>?;
+                        if (room != null &&
+                            room.isNotEmpty &&
+                            room["topicId"] != _currentTopicId) {
                           _enableShowTopic = true;
-                          _currentTopic = _allTopics[room["topicId"]]!;
+                          _previousTopicId = _currentTopicId;
+                          _currentTopicId = room["topicId"];
                           _height = 50;
+                          _newQuestion();
                         } else {
                           if (_enableShowTopic) {
                             _height = 50;
@@ -888,7 +964,9 @@ class _ChatPageState extends State<ChatPage> {
                                       duration: Duration(milliseconds: 500),
                                       child: Text(
                                         key: UniqueKey(),
-                                        _enableShowTopic ? _currentTopic : "",
+                                        _enableShowTopic
+                                            ? _allTopics[_currentTopicId]!
+                                            : "",
                                         style: TextStyle(
                                           fontSize: 20,
                                           color: Theme.of(context)
@@ -935,7 +1013,7 @@ class _ChatPageState extends State<ChatPage> {
                     child: Stack(
                       children: [
                         Container(
-                          color: Theme.of(context).colorScheme.background,
+                          color: Theme.of(context).colorScheme.background.withOpacity(0.5),
                           child: Column(
                             children: [
                               Flexible(

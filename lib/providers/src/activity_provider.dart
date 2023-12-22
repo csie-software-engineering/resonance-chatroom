@@ -329,6 +329,7 @@ class ActivityProvider {
       Question questionData,
       ) async {
     assert(await _isManager(activityId), '你不是管理者');
+    while(questionData.choices.remove("")){}
     assert(
     questionData.choices.toSet().length == questionData.choices.length,
     'There are two same choices',
@@ -410,14 +411,30 @@ class ActivityProvider {
     assert(
     activityData.startDate.toEpochTime().isAfter(DateTime.now()), '活動已經開始');
 
-    await questionDoc.update(
-        {QuestionConstants.questionName.value: questionData.questionName});
+    while(questionData.choices.remove("")){}
+
+    await questionDoc.update({
+      QuestionConstants.questionName.value: questionData.questionName,
+      QuestionConstants.choices.value: questionData.choices});
 
     return await getQuestion(activityId, questionId);
   }
 
-  /// 取得問卷
-  Future<Question> getQuestion(String activityId, String topicId) async {
+  /// 用問券ID取得問卷
+  Future<Question> getQuestion(String activityId, String questionId) async {
+    final questionRef = db
+        .collection(FirestoreConstants.activityCollectionPath.value)
+        .doc(activityId)
+        .collection(FirestoreConstants.questionCollectionPath.value)
+        .doc(questionId);
+
+    final questionDoc = await questionRef.get();
+    assert(questionDoc.exists, '問卷不存在');
+    return Question.fromDocument(questionDoc);
+  }
+
+  /// 用話題ID取得問卷
+  Future<Question> getQuestionByTopic(String activityId, String topicId) async {
     final questionQuery = db
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityId)

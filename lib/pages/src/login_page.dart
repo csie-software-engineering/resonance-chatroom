@@ -150,7 +150,8 @@ class _LoginPageState extends State<LoginPage> {
                     context: context,
                     builder: (_) => AlertDialog(
                       title: const Text('注意'),
-                      content: const Text('匿名使用無法使用部分功能\n且無法轉移帳號資料\n也無法串辦活動\n確定要繼續嗎？'),
+                      content: const Text(
+                          '匿名使用無法使用部分功能\n且無法轉移帳號資料\n也無法串辦活動\n確定要繼續嗎？'),
                       actions: [
                         TextButton(
                           onPressed: () {
@@ -235,10 +236,11 @@ class _SetIsHostWidgetState extends State<_SetIsHostWidget> {
             '我是參與者',
             style: TextStyle(
               fontSize: MediaQuery.of(context).size.width * 0.05,
+              color: Colors.green[800],
             ),
           ),
           const SizedBox(width: 10),
-          Switch(
+          Switch.adaptive(
             value: isHost,
             onChanged: (value) => setState(() {
               debugPrint(value.toString());
@@ -246,18 +248,24 @@ class _SetIsHostWidgetState extends State<_SetIsHostWidget> {
               context.read<SharedPreferenceProvider>().setIsHost(isHost);
             }),
             activeColor: Colors.transparent,
-            activeTrackColor: Colors.pink,
+            activeTrackColor: Colors.lightBlue,
             inactiveThumbColor: Colors.transparent,
-            inactiveTrackColor: const Color(0xffA7D073),
+            inactiveTrackColor: Colors.lightGreen,
             trackOutlineWidth: MaterialStateProperty.all(0.5),
             trackOutlineColor: MaterialStateProperty.all(Colors.black),
-
+            thumbIcon: MaterialStateProperty.all(
+              Icon(
+                Icons.person,
+                color: isHost ? Colors.blue[900] : Colors.green[900],
+              ),
+            ),
           ),
           const SizedBox(width: 10),
           Text(
             '我是主辦者',
             style: TextStyle(
               fontSize: MediaQuery.of(context).size.width * 0.05,
+              color: Colors.blue[800],
             ),
           ),
         ],

@@ -500,7 +500,7 @@ class UserProvider {
 
   ///取得使用者活動點數(僅能取得自己的資料)
   Future<int> getUserActivityPoint(String activityId) async{
-    final activity = await getUserActivity(activityId);
+    final activity = await getUserActivity(activityId, isManager: false);
     return activity.point;
   }
 
@@ -516,7 +516,7 @@ class UserProvider {
     assert(userData.get(FSUserConstants.isEnabled.value), "使用者已被停用");
 
     final userActivityRef = userRef
-        .collection(FireStoreUserConstants.userActivityCollectionPath.value)
+        .collection(FireStoreUserConstants.userJoinedActivityCollectionPath.value)
         .doc(activityId);
 
     assert((await userActivityRef.get()).exists, "使用者未參加該活動");
@@ -539,7 +539,7 @@ class UserProvider {
     assert(userData.get(FSUserConstants.isEnabled.value), "使用者已被停用");
 
     final userActivityRef = userRef
-        .collection(FireStoreUserConstants.userActivityCollectionPath.value)
+        .collection(FireStoreUserConstants.userJoinedActivityCollectionPath.value)
         .doc(activityId);
 
     final activity = await userActivityRef.get();

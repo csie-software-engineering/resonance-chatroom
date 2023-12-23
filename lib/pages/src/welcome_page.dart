@@ -41,6 +41,7 @@ class WelcomePage extends StatelessWidget {
               ),
               SizedBox(height: MediaQuery.of(context).size.height * 0.03),
               FloatingActionButton.extended(
+                heroTag: 'welcomeFAB',
                 onPressed: () =>
                     Navigator.of(context).pushNamed(LoginPage.routeName),
                 icon: const Icon(Icons.arrow_forward),

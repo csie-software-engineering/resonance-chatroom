@@ -182,6 +182,7 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
                   SizedBox(width: MediaQuery.of(context).size.width * 0.02),
                   Expanded(
                     child: FloatingActionButton.extended(
+                      heroTag: 'changeRoleFAB',
                       onPressed: () {
                         showDialog(
                           context: context,
@@ -257,6 +258,7 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
                   SizedBox(width: MediaQuery.of(context).size.width * 0.05),
                   Expanded(
                     child: FloatingActionButton.extended(
+                      heroTag: 'logoutFAB',
                       backgroundColor:
                           Theme.of(context).colorScheme.errorContainer,
                       onPressed: () {

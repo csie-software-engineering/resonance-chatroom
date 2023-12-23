@@ -58,6 +58,7 @@ class _LoginPageState extends State<LoginPage> {
               width: MediaQuery.of(context).size.width * 0.7,
               height: MediaQuery.of(context).size.height * 0.08,
               child: FloatingActionButton.extended(
+                heroTag: 'googleFAB',
                 onPressed: () {
                   context.read<AuthProvider>().signInWithGoogle().then((_) {
                     pref.then((instance) {
@@ -95,6 +96,7 @@ class _LoginPageState extends State<LoginPage> {
               width: MediaQuery.of(context).size.width * 0.7,
               height: MediaQuery.of(context).size.height * 0.08,
               child: FloatingActionButton.extended(
+                heroTag: 'facebookFAB',
                 onPressed: () {
                   context.read<AuthProvider>().signInWithFacebook().then((_) {
                     pref.then((instance) {
@@ -144,6 +146,7 @@ class _LoginPageState extends State<LoginPage> {
               width: MediaQuery.of(context).size.width * 0.7,
               height: MediaQuery.of(context).size.height * 0.08,
               child: FloatingActionButton.extended(
+                heroTag: 'anonymousFAB',
                 onPressed: () {
                   showDialog(
                     context: context,
@@ -167,7 +170,7 @@ class _LoginPageState extends State<LoginPage> {
                               pref.then((instance) {
                                 Navigator.of(context).pushNamed(
                                   MainPage.routeName,
-                                  arguments: MainPageArguments(
+                                  arguments: const MainPageArguments(
                                     isHost: false,
                                   ),
                                 );

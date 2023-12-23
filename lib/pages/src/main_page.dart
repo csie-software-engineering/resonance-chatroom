@@ -10,7 +10,7 @@ import '../routes.dart';
 class MainPageArguments {
   final bool isHost;
 
-  MainPageArguments({required this.isHost});
+  const MainPageArguments({required this.isHost});
 }
 
 class MainPage extends StatefulWidget {
@@ -62,7 +62,7 @@ class _MainPageState extends State<MainPage> {
                     Navigator.of(context).pushNamed(
                         PersonalSettingPage.routeName,
                         arguments:
-                            PersonalSettingArguments(isHost: args.isHost));
+                            PersonalSettingPageArguments(isHost: args.isHost));
                   },
                   child: CircleAvatar(
                     foregroundImage: user.photoUrl != null

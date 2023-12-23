@@ -5,12 +5,10 @@ import '../../models/models.dart';
 import '../../pages/routes.dart';
 import '../../providers/providers.dart';
 
-class PersonalSettingArguments {
+class PersonalSettingPageArguments {
   final bool isHost;
 
-  PersonalSettingArguments({
-    required this.isHost,
-  });
+  const PersonalSettingPageArguments({required this.isHost});
 }
 
 class PersonalSettingPage extends StatefulWidget {
@@ -26,7 +24,7 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
   @override
   Widget build(BuildContext context) {
     final args =
-        ModalRoute.of(context)!.settings.arguments as PersonalSettingArguments;
+        ModalRoute.of(context)!.settings.arguments as PersonalSettingPageArguments;
 
     return FutureBuilder<User>(
       future: context.read<AuthProvider>().currentUser,

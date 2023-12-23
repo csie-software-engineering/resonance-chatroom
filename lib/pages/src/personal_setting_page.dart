@@ -23,299 +23,311 @@ class PersonalSettingPage extends StatefulWidget {
 class _PersonalSettingPageState extends State<PersonalSettingPage> {
   @override
   Widget build(BuildContext context) {
-    final args =
-        ModalRoute.of(context)!.settings.arguments as PersonalSettingPageArguments;
+    final args = ModalRoute.of(context)!.settings.arguments
+        as PersonalSettingPageArguments;
 
-    return FutureBuilder<User>(
-      future: context.read<AuthProvider>().currentUser,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        final user = snapshot.data!;
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(
-              '使用者資訊',
-              style: TextStyle(color: Theme.of(context).colorScheme.primary),
+    return Container(
+      color: Theme.of(context).colorScheme.background,
+      child: FutureBuilder<User>(
+        future: context.read<AuthProvider>().currentUser,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          final user = snapshot.data!;
+          return Scaffold(
+            appBar: AppBar(
+              title: Text(
+                '使用者資訊',
+                style: TextStyle(color: Theme.of(context).colorScheme.primary),
+              ),
             ),
-          ),
-          body: Column(
-            children: [
-              SizedBox(height: MediaQuery.of(context).size.height * 0.01),
-              CircleAvatar(
-                foregroundImage:
-                    user.photoUrl != null ? NetworkImage(user.photoUrl!) : null,
-                backgroundImage: const AssetImage('lib/assets/user.png'),
-                radius: MediaQuery.of(context).size.height * 0.07,
-              ),
-              SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-              SizedBox(
-                height: MediaQuery.of(context).size.height * 0.03,
-                child: _NickNameWidget(user: user),
-              ),
-              SizedBox(height: MediaQuery.of(context).size.height * 0.01),
-              SizedBox(
-                height: MediaQuery.of(context).size.height * 0.03,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.2,
-                      child: const Text(
-                        'Email : ',
-                        textAlign: TextAlign.right,
-                      ),
-                    ),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.55,
-                      child: Text(
-                        user.email ?? '匿名使用',
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    SizedBox(width: MediaQuery.of(context).size.width * 0.2)
-                  ],
+            body: Column(
+              children: [
+                SizedBox(height: MediaQuery.of(context).size.height * 0.01),
+                CircleAvatar(
+                  foregroundImage: user.photoUrl != null
+                      ? NetworkImage(user.photoUrl!)
+                      : null,
+                  backgroundImage: const AssetImage('lib/assets/user.png'),
+                  radius: MediaQuery.of(context).size.height * 0.07,
                 ),
-              ),
-              SizedBox(height: MediaQuery.of(context).size.height * 0.01),
-              SizedBox(
-                height: MediaQuery.of(context).size.height * 0.03,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.2,
-                      child: const Text(
-                        '目前身份 : ',
-                        textAlign: TextAlign.right,
-                      ),
-                    ),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.55,
-                      child: Text(
-                        args.isHost ? '主辦方' : '參加者',
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    SizedBox(width: MediaQuery.of(context).size.width * 0.2)
-                  ],
+                SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.03,
+                  child: _NickNameWidget(user: user),
                 ),
-              ),
-              Divider(height: MediaQuery.of(context).size.height * 0.03),
-              Expanded(
-                child: Scrollbar(
-                  child: Column(
+                SizedBox(height: MediaQuery.of(context).size.height * 0.01),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.03,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        args.isHost ? '我舉辦過的活動' : '我參加過的活動',
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.2,
+                        child: const Text(
+                          'Email : ',
+                          textAlign: TextAlign.right,
                         ),
-                        textAlign: TextAlign.center,
                       ),
                       SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.01),
-                      Expanded(
-                        child: FutureBuilder<List<Activity>>(
-                          future: _getRelateActivities(
-                            args.isHost,
-                            context.read<ActivityProvider>(),
-                            context.read<UserProvider>(),
-                          ),
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return const Center(
-                                  child: CircularProgressIndicator());
-                            }
-                            final activities = snapshot.data!;
-                            return ListView.builder(
-                              itemCount: activities.length,
-                              itemBuilder: (context, index) {
-                                final activity = activities[index];
-                                return ListTile(
-                                  leading: Icon(
-                                    Icons.event,
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                  ),
-                                  title: Text(activity.activityName),
-                                  subtitle: FutureBuilder<List<Tag>>(
-                                    future: context
-                                        .read<ActivityProvider>()
-                                        .getAllTags(activity.uid),
-                                    builder: (context, snapshot) {
-                                      if (snapshot.connectionState ==
-                                          ConnectionState.waiting) {
-                                        return const Center(
-                                            child: CircularProgressIndicator());
-                                      }
-                                      final tags = snapshot.data!;
-                                      return Text(
-                                        '標籤: ${tags.map((e) => e.tagName).join(', ')}',
-                                        overflow: TextOverflow.ellipsis,
-                                      );
-                                    },
-                                  ),
-                                );
-                              },
-                            );
-                          },
+                        width: MediaQuery.of(context).size.width * 0.55,
+                        child: Text(
+                          user.email ?? '匿名使用',
+                          textAlign: TextAlign.center,
                         ),
                       ),
+                      SizedBox(width: MediaQuery.of(context).size.width * 0.2)
                     ],
                   ),
                 ),
-              ),
-            ],
-          ),
-          bottomNavigationBar: BottomAppBar(
-            child: Row(
-              children: [
-                SizedBox(width: MediaQuery.of(context).size.width * 0.02),
-                Expanded(
-                  child: FloatingActionButton.extended(
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (_) => AlertDialog(
-                          title: const Text('確認身份切換'),
-                          content:
-                              Text('確定要切換成${args.isHost ? '參加者' : '主辦方'}角色嗎？'),
-                          actions: [
-                            FilledButton.tonal(
-                              style: ButtonStyle(
-                                backgroundColor:
-                                    MaterialStateProperty.all<Color>(
-                                  Theme.of(context).colorScheme.errorContainer,
-                                ),
-                              ),
-                              onPressed: () {
-                                Navigator.of(context).maybePop();
-                              },
-                              child: Text(
-                                '取消',
-                                style: TextStyle(
-                                  color: Theme.of(context).colorScheme.error,
-                                ),
-                              ),
-                            ),
-                            FilledButton.tonal(
-                              style: ButtonStyle(
-                                backgroundColor:
-                                    MaterialStateProperty.all<Color>(
-                                  Theme.of(context)
-                                      .colorScheme
-                                      .primaryContainer,
-                                ),
-                              ),
-                              onPressed: () {
-                                context
-                                    .read<SharedPreferenceProvider>()
-                                    .setIsHost(!args.isHost)
-                                    .then((_) => Navigator.of(context)
-                                            .pushNamedAndRemoveUntil(
-                                          MainPage.routeName,
-                                          ModalRoute.withName(
-                                              LoginPage.routeName),
-                                          arguments: MainPageArguments(
-                                            isHost: !args.isHost,
-                                          ),
-                                        ));
-                              },
-                              child: Text(
-                                '確定',
-                                style: TextStyle(
-                                    color:
-                                        Theme.of(context).colorScheme.primary),
-                              ),
-                            ),
-                          ],
+                SizedBox(height: MediaQuery.of(context).size.height * 0.01),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.03,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.2,
+                        child: const Text(
+                          '目前身份 : ',
+                          textAlign: TextAlign.right,
                         ),
-                      );
-                    },
-                    label: Text(
-                      '切換身份',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary,
                       ),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.55,
+                        child: Text(
+                          args.isHost ? '主辦方' : '參加者',
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      SizedBox(width: MediaQuery.of(context).size.width * 0.2)
+                    ],
+                  ),
+                ),
+                Divider(height: MediaQuery.of(context).size.height * 0.03),
+                Expanded(
+                  child: Scrollbar(
+                    child: Column(
+                      children: [
+                        Text(
+                          args.isHost ? '我舉辦過的活動' : '我參加過的活動',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.01),
+                        Expanded(
+                          child: FutureBuilder<List<Activity>>(
+                            future: _getRelateActivities(
+                              args.isHost,
+                              context.read<ActivityProvider>(),
+                              context.read<UserProvider>(),
+                            ),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const Center(
+                                    child: CircularProgressIndicator());
+                              }
+                              final activities = snapshot.data!;
+                              return ListView.builder(
+                                physics: const NeverScrollableScrollPhysics(),
+                                itemCount: activities.length,
+                                itemBuilder: (context, index) {
+                                  final activity = activities[index];
+                                  return ListTile(
+                                    leading: Icon(
+                                      Icons.event,
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
+                                    ),
+                                    title: Text(activity.activityName),
+                                    subtitle: FutureBuilder<List<Tag>>(
+                                      future: context
+                                          .read<ActivityProvider>()
+                                          .getAllTags(activity.uid),
+                                      builder: (context, snapshot) {
+                                        if (snapshot.connectionState ==
+                                            ConnectionState.waiting) {
+                                          return const Center(
+                                              child:
+                                                  CircularProgressIndicator());
+                                        }
+                                        final tags = snapshot.data!;
+                                        return Text(
+                                          '標籤: ${tags.map((e) => e.tagName).join(', ')}',
+                                          overflow: TextOverflow.ellipsis,
+                                        );
+                                      },
+                                    ),
+                                  );
+                                },
+                              );
+                            },
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-                SizedBox(width: MediaQuery.of(context).size.width * 0.05),
-                Expanded(
-                  child: FloatingActionButton.extended(
-                    backgroundColor:
-                        Theme.of(context).colorScheme.errorContainer,
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (_) => AlertDialog(
-                          title: const Text('確認登出'),
-                          content: const Text('確定要登出嗎？'),
-                          actions: [
-                            FilledButton.tonal(
-                              style: ButtonStyle(
-                                backgroundColor:
-                                    MaterialStateProperty.all<Color>(
-                                  Theme.of(context).colorScheme.errorContainer,
-                                ),
-                              ),
-                              onPressed: () {
-                                Navigator.of(context).maybePop();
-                              },
-                              child: Text(
-                                '取消',
-                                style: TextStyle(
-                                  color: Theme.of(context).colorScheme.error,
-                                ),
-                              ),
-                            ),
-                            FilledButton.tonal(
-                              style: ButtonStyle(
-                                backgroundColor:
-                                    MaterialStateProperty.all<Color>(
-                                  Theme.of(context)
-                                      .colorScheme
-                                      .primaryContainer,
-                                ),
-                              ),
-                              onPressed: () {
-                                Navigator.of(context)
-                                    .popUntil(ModalRoute.withName('/'));
-                                context.read<AuthProvider>().logout();
-                              },
-                              child: Text(
-                                '確定',
-                                style: TextStyle(
-                                    color:
-                                        Theme.of(context).colorScheme.primary),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                    label: Text(
-                      '登出',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.error,
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(width: MediaQuery.of(context).size.width * 0.02),
               ],
             ),
-          ),
-        );
-      },
+            bottomNavigationBar: BottomAppBar(
+              child: Row(
+                children: [
+                  SizedBox(width: MediaQuery.of(context).size.width * 0.02),
+                  Expanded(
+                    child: FloatingActionButton.extended(
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (_) => AlertDialog(
+                            title: const Text('確認身份切換'),
+                            content: Text(
+                                '確定要切換成${args.isHost ? '參加者' : '主辦方'}角色嗎？'),
+                            actions: [
+                              FilledButton.tonal(
+                                style: ButtonStyle(
+                                  backgroundColor:
+                                      MaterialStateProperty.all<Color>(
+                                    Theme.of(context)
+                                        .colorScheme
+                                        .errorContainer,
+                                  ),
+                                ),
+                                onPressed: () {
+                                  Navigator.of(context).maybePop();
+                                },
+                                child: Text(
+                                  '取消',
+                                  style: TextStyle(
+                                    color: Theme.of(context).colorScheme.error,
+                                  ),
+                                ),
+                              ),
+                              FilledButton.tonal(
+                                style: ButtonStyle(
+                                  backgroundColor:
+                                      MaterialStateProperty.all<Color>(
+                                    Theme.of(context)
+                                        .colorScheme
+                                        .primaryContainer,
+                                  ),
+                                ),
+                                onPressed: () {
+                                  context
+                                      .read<SharedPreferenceProvider>()
+                                      .setIsHost(!args.isHost)
+                                      .then((_) => Navigator.of(context)
+                                              .pushNamedAndRemoveUntil(
+                                            MainPage.routeName,
+                                            ModalRoute.withName(
+                                                LoginPage.routeName),
+                                            arguments: MainPageArguments(
+                                              isHost: !args.isHost,
+                                            ),
+                                          ));
+                                },
+                                child: Text(
+                                  '確定',
+                                  style: TextStyle(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .primary),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                      label: Text(
+                        '切換身份',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: MediaQuery.of(context).size.width * 0.05),
+                  Expanded(
+                    child: FloatingActionButton.extended(
+                      backgroundColor:
+                          Theme.of(context).colorScheme.errorContainer,
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (_) => AlertDialog(
+                            title: const Text('確認登出'),
+                            content: const Text('確定要登出嗎？'),
+                            actions: [
+                              FilledButton.tonal(
+                                style: ButtonStyle(
+                                  backgroundColor:
+                                      MaterialStateProperty.all<Color>(
+                                    Theme.of(context)
+                                        .colorScheme
+                                        .errorContainer,
+                                  ),
+                                ),
+                                onPressed: () {
+                                  Navigator.of(context).maybePop();
+                                },
+                                child: Text(
+                                  '取消',
+                                  style: TextStyle(
+                                    color: Theme.of(context).colorScheme.error,
+                                  ),
+                                ),
+                              ),
+                              FilledButton.tonal(
+                                style: ButtonStyle(
+                                  backgroundColor:
+                                      MaterialStateProperty.all<Color>(
+                                    Theme.of(context)
+                                        .colorScheme
+                                        .primaryContainer,
+                                  ),
+                                ),
+                                onPressed: () {
+                                  Navigator.of(context)
+                                      .popUntil(ModalRoute.withName('/'));
+                                  context.read<AuthProvider>().logout();
+                                },
+                                child: Text(
+                                  '確定',
+                                  style: TextStyle(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .primary),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                      label: Text(
+                        '登出',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: MediaQuery.of(context).size.width * 0.02),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 

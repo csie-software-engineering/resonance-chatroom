@@ -23,7 +23,7 @@ class ActivityProvider {
         activityData.endDate
             .toEpochTime()
             .isAfter(activityData.startDate.toEpochTime()),
-        '活動結束時間需要在開始之間之後');
+        '活動結束時間需要在開始時間之後');
 
     activityData.uid = generateUuid();
     final documentReference = db
@@ -492,6 +492,8 @@ class ActivityProvider {
 
   /// 取得問卷
   Future<Question> getQuestion(String activityId, String questionId) async {
+    assert(await _checkActivityAlive(activityId), "活動不存在");
+
     final questionRef = db
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityId)
@@ -506,6 +508,8 @@ class ActivityProvider {
 
   /// 用話題取得問卷
   Future<Question> getQuestionByTopic(String activityId, String topicId) async {
+    assert(await _checkActivityAlive(activityId), "活動不存在");
+    assert(await _checkTopicAlive(activityId, topicId), "話題不存在");
     final questionQuery = db
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityId)

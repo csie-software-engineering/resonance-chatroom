@@ -32,9 +32,9 @@ enum FirestoreConstants {
       case FirestoreConstants.questionCollectionPath:
         return "questions";
       case FirestoreConstants.replyCollectionPath:
-        return "reviews";
+        return "reply";
       case FirestoreConstants.reportCollectionPath:
-        return "reports";
+        return "report";
       case FirestoreConstants.nickname:
         return "nickname";
       case FirestoreConstants.aboutMe:

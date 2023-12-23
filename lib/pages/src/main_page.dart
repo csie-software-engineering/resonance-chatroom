@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../models/models.dart';
 import '../../providers/providers.dart';
 import '../../utils/utils.dart';
+import '../../widgets/src/confirm_buttons.dart';
 import '../routes.dart';
 
 class MainPageArguments {
@@ -97,9 +98,30 @@ class _MainPageState extends State<MainPage> {
                           viewportFraction: 0.8,
                         ),
                         itemBuilder: (context, index, realIndex) {
-                          return RoomCard(
-                            isHost: args.isHost,
-                            activityId: userActivities[index].uid,
+                          final activityId = userActivities[index].uid;
+                          return InkWell(
+                            onLongPress: () => args.isHost
+                                ? ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('主辦方無法刪除活動')))
+                                : showDialog(
+                                    context: context,
+                                    builder: (context) => AlertDialog(
+                                      title: const Text('刪除活動'),
+                                      content: const Text('是否要刪除該活動？'),
+                                      actions: confirmButtons(context, () {
+                                        context
+                                            .read<UserProvider>()
+                                            .removeUserActivity(activityId,
+                                                isManager: false)
+                                            .then((value) => setState(() {}));
+                                        Navigator.of(context).pop();
+                                      }),
+                                    ),
+                                  ),
+                            child: RoomCard(
+                              isHost: args.isHost,
+                              activityId: activityId,
+                            ),
                           );
                         },
                       )
@@ -177,28 +199,16 @@ class _MainPageState extends State<MainPage> {
                                   title: const Text('確認加入活動'),
                                   content: Text(
                                       '是否要加入「${activity.activityName}」活動？'),
-                                  actions: [
-                                    TextButton(
-                                      child: const Text('取消'),
-                                      onPressed: () =>
-                                          Navigator.of(context).maybePop(),
-                                    ),
-                                    TextButton(
-                                      child: const Text('加入'),
-                                      onPressed: () {
-                                        context
-                                            .read<UserProvider>()
-                                            .addUserActivity(UserActivity(
-                                              uid: activity.uid,
-                                              isManager: false,
-                                            ))
-                                            .then((_) => setState(() {
-                                                  Navigator.of(context)
-                                                      .maybePop();
-                                                }));
-                                      },
-                                    ),
-                                  ],
+                                  actions: confirmButtons(context, () {
+                                    context
+                                        .read<UserProvider>()
+                                        .addUserActivity(UserActivity(
+                                          uid: activity.uid,
+                                          isManager: false,
+                                        ))
+                                        .then((_) => setState(() {}));
+                                    Navigator.of(context).pop();
+                                  }),
                                 ),
                               );
                             },
@@ -211,7 +221,7 @@ class _MainPageState extends State<MainPage> {
                 actions: [
                   ElevatedButton(
                     onPressed: () {
-                      Navigator.of(context).maybePop();
+                      Navigator.of(context).pop();
                     },
                     child: const Text('關閉'),
                   ),
@@ -224,51 +234,6 @@ class _MainPageState extends State<MainPage> {
     );
   }
 }
-
-// class StatisticsScreen extends StatelessWidget {
-//   const StatisticsScreen({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: const Text(
-//           '統計圖',
-//           style: TextStyle(
-//             fontSize: 24.0,
-//             fontWeight: FontWeight.bold,
-//             letterSpacing: 1.2,
-//             color: Colors.white,
-//           ),
-//         ),
-//         centerTitle: true,
-//         backgroundColor: Colors.green,
-//       ),
-//       body: Center(
-//         child: SfCartesianChart(
-//           primaryXAxis: CategoryAxis(),
-//           primaryYAxis: NumericAxis(minimum: 0, maximum: 40, interval: 10),
-//           tooltipBehavior: TooltipBehavior(enable: true),
-//           series: <ChartSeries<_ChartData, String>>[
-//             ColumnSeries<_ChartData, String>(
-//               dataSource: [
-//                 _ChartData('數據1', 12),
-//                 _ChartData('數據2', 15),
-//                 _ChartData('數據3', 30),
-//                 _ChartData('數據4', 6.4),
-//                 _ChartData('數據5', 14), //*****
-//               ],
-//               xValueMapper: (_ChartData data, _) => data.x,
-//               yValueMapper: (_ChartData data, _) => data.y,
-//               name: 'Gold',
-//               color: Color.fromRGBO(8, 142, 255, 1),
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
 
 class RoomCard extends StatelessWidget {
   final bool isHost;
@@ -319,38 +284,13 @@ class RoomCard extends StatelessWidget {
                         actions: [
                           TextButton(
                             child: const Text('了解'),
-                            onPressed: () => Navigator.of(context).maybePop(),
+                            onPressed: () => Navigator.of(context).pop(),
                           ),
                         ],
                       ),
                     );
                   }
                 },
-                onLongPress: () => isHost
-                    ? ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('主辦方無法刪除活動')))
-                    : showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: const Text('刪除活動'),
-                          content: const Text('是否要刪除該活動？'),
-                          actions: [
-                            TextButton(
-                              child: const Text('取消'),
-                              onPressed: () => Navigator.of(context).maybePop(),
-                            ),
-                            TextButton(
-                              child: const Text('刪除'),
-                              onPressed: () {
-                                context.read<UserProvider>().removeUserActivity(
-                                    activityId,
-                                    isManager: false);
-                                Navigator.of(context).maybePop();
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
                 child: Image.memory(
                   base64ToImage(activity.activityPhoto),
                   fit: BoxFit.contain,

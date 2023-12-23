@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../widgets/src/confirm_buttons.dart';
 import '../routes.dart';
 import '../../providers/providers.dart';
 
@@ -154,33 +155,22 @@ class _LoginPageState extends State<LoginPage> {
                       title: const Text('注意'),
                       content: const Text(
                           '匿名使用無法使用部分功能\n且無法轉移帳號資料\n也無法串辦活動\n確定要繼續嗎？'),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).maybePop();
-                          },
-                          child: const Text('取消'),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            context
-                                .read<AuthProvider>()
-                                .signInWithAnonymous()
-                                .then((_) {
-                              pref.then((instance) {
-                                Navigator.of(context).pushNamed(
-                                  MainPage.routeName,
-                                  arguments: const MainPageArguments(
-                                    isHost: false,
-                                  ),
-                                );
-                              });
-                            });
-                            Navigator.of(context).maybePop();
-                          },
-                          child: const Text('確定'),
-                        ),
-                      ],
+                      actions: confirmButtons(context, () {
+                        context
+                            .read<AuthProvider>()
+                            .signInWithAnonymous()
+                            .then((_) {
+                          pref.then((instance) {
+                            Navigator.of(context).pushNamed(
+                              MainPage.routeName,
+                              arguments: const MainPageArguments(
+                                isHost: false,
+                              ),
+                            );
+                          });
+                        });
+                        Navigator.of(context).pop();
+                      }),
                     ),
                   );
                 },
@@ -249,7 +239,6 @@ class _SetIsHostWidgetState extends State<_SetIsHostWidget> {
             Switch.adaptive(
               value: isHost,
               onChanged: (value) => setState(() {
-                debugPrint(value.toString());
                 isHost = value;
                 context.read<SharedPreferenceProvider>().setIsHost(isHost);
               }),

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../models/models.dart';
 import '../../pages/routes.dart';
 import '../../providers/providers.dart';
+import '../../widgets/src/confirm_buttons.dart';
 
 class PersonalSettingPageArguments {
   final bool isHost;
@@ -190,58 +191,23 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
                             title: const Text('確認身份切換'),
                             content: Text(
                                 '確定要切換成${args.isHost ? '參加者' : '主辦方'}角色嗎？'),
-                            actions: [
-                              FilledButton.tonal(
-                                style: ButtonStyle(
-                                  backgroundColor:
-                                      MaterialStateProperty.all<Color>(
-                                    Theme.of(context)
-                                        .colorScheme
-                                        .errorContainer,
-                                  ),
-                                ),
-                                onPressed: () {
-                                  Navigator.of(context).maybePop();
-                                },
-                                child: Text(
-                                  '取消',
-                                  style: TextStyle(
-                                    color: Theme.of(context).colorScheme.error,
-                                  ),
-                                ),
-                              ),
-                              FilledButton.tonal(
-                                style: ButtonStyle(
-                                  backgroundColor:
-                                      MaterialStateProperty.all<Color>(
-                                    Theme.of(context)
-                                        .colorScheme
-                                        .primaryContainer,
-                                  ),
-                                ),
-                                onPressed: () {
-                                  context
-                                      .read<SharedPreferenceProvider>()
-                                      .setIsHost(!args.isHost)
-                                      .then((_) => Navigator.of(context)
-                                              .pushNamedAndRemoveUntil(
-                                            MainPage.routeName,
-                                            ModalRoute.withName(
-                                                LoginPage.routeName),
-                                            arguments: MainPageArguments(
-                                              isHost: !args.isHost,
-                                            ),
-                                          ));
-                                },
-                                child: Text(
-                                  '確定',
-                                  style: TextStyle(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .primary),
-                                ),
-                              ),
-                            ],
+                            actions: confirmButtons(
+                              context,
+                              () {
+                                context
+                                    .read<SharedPreferenceProvider>()
+                                    .setIsHost(!args.isHost)
+                                    .then((_) => Navigator.of(context)
+                                            .pushNamedAndRemoveUntil(
+                                          MainPage.routeName,
+                                          ModalRoute.withName(
+                                              LoginPage.routeName),
+                                          arguments: MainPageArguments(
+                                            isHost: !args.isHost,
+                                          ),
+                                        ));
+                              },
+                            ),
                           ),
                         );
                       },
@@ -267,49 +233,14 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
                           builder: (_) => AlertDialog(
                             title: const Text('確認登出'),
                             content: const Text('確定要登出嗎？'),
-                            actions: [
-                              FilledButton.tonal(
-                                style: ButtonStyle(
-                                  backgroundColor:
-                                      MaterialStateProperty.all<Color>(
-                                    Theme.of(context)
-                                        .colorScheme
-                                        .errorContainer,
-                                  ),
-                                ),
-                                onPressed: () {
-                                  Navigator.of(context).maybePop();
-                                },
-                                child: Text(
-                                  '取消',
-                                  style: TextStyle(
-                                    color: Theme.of(context).colorScheme.error,
-                                  ),
-                                ),
-                              ),
-                              FilledButton.tonal(
-                                style: ButtonStyle(
-                                  backgroundColor:
-                                      MaterialStateProperty.all<Color>(
-                                    Theme.of(context)
-                                        .colorScheme
-                                        .primaryContainer,
-                                  ),
-                                ),
-                                onPressed: () {
-                                  Navigator.of(context)
-                                      .popUntil(ModalRoute.withName('/'));
-                                  context.read<AuthProvider>().logout();
-                                },
-                                child: Text(
-                                  '確定',
-                                  style: TextStyle(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .primary),
-                                ),
-                              ),
-                            ],
+                            actions: confirmButtons(
+                              context,
+                              () {
+                                Navigator.of(context).popUntil(
+                                    ModalRoute.withName(LoginPage.routeName));
+                                context.read<AuthProvider>().logout();
+                              },
+                            ),
                           ),
                         );
                       },

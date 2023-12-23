@@ -20,10 +20,11 @@ class ActivityProvider {
     assert(activityData.startDate.toEpochTime().isAfter(DateTime.now()),
         '活動開始時間需要在現在之後');
     assert(
-        activityData.endDate
-            .toEpochTime()
-            .isAfter(activityData.startDate.toEpochTime()),
-        '活動結束時間需要在開始時間之後');
+      activityData.endDate
+          .toEpochTime()
+          .isAfter(activityData.startDate.toEpochTime()),
+      '活動結束時間需要在開始之間之後',
+    );
 
     activityData.uid = generateUuid();
     final documentReference = db
@@ -435,7 +436,7 @@ class ActivityProvider {
     return await getQuestion(activityId, questionData.uid);
   }
 
-  /// 修改問卷選項(若活動已經開始，則不可修改)
+  /// 新增/修改問卷選項(若活動已經開始，則不可修改)
   Future<void> editQuestionChoices(
     String activityId,
     String questionId,
@@ -532,6 +533,17 @@ class ActivityProvider {
     final questionDocs = (await questionQuery.get()).docs;
     assert(questionDocs.isNotEmpty, '該話題沒有問卷');
     return Question.fromDocument(questionDocs.first);
+  }
+
+  /// 取得所有問卷
+  Future<List<Question>> getAllQuestions(String activityId) async {
+    final questionQuery = db
+        .collection(FirestoreConstants.activityCollectionPath.value)
+        .doc(activityId)
+        .collection(FirestoreConstants.questionCollectionPath.value);
+
+    final questionDocs = (await questionQuery.get()).docs;
+    return questionDocs.map((e) => Question.fromDocument(e)).toList();
   }
 
   /// 刪除話題與問卷問題

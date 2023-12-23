@@ -514,10 +514,10 @@ class ActivityProvider {
         .collection(FirestoreConstants.questionCollectionPath.value)
         .doc(questionId);
 
-    final questionDoc = await questionRef.get();
-    assert(questionDoc.exists, '問卷不存在');
+    final questionData = await questionRef.get();
+    assert(questionData.exists, '問卷不存在');
 
-    return Question.fromDocument(questionDoc);
+    return Question.fromDocument(questionData);
   }
 
   /// 用話題取得問卷

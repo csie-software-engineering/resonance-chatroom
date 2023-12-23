@@ -183,6 +183,19 @@ class ActivityProvider {
     return false;
   }
 
+  Future<List<String>> getManagers(String activityId) async {
+    final userId = AuthProvider().currentUserId;
+    assert(await _isManager(activityId), "你不是管理者");
+
+    final documentReference = db
+        .collection(FirestoreConstants.activityCollectionPath.value)
+        .doc(activityId);
+
+    final activityData = Activity.fromDocument(await documentReference.get());
+
+    return activityData.managers;
+  }
+
   /// 增加管理者
   Future<void> addManagers(String activityId, String addUserId) async {
     assert(await _checkActivityAlive(activityId), "活動不存在");

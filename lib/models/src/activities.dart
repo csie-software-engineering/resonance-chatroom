@@ -138,7 +138,7 @@ class Question {
   final String tagId;
   final String topicId;
   String questionName;
-  final List<String> choices;
+  late List<String> choices;
 
 
   Question({
@@ -146,7 +146,6 @@ class Question {
     required this.tagId,
     required this.topicId,
     required this.questionName,
-    required this.choices,
   });
 
   Map<String, dynamic> toJson() {
@@ -173,9 +172,9 @@ class Question {
       tagId: tagId,
       topicId: topicId,
       questionName: questionName,
-      choices: choices.cast<String>(),
     );
 
+    question.choices = choices.cast<String>();
     question.uid = uid;
     return question;
   }

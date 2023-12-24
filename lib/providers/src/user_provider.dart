@@ -87,14 +87,19 @@ class UserProvider {
   /// 添加(覆寫)使用者活動資料(僅能添加自己的資料)
   Future<UserActivity> addUserActivity(
     UserActivity activity, {
+    String? userId,
     Transaction? transaction,
   }) async {
-    final userId = AuthProvider().currentUserId;
+    userId ??= AuthProvider().currentUserId;
     final userRef = db
         .collection(FireStoreUserConstants.userCollectionPath.value)
         .doc(userId);
 
-    assert((await userRef.get()).exists, "使用者不存在");
+    final userData = await userRef.get();
+    assert(userData.exists, "使用者不存在");
+    final fsUser = FSUser.fromDocument(userData);
+    final user = fsUser.toUser();
+    assert(user.email != null || activity.isManager != true, "匿名使用者不能管理活動");
 
     final collection = activity.isManager
         ? FireStoreUserConstants.userHostedActivityCollectionPath.value
@@ -145,9 +150,10 @@ class UserProvider {
   /// 刪除使用者活動資料(僅能刪除自己的資料)
   Future<void> removeUserActivity(
     String activityId, {
+    String? userId,
     required bool isManager,
   }) async {
-    final userId = AuthProvider().currentUserId;
+    userId ??= AuthProvider().currentUserId;
     final userRef = db
         .collection(FireStoreUserConstants.userCollectionPath.value)
         .doc(userId);

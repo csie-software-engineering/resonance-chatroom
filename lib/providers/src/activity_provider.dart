@@ -196,7 +196,6 @@ class ActivityProvider {
     return activityData.managers;
   }
 
-  //todo 用戶資料存取問題
   /// 增加管理者
   Future<void> addManagers(String activityId, String addUserId) async {
     assert(await _checkActivityAlive(activityId), "活動不存在");
@@ -210,9 +209,7 @@ class ActivityProvider {
     final activityData = Activity.fromDocument(await documentReference.get());
 
     activityData.managers.add(addUserId);
-    await UserProvider().getUser(userId: addUserId);
-    await UserProvider()
-        .addUserActivity(UserActivity(uid: activityData.uid, isManager: true));
+    await UserProvider().addUserActivity(UserActivity(uid: activityData.uid, isManager: true), userId: addUserId);
     await documentReference.set(activityData.toJson());
   }
 
@@ -227,8 +224,9 @@ class ActivityProvider {
 
     final activityData = Activity.fromDocument(await documentReference.get());
 
+    assert(activityData.ownerId != deleteUserId, "不能刪除主辦者");
     assert(activityData.managers.remove(deleteUserId), '該用戶不是管理者');
-    await UserProvider().removeUserActivity(activityId, isManager: true);
+    await UserProvider().removeUserActivity(activityId, userId: deleteUserId, isManager: true);
     await documentReference.set(activityData.toJson());
   }
 

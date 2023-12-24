@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -8,8 +7,6 @@ import 'package:resonance_chatroom/models/models.dart';
 import 'package:resonance_chatroom/providers/providers.dart';
 import 'package:resonance_chatroom/utils/src/time.dart';
 import '../routes.dart';
-
-// 定義一個類別來儲存活動的所有內容
 
 class HostActivitySetPage extends StatefulWidget {
   const HostActivitySetPage({Key? key}) : super(key: key);
@@ -28,7 +25,6 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
   final List<DateTime> _selectedDates = [DateTime.now(), DateTime.now()];
   File? _selectedImage;
 
-  List<Tag> tags = []; // 活動標籤的List
   Future<void> _pickImage() async {
     final image = await ImagePicker().pickImage(source: ImageSource.gallery);
     setState(() {

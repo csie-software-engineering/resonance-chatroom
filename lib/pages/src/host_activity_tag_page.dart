@@ -3,13 +3,14 @@ import 'package:provider/provider.dart';
 import 'package:resonance_chatroom/providers/providers.dart';
 import '../../models/models.dart';
 import '../routes.dart';
+
 class HostActivityTagPageArguments {
   final String activityId;
-  final List<Tag> tag;
-  HostActivityTagPageArguments(this.tag, {required this.activityId});
+  HostActivityTagPageArguments({required this.activityId});
 }
+
 class HostActivityTagPage extends StatefulWidget {
-  const HostActivityTagPage({Key? key, required String activityId, required List<Tag> tag}) : super(key: key);
+  const HostActivityTagPage({super.key});
 
   static const routeName = '/host_activity_tag_page';
 
@@ -17,9 +18,10 @@ class HostActivityTagPage extends StatefulWidget {
   State<HostActivityTagPage> createState() => _HostActivityTagPageState();
 }
 
-class _HostActivityTagPageState extends State<HostActivityTagPage> with SingleTickerProviderStateMixin{
-    late final args = ModalRoute.of(context)!.settings.arguments
+class _HostActivityTagPageState extends State<HostActivityTagPage> {
+  late final args = ModalRoute.of(context)!.settings.arguments
       as HostActivityTagPageArguments;
+
   late final ActivityProvider activityProvider =
       context.read<ActivityProvider>();
   List<Widget> fields = [];
@@ -49,9 +51,11 @@ class _HostActivityTagPageState extends State<HostActivityTagPage> with SingleTi
                       ),
                       onPressed: () async {
                         Tag tag = await activityProvider.addNewTag(
-                          "20231221-1345-8f43-9113-b1dd764c427f",
-                            //args.activityId,
-                            "",);
+                          //"20231221-1345-8f43-9113-b1dd764c427f",
+                          args.activityId,
+                          "",
+                        );
+                        print("活動id" + args.activityId);
                         setState(() {
                           fields.add(NewTagField(
                             onDelete: () {
@@ -60,6 +64,7 @@ class _HostActivityTagPageState extends State<HostActivityTagPage> with SingleTi
                               });
                             },
                             id: tag.uid,
+                            activityid: args.activityId,
                           ));
                         });
                       },
@@ -91,16 +96,16 @@ class NewTagField extends StatefulWidget {
     super.key,
     required this.onDelete,
     required this.id,
+    required this.activityid,
   });
   final VoidCallback? onDelete;
   String id;
+  String activityid;
   @override
   _NewTagFieldState createState() => _NewTagFieldState();
 }
 
 class _NewTagFieldState extends State<NewTagField> {
-      late final args = ModalRoute.of(context)!.settings.arguments
-      as HostActivityTagPageArguments;
   bool isEditing = false; // 定義一個bool變量來控制按鈕的狀態
   late String tag; // 定義一個String變量來儲存按鈕的文字
   final TextEditingController _controller =
@@ -130,14 +135,14 @@ class _NewTagFieldState extends State<NewTagField> {
               onPressed: () {
                 // 跳至預覽頁面的邏輯
                 // 傳遞createEvent()方法的回傳值給預覽頁面
+                print("跳至topic頁面");
                 Navigator.of(context).pushNamed(HostActivityTopicPage.routeName,
-          arguments: HostActivityTopicPage(activityId: "20231221-1345-8f43-9113-b1dd764c427f",
-          //args.activityId,
-           tagId: "20231221-1400-8418-8208-3535109ee14f",
-           //widget.id
-           ));
-                Navigator.of(context)
-                    .pushNamed(HostActivityTopicPage.routeName);
+                    arguments: HostActivityTopicPageArguments(
+                      activityId: //"20231221-1345-8f43-9113-b1dd764c427f",
+                          widget.activityid,
+                      tagId: //"20231221-1400-8418-8208-3535109ee14f",
+                          widget.id,
+                    ));
               },
             ),
           ),
@@ -156,11 +161,12 @@ class _NewTagFieldState extends State<NewTagField> {
                   _focusNode.requestFocus(); // 將焦點賦值給TextField
                 }
               });
+              print("更改標籤");
               await activityProvider.editTag(
-                "20231221-1345-8f43-9113-b1dd764c427f",
-                  //args.activityId,
-                  widget.id,
-                  tag,);
+                widget.activityid,
+                widget.id,
+                tag,
+              );
             },
           ),
           IconButton(

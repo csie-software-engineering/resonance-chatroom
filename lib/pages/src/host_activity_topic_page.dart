@@ -17,9 +17,7 @@ class HostActivityTopicPageArguments {
 }
 
 class HostActivityTopicPage extends StatefulWidget {
-  const HostActivityTopicPage(
-      {Key? key, required String activityId, required String tagId})
-      : super(key: key);
+  const HostActivityTopicPage({super.key});
 
   static const routeName = '/host_activity_topic_page';
 
@@ -57,29 +55,32 @@ class _HostActivityTopicPageState extends State<HostActivityTopicPage> {
                         "新增話題",
                       ),
                       onPressed: () async {
+                        print("新增話題");
                         Topic topic = Topic(
-                            activityId: "20231221-1345-8f43-9113-b1dd764c427f",
-                            //args.activityId,
-                            tagId: "20231221-1400-8418-8208-3535109ee14f",
-                            //args.tagId,
+                            activityId: //"20231221-1345-8f43-9113-b1dd764c427f",
+                                args.activityId,
+                            tagId: //"20231221-1400-8418-8208-3535109ee14f",
+                                args.tagId,
                             topicName: "");
                         Topic tmp = await activityProvider.addNewTopic(
-                          "20231221-1345-8f43-9113-b1dd764c427f",
-                          //  args.activityId,
+                          //"20231221-1345-8f43-9113-b1dd764c427f",
+                          args.activityId,
                           topic,
                         );
-                        print("topic測試");
                         Question questiontmp = Question(
-                            activityId: "20231221-1345-8f43-9113-b1dd764c427f",
-                            tagId: "20231221-1400-8418-8208-3535109ee14f",
-                            topicId: tmp.uid,
-                            questionName: "questionName",
-                            choices: []);
+                          activityId: //"20231221-1345-8f43-9113-b1dd764c427f",
+                              args.activityId,
+                          tagId: //"20231221-1400-8418-8208-3535109ee14f",
+                              args.tagId,
+                          topicId: tmp.uid,
+                          questionName: "questionName",
+                        );
                         Question question =
                             await activityProvider.addNewQuestion(
-                                "20231221-1345-8f43-9113-b1dd764c427f",
+                                args.activityId,
+                                //"20231221-1345-8f43-9113-b1dd764c427f",
                                 questiontmp);
-                                print("question測試");
+                        print("question測試");
                         setState(() {
                           fields.add(NewTopicField(
                             onDelete: () {
@@ -89,6 +90,7 @@ class _HostActivityTopicPageState extends State<HostActivityTopicPage> {
                             },
                             id: tmp.uid,
                             questionid: question.uid,
+                            activityid: args.activityId,
                           ));
                         });
                       },
@@ -121,17 +123,17 @@ class NewTopicField extends StatefulWidget {
     required this.onDelete,
     required this.id,
     required this.questionid,
+    required this.activityid,
   });
   final VoidCallback? onDelete;
   String questionid;
   String id;
+  String activityid;
   @override
   _NewTopicFieldState createState() => _NewTopicFieldState();
 }
 
 class _NewTopicFieldState extends State<NewTopicField> {
-  late final args = ModalRoute.of(context)!.settings.arguments
-      as HostActivityTopicPageArguments;
   bool isEditing = false; // 定義一個bool變量來控制按鈕的狀態
   late String topic; // 定義一個String變量來儲存按鈕的文字
   final TextEditingController _controller =
@@ -162,11 +164,13 @@ class _NewTopicFieldState extends State<NewTopicField> {
               onPressed: () async {
                 // 跳至預覽頁面的邏輯
                 // 傳遞createEvent()方法的回傳值給預覽頁面
+                print("跳至問卷頁面");
+                 print(widget.questionid);
                 Navigator.of(context)
                     .pushNamed(HostActivityQuestionPage.routeName,
-                        arguments: HostActivityQuestionPage(
-                          activityId: "20231221-1345-8f43-9113-b1dd764c427f",
-                          //args.activityId,
+                        arguments: HostActivityQuestionPageArguments(
+                          activityId: //"20231221-1345-8f43-9113-b1dd764c427f",
+                          widget.activityid,
                           questionId: widget.questionid,
                         ));
               },
@@ -188,8 +192,8 @@ class _NewTopicFieldState extends State<NewTopicField> {
                 }
               });
               await activityProvider.editTopic(
-                  "20231221-1345-8f43-9113-b1dd764c427f",
-                  //args.activityId,
+                  //"20231221-1345-8f43-9113-b1dd764c427f",
+                  widget.activityid,
                   widget.id,
                   topic);
             },

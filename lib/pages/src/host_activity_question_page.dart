@@ -5,8 +5,6 @@ import '../../providers/providers.dart';
 import '../routes.dart';
 
 class HostActivityQuestionPageArguments {
-  // todo
-  // final ;
   final String activityId;
   final String questionId;
 
@@ -15,9 +13,7 @@ class HostActivityQuestionPageArguments {
 }
 
 class HostActivityQuestionPage extends StatefulWidget {
-  const HostActivityQuestionPage(
-      {Key? key, required String activityId, required String questionId})
-      : super(key: key);
+  const HostActivityQuestionPage({super.key});
 
   static const routeName = '/host_activity_question_page';
 
@@ -26,13 +22,20 @@ class HostActivityQuestionPage extends StatefulWidget {
       _HostActivityQuestionPageState();
 }
 
+
+
 class _HostActivityQuestionPageState extends State<HostActivityQuestionPage> {
+  List<String> choice = [];
   List<Widget> fields = [];
+    late final args = ModalRoute.of(context)!.settings.arguments
+      as HostActivityQuestionPageArguments;
   TextEditingController _questionController = TextEditingController();
+  TextEditingController _choice1Controller = TextEditingController();
   late final ActivityProvider setActivityProvider =
       context.read<ActivityProvider>();
   @override
   Widget build(BuildContext context) {
+    final double height = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
         title: Text('問卷頁面'),
@@ -58,7 +61,25 @@ class _HostActivityQuestionPageState extends State<HostActivityQuestionPage> {
                   ),
                 ],
               ),
-              SizedBox(width: 16.0),
+              Row(
+                mainAxisAlignment:
+                    MainAxisAlignment.spaceEvenly, // 調整子元件的水平對齊方式
+                crossAxisAlignment: CrossAxisAlignment.center, // 調整子元件的垂直對齊方式
+                children: [
+                  SizedBox(
+                    height: height * 0.05,
+                  ),
+                  Expanded(
+                    // 使用Expanded Widget來包裹TextFormField
+                    flex: 2, // 指定flex因數為2
+                    child: TextFormField(
+                      controller: _choice1Controller,
+                      decoration: const InputDecoration(labelText: "選項一"),
+                    ),
+                  ),
+                ],
+              ),
+/*              SizedBox(width: 16.0),
               Container(
                 width: 280, // 使用Container來設定按鈕的寬度
                 child: ElevatedButton(
@@ -78,21 +99,31 @@ class _HostActivityQuestionPageState extends State<HostActivityQuestionPage> {
                   },
                 ),
               ),
-              ...fields,
+              ...fields,*/
               Container(
                 width: 100, // 使用Container來設定按鈕的寬度
                 child: ElevatedButton(
                   onPressed: () async {
-                    List<String> choice = [];
+                    print("問卷修改");
                     // 跳至送出頁面的邏輯
                     // 傳遞createEvent()方法的回傳值給送出頁面
                     Question question = await setActivityProvider.getQuestion(
-                        "20231221-1345-8f43-9113-b1dd764c427f",
-                        "20231221-1515-8441-b984-c81834926ea7");
+                      args.activityId,
+                      args.questionId,
+                //        "20231221-1345-8f43-9113-b1dd764c427f",
+                  //      "20231221-1515-8441-b984-c81834926ea7"
+                  );
+                  print(question.choices);
                     question.questionName = _questionController.text;
+                    print("===========");
+                    print(choice);
+                    choice.add(_choice1Controller.text);
+                    question.choices = choice;
                     await setActivityProvider.editQuestion(
-                        "20231221-1345-8f43-9113-b1dd764c427f",
-                        "20231221-1515-8441-b984-c81834926ea7",
+                      args.activityId,
+                      args.questionId,
+                       // "20231221-1345-8f43-9113-b1dd764c427f",
+                       // "20231221-1515-8441-b984-c81834926ea7",
                         question);
                   },
                   child: Text('送出'),
@@ -105,7 +136,9 @@ class _HostActivityQuestionPageState extends State<HostActivityQuestionPage> {
     );
   }
 }
+
 List<String> test = [];
+
 class NewChoiceField extends StatelessWidget {
   NewChoiceField({
     super.key,
@@ -128,13 +161,6 @@ class NewChoiceField extends StatelessWidget {
               ),
             ),
           ),
-          /*OutlinedButton(
-            onPressed: () {
-              // 跳至預覽頁面的邏輯
-              // 傳遞createEvent()方法的回傳值給預覽頁面
-            },
-            child: Text('確認'),
-          ),*/
           IconButton(
             icon: const Icon(Icons.delete_forever),
             onPressed: onDelete,

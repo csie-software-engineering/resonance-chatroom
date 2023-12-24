@@ -214,43 +214,43 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
                       ),
               ),
 
-
               SizedBox(height: 16.0),
               Row(
                 children: [
                   ElevatedButton(
                     onPressed: () async {
-                      final data = await setActivityProvider.getActivity(
-                          "8a815b73-8fde-4564-8c11-e3d738f547d8");
+                      final data = await setActivityProvider
+                          .getActivity("8a815b73-8fde-4564-8c11-e3d738f547d8");
                       setState(() {
                         _checkselectedImage = base64Decode(data!.activityPhoto);
                       });
                       // 跳至預覽頁面的邏輯
                       // 傳遞createEvent()方法的回傳值給預覽頁面
                       Navigator.of(context)
-                    .pushNamed(HostActivityTagPage.routeName);
+                          .pushNamed(HostActivityTagPage.routeName);
                     },
                     child: Text('預覽'),
                   ),
                   SizedBox(width: 16.0),
                   ElevatedButton(
                     onPressed: () async {
-                      print("測試");
+                      print("活動送出");
                       Activity activitydata = Activity(
-                          activityPhoto:
-                              base64Encode(_selectedImage!.readAsBytesSync()),
-                          activityInfo: _infoController.text,
-                          activityName: _nameController.text,
-                          startDate: _selectedDates[0].toEpochString(),
-                          endDate: _selectedDates[1].toEpochString(),
-                          );
-                      Activity activity =  await setActivityProvider.setNewActivity(
-                          activitydata);
+                        activityPhoto:
+                            base64Encode(_selectedImage!.readAsBytesSync()),
+                        activityInfo: _infoController.text,
+                        activityName: _nameController.text,
+                        startDate: _selectedDates[0].toEpochString(),
+                        endDate: _selectedDates[1].toEpochString(),
+                      );
+                      Activity activity = await setActivityProvider
+                          .setNewActivity(activitydata);
                       // 跳至送出頁面的邏輯
                       // 傳遞createEvent()方法的回傳值給送出頁面
-                        List<Tag> tags= await setActivityProvider.getAllTags("20231221-1345-8f43-9113-b1dd764c427f");
-                      Navigator.of(context).pushNamed(HostActivityTagPage.routeName,
-          arguments: HostActivityTagPage(activityId: activity.uid, tag: tags));
+                      Navigator.of(context).pushNamed(
+                          HostActivityTagPage.routeName,
+                          arguments: HostActivityTagPageArguments(
+                              activityId: activity.uid));
                     },
                     child: Text('送出'),
                   ),

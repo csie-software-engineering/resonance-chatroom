@@ -509,11 +509,11 @@ class ActivityProvider {
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityId)
         .collection(FirestoreConstants.questionCollectionPath.value)
-        .where(QuestionConstants.questionId.value, isEqualTo: questionId);
+        .doc(questionId);
 
-    final questionDocs = (await questionQuery.get()).docs;
-    assert(questionDocs.isNotEmpty, '該話題沒有問卷');
-    return Question.fromDocument(questionDocs.first);
+    final questionDoc = await documentReference.get();
+    assert(questionDoc.exists, '問卷不存在');
+    return Question.fromDocument(questionDoc);
   }
 
   /// 刪除話題與問卷問題

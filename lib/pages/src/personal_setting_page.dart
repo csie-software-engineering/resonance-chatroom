@@ -356,7 +356,7 @@ class _NickNameWidget extends StatefulWidget {
 
 class _NickNameWidgetState extends State<_NickNameWidget> {
   bool _setNickname = false;
-
+  // FocusNode _focusNode = FocusNode();
   @override
   Widget build(BuildContext context) {
     final nameController = TextEditingController(text: widget.user.displayName);
@@ -374,7 +374,9 @@ class _NickNameWidgetState extends State<_NickNameWidget> {
           width: MediaQuery.of(context).size.width * 0.55,
           child: _setNickname
               ? TextField(
-                  controller: nameController,
+                  controller:
+                      TextEditingController(text: widget.user.displayName),
+                  // focusNode: _focusNode,
                   onChanged: (value) {
                     widget.user.displayName = value;
                   },

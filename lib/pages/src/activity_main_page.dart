@@ -447,7 +447,7 @@ class _ActivityMainPageState extends State<ActivityMainPage>
                                 ),
                               ),
                               // const SizedBox(width: 50),
-                              Align(
+                              args.isHost ? Align(
                                 alignment: Alignment.centerRight,
                                 child: Padding(
                                   padding: const EdgeInsets.only(right: 10.0),
@@ -464,7 +464,7 @@ class _ActivityMainPageState extends State<ActivityMainPage>
                                                 activityId: args.activityId));
                                       }),
                                 ),
-                              )
+                              ) : const SizedBox(),
                             ],
                           ),
                         ),

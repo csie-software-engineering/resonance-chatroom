@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:resonance_chatroom/models/models.dart';
@@ -41,14 +43,19 @@ class _HostActivityTagPageState extends State<HostActivityTagPage> {
                         "新增標籤",
                       ),
                       onPressed: () async {
-                        String? tagid = await setActivityProvider.AddNewTag("activityid", "", "UserId");
+                        String? tagid = await setActivityProvider.AddNewTag(
+                            "20231215-0916-8a22-9073-4055400dbd48",
+                            "",
+                            "zCgg4AnXJGgayN3ssQ56cBYQRQ03");
+
                         setState(() {
                           fields.add(NewTagField(
                             onDelete: () {
                               setState(() {
                                 fields.removeAt(fields.length - 1);
                               });
-                            }, id: tagid,
+                            },
+                            id: tagid,
                           ));
                         });
                       },
@@ -126,18 +133,24 @@ class _NewTagFieldState extends State<NewTagField> {
             icon: isEditing
                 ? Icon(Icons.check)
                 : Icon(Icons.edit), // 根據isEditing的值顯示不同的icon
-            onPressed: () async{
+            onPressed: () async {
+              
               setState(() {
                 isEditing = !isEditing; // 改變isEditing的值
                 if (isEditing == false) {
                   // 如果isEditing為false，表示編輯完成
                   tag = _controller.text; // 將TextEditingController的文字賦值給tag變量
-                  setActivityProvider.EditTag("activityid", widget.id , tag, "UserId");
                 } else {
                   // 如果isEditing為true，表示開始編輯
                   _focusNode.requestFocus(); // 將焦點賦值給TextField
                 }
+                
               });
+              await setActivityProvider.EditTag(
+                  "20231215-0916-8a22-9073-4055400dbd48",
+                  widget.id,
+                  tag,
+                  "zCgg4AnXJGgayN3ssQ56cBYQRQ03");
             },
           ),
           IconButton(

@@ -8,6 +8,8 @@ import 'package:provider/provider.dart';
 import 'package:resonance_chatroom/models/models.dart';
 import 'package:resonance_chatroom/providers/providers.dart';
 
+import '../routes.dart';
+
 // 定義一個類別來儲存活動的所有內容
 class Event {
   String name; // 活動名稱
@@ -283,6 +285,8 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
                       });
                       // 跳至預覽頁面的邏輯
                       // 傳遞createEvent()方法的回傳值給預覽頁面
+                      Navigator.of(context)
+                    .pushNamed(HostActivityTagPage.routeName);
                     },
                     child: Text('預覽'),
                   ),

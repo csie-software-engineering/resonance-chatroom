@@ -218,7 +218,7 @@ class SetActivityProvider {
         .collection(FirestoreConstants.tagCollectionPath.value)
         .doc(tagid);
 
-    await documentReference.update({Tagconstants.tagname: tagdata.name});
+    await documentReference.update({Tagconstants.tagname.value: tagname});
   }
 
   ///刪除標籤

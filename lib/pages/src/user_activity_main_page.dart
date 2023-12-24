@@ -181,9 +181,6 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
       }
     }
     _enableMatch = false;
-    setState(() {
-      Navigator.of(context).pop();
-    });
     var newName = textEditingController.text;
     if (newName != _currentUser.displayName && newName.isNotEmpty) {
       _currentUser.displayName = textEditingController.text;

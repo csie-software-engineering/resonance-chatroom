@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:resonance_chatroom/models/models.dart';
 
 import 'src/chat.dart';
 import 'src/host_activity_question_page.dart';
@@ -12,7 +11,7 @@ import 'src/main_page.dart';
 import 'src/personal_setting_page.dart';
 import 'src/user_activity_main_page.dart';
 import 'src/welcome_page.dart';
-import 'src/manager.dart';
+import 'src/manager_page.dart';
 
 export 'src/chat.dart';
 export 'src/host_activity_question_page.dart';
@@ -25,7 +24,7 @@ export 'src/main_page.dart';
 export 'src/personal_setting_page.dart';
 export 'src/user_activity_main_page.dart';
 export 'src/welcome_page.dart';
-export 'src/manager.dart';
+export 'src/manager_page.dart';
 
 Map<String, Widget Function(BuildContext)> routes = {
   ChatPage.routeName: (_) => const ChatPage(),

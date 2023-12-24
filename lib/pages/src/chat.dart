@@ -8,7 +8,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 // import 'package:url_launcher/url_launcher.dart';
 import 'package:provider/provider.dart';
 import 'package:resonance_chatroom/models/models.dart';
-import 'package:resonance_chatroom/pages/src/user_activity_main_page.dart';
+import 'package:resonance_chatroom/pages/src/activity_main_page.dart';
 import 'package:resonance_chatroom/widgets/src/public/quit_warning_dialog.dart';
 import 'package:resonance_chatroom/widgets/widgets.dart';
 import 'package:resonance_chatroom/providers/providers.dart';
@@ -808,7 +808,7 @@ class _ChatPageState extends State<ChatPage> {
                                           Navigator.popUntil(
                                               context,
                                               ModalRoute.withName(
-                                                  UserActivityMainPage
+                                                  ActivityMainPage
                                                       .routeName));
                                         });
                                       }

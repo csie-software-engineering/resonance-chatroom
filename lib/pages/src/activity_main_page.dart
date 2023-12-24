@@ -5,6 +5,7 @@ import 'dart:isolate';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:async/async.dart';
+import 'package:resonance_chatroom/widgets/src/activity_buttons/host_buttons.dart';
 
 import '../../widgets/src/public/quit_warning_dialog.dart';
 import '../routes.dart';
@@ -12,27 +13,26 @@ import '../../models/models.dart';
 import '../../utils/utils.dart';
 import '../../providers/providers.dart';
 import '../../widgets/src/activity_card/activity_card.dart';
-import '../../widgets/src/activity_buttons/animated_buttons.dart';
+import '../../widgets/src/activity_buttons/user_buttons.dart';
 
-class UserActivityMainPageArguments {
+class ActivityMainPageArguments {
   // final ;
   final String activityId;
-  final bool isPreview;
+  final bool isHost;
 
-  UserActivityMainPageArguments(
-      {required this.isPreview, required this.activityId});
+  ActivityMainPageArguments({required this.isHost, required this.activityId});
 }
 
-class UserActivityMainPage extends StatefulWidget {
-  const UserActivityMainPage({super.key});
+class ActivityMainPage extends StatefulWidget {
+  const ActivityMainPage({super.key});
 
-  static const routeName = "/user_activity_main_page";
+  static const routeName = "/activity_main_page";
 
   @override
-  State<UserActivityMainPage> createState() => _UserActivityMainPageState();
+  State<ActivityMainPage> createState() => _ActivityMainPageState();
 }
 
-class _UserActivityMainPageState extends State<UserActivityMainPage>
+class _ActivityMainPageState extends State<ActivityMainPage>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation _animation;
@@ -45,8 +45,8 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
   late final ActivityProvider activityProvider =
       context.read<ActivityProvider>();
 
-  late final args = ModalRoute.of(context)!.settings.arguments
-      as UserActivityMainPageArguments;
+  late final args =
+      ModalRoute.of(context)!.settings.arguments as ActivityMainPageArguments;
   late final _currentUser;
   late final _currentUserActivity;
   late final _image;
@@ -69,9 +69,6 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
   bool _enableMatch = false;
 
   bool initial = false;
-
-  late double buttonPositionTop;
-  late double buttonPositionLeft;
 
   void _onTimerTick(Timer timer) {
     setState(() {
@@ -298,8 +295,6 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
 
   Future<void> _init() async {
     if (!initial) {
-      buttonPositionTop = MediaQuery.of(context).size.height - 70; //70
-      buttonPositionLeft = MediaQuery.of(context).size.width - 100;
       await _initActivityContent();
       _initSetTag();
       _initImage();

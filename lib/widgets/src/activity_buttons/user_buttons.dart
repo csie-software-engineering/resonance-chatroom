@@ -31,22 +31,23 @@ class AnimatedButtons extends StatefulWidget {
   final Function() matching;
   final Function() goToHistoricalChatRoomPage;
   final void Function(TextEditingController, List<bool>) changeTagAndName;
-  final double buttonPositionTop;
-  final double buttonPositionLeft;
   final List<bool> tagSelected;
   final List<Tag> currentActivityTags;
   final String currentUserName;
 
   @override
-  State<AnimatedButtons> createState() => AnimatedButtonsState();
+  State<UserButtons> createState() => UserButtonsState();
 }
 
-class AnimatedButtonsState extends State<AnimatedButtons>
+class UserButtonsState extends State<UserButtons>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation _animation;
 
   final TextEditingController _textEditingController = TextEditingController();
+
+  late final double buttonPositionTop;
+  late final double buttonPositionLeft;
 
   bool toggle = true;
   late double top1;
@@ -61,11 +62,14 @@ class AnimatedButtonsState extends State<AnimatedButtons>
   double size3 = 20;
 
   bool initial = false;
+  bool isPushButton = false;
 
   void _init() {
     if (!initial) {
-      top1 = top2 = top3 = widget.buttonPositionTop + 10;
-      left1 = left2 = left3 = widget.buttonPositionLeft + 10;
+      buttonPositionTop = MediaQuery.of(context).size.height - 70; //70
+      buttonPositionLeft = MediaQuery.of(context).size.width - 100;
+      top1 = top2 = top3 = buttonPositionTop + 10;
+      left1 = left2 = left3 = buttonPositionLeft + 10;
       initial = true;
     }
   }
@@ -341,8 +345,8 @@ class AnimatedButtonsState extends State<AnimatedButtons>
           ),
         ),
         Positioned(
-          top: widget.buttonPositionTop,
-          left: widget.buttonPositionLeft,
+          top: buttonPositionTop,
+          left: buttonPositionLeft,
           child: Transform.rotate(
             angle: _animation.value * 3.14159 * (3 / 4),
             child: AnimatedContainer(
@@ -360,37 +364,40 @@ class AnimatedButtonsState extends State<AnimatedButtons>
                       color: Theme.of(context).colorScheme.onInverseSurface,
                       splashColor: Colors.black54,
                       onPressed: () {
-                        setState(() {
-                          if (toggle) {
-                            toggle = !toggle;
-                            _controller.forward();
-                            Future.delayed(const Duration(milliseconds: 10),
-                                () {
-                              top1;
-                              left1 = left1 - 100;
-                              size1 = 50;
-                            });
-                            Future.delayed(const Duration(milliseconds: 100),
-                                () {
-                              top2 = top2 - 70;
-                              left2 = left2 - 70;
-                              size2 = 50;
-                            });
-                            Future.delayed(const Duration(milliseconds: 200),
-                                () {
-                              left3;
-                              top3 = top3 - 100;
-                              size3 = 50;
-                            });
-                          } else {
-                            toggle = !toggle;
-                            _controller.reverse();
-                            top1 = top2 = top3 = widget.buttonPositionTop + 10;
-                            left1 =
-                                left2 = left3 = widget.buttonPositionLeft + 10;
-                            size1 = size2 = size3 = 20.0;
-                          }
-                        });
+                        if(!isPushButton) {
+                          isPushButton = true;
+                          setState(() {
+                            if (toggle) {
+                              toggle = !toggle;
+                              _controller.forward();
+                              Future.delayed(Duration(milliseconds: 10), () {
+                                top1;
+                                left1 = left1 - 100;
+                                size1 = 50;
+                              });
+                              Future.delayed(Duration(milliseconds: 100), () {
+                                top2 = top2 - 70;
+                                left2 = left2 - 70;
+                                size2 = 50;
+                              });
+                              Future.delayed(Duration(milliseconds: 200), () {
+                                left3;
+                                top3 = top3 - 100;
+                                size3 = 50;
+                              });
+                            } else {
+                              toggle = !toggle;
+                              _controller.reverse();
+                              top1 = top2 = top3 = buttonPositionTop + 10;
+                              left1 =
+                                  left2 = left3 = buttonPositionLeft + 10;
+                              size1 = size2 = size3 = 20.0;
+                            }
+                          });
+                          Future.delayed(Duration(milliseconds: 500), (){
+                            isPushButton = false;
+                          });
+                        }
                       },
                       icon: const Icon(
                         Icons.add,

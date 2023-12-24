@@ -263,10 +263,10 @@ class RoomCardWidget extends StatelessWidget {
               onTap: () {
                 if (isHost || activity.isEnabled) {
                   Navigator.of(context).pushNamed(
-                    UserActivityMainPage.routeName,
-                    arguments: UserActivityMainPageArguments(
+                    ActivityMainPage.routeName,
+                    arguments: ActivityMainPageArguments(
                       activityId: activityId,
-                      isPreview: false,
+                      isHost: !isHost, //todo
                     ),
                   );
                 } else {

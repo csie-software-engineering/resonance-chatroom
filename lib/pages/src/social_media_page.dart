@@ -15,104 +15,109 @@ class SocialMediaPage extends StatefulWidget {
 }
 
 class _SocialMediaPageState extends State<SocialMediaPage> {
+  final nameController = TextEditingController();
+  final linkController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
-      appBar: myAppBar(
-        context,
-        title: const Text('社群媒體'),
-        leading: const BackButton(),
-      ),
-      body: FutureBuilder(
-        future: context.read<UserProvider>().getUserSocialMedium(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+    return FutureBuilder(
+      future: context.read<UserProvider>().getUserSocialMedium(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-          final socialMedium = snapshot.requireData;
-          final nameController = TextEditingController();
-          final linkController = TextEditingController();
-          return Column(
-            children: [
-              SizedBox(height: MediaQuery.of(context).size.height * 0.05),
-              SizedBox(
-                width: MediaQuery.of(context).size.width * 0.8,
-                height: MediaQuery.of(context).size.height * 0.1,
-                child: TextField(
-                  controller: nameController,
-                  decoration: const InputDecoration(
-                    hintText: '輸入社群媒體名稱',
+        final socialMedium = snapshot.requireData;
+        return Scaffold(
+          backgroundColor: Theme.of(context).colorScheme.background,
+          appBar: myAppBar(
+            context,
+            title: const Text('社群媒體'),
+            leading: const BackButton(),
+          ),
+          body: SizedBox(
+            height: MediaQuery.of(context).size.height -
+                MediaQuery.of(context).viewInsets.bottom,
+            child: Column(
+              children: [
+                SizedBox(height: MediaQuery.of(context).size.height * 0.05),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.8,
+                  height: MediaQuery.of(context).size.height * 0.1,
+                  child: TextField(
+                    controller: nameController,
+                    decoration: const InputDecoration(
+                      hintText: '輸入社群媒體名稱',
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(width: MediaQuery.of(context).size.width * 0.1),
-              SizedBox(
-                width: MediaQuery.of(context).size.width * 0.8,
-                height: MediaQuery.of(context).size.height * 0.1,
-                child: TextField(
-                  controller: linkController,
-                  decoration: const InputDecoration(
-                    hintText: '輸入社群媒體連結',
+                SizedBox(width: MediaQuery.of(context).size.width * 0.1),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.8,
+                  height: MediaQuery.of(context).size.height * 0.1,
+                  child: TextField(
+                    controller: linkController,
+                    decoration: const InputDecoration(
+                      hintText: '輸入社群媒體連結',
+                    ),
                   ),
                 ),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  final name = nameController.text;
-                  final link = linkController.text;
-                  if (name.isNotEmpty && link.isNotEmpty) {
-                    context
-                        .read<UserProvider>()
-                        .addUserSocialMedia(
-                            UserSocialMedia(displayName: name, linkUrl: link))
-                        .then((_) => setState(() {}));
-                  } else {
-                    ScaffoldMessenger.of(context)
-                        .showSnackBar(const SnackBar(content: Text('請輸入完整資訊')));
-                  }
-                },
-                child: const Text('新增社群媒體'),
-              ),
-              Divider(height: MediaQuery.of(context).size.height * 0.05),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: socialMedium.length,
-                  itemBuilder: (context, index) {
-                    return ListTile(
-                      title: Text(socialMedium[index].displayName),
-                      subtitle: Text(socialMedium[index].linkUrl),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.delete),
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (_) => AlertDialog(
-                              title: const Text('確認刪除'),
-                              content: const Text('確定要刪除嗎？'),
-                              actions: confirmButtons(
-                                context,
-                                action: () {
-                                  context
-                                      .read<UserProvider>()
-                                      .removeUserSocialMedia(
-                                          socialMedium[index].displayName)
-                                      .then((_) => setState(() {}));
-                                },
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    );
+                ElevatedButton(
+                  onPressed: () {
+                    final name = nameController.text;
+                    final link = linkController.text;
+                    if (name.isNotEmpty && link.isNotEmpty) {
+                      context
+                          .read<UserProvider>()
+                          .addUserSocialMedia(
+                              UserSocialMedia(displayName: name, linkUrl: link))
+                          .then((_) => setState(() {}));
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('請輸入完整資訊')));
+                    }
                   },
+                  child: const Text('新增社群媒體'),
                 ),
-              ),
-            ],
-          );
-        },
-      ),
+                Divider(height: MediaQuery.of(context).size.height * 0.05),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: socialMedium.length,
+                    itemBuilder: (context, index) {
+                      return ListTile(
+                        title: Text(socialMedium[index].displayName),
+                        subtitle: Text(socialMedium[index].linkUrl),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.delete),
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (_) => AlertDialog(
+                                title: const Text('確認刪除'),
+                                content: const Text('確定要刪除嗎？'),
+                                actions: confirmButtons(
+                                  context,
+                                  action: () {
+                                    context
+                                        .read<UserProvider>()
+                                        .removeUserSocialMedia(
+                                            socialMedium[index].displayName)
+                                        .then((_) => setState(() {}));
+                                  },
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

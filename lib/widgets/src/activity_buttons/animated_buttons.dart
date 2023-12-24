@@ -3,28 +3,32 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../../models/models.dart';
+import '../../../pages/routes.dart';
 import '../activity_card/tag_list.dart';
 
 class AnimatedButtons extends StatefulWidget {
-  const AnimatedButtons(
-      {super.key,
-      required this.enableTagWidget,
-      required this.matching,
-      required this.startMatching,
-      required this.buttonPositionTop,
-      required this.buttonPositionLeft,
-      required this.tagSelected,
-      required this.currentActivityTags,
-      required this.changeTagAndName,
-      required this.enableMatch,
-      required this.currentUserName,
-      required this.enablePreviousChatRoom});
+  const AnimatedButtons({
+    super.key,
+    required this.enableTagWidget,
+    required this.matching,
+    required this.startMatching,
+    required this.goToHistoricalChatRoomPage,
+    required this.buttonPositionTop,
+    required this.buttonPositionLeft,
+    required this.tagSelected,
+    required this.currentActivityTags,
+    required this.changeTagAndName,
+    required this.enableMatch,
+    required this.currentUserName,
+    required this.enableHistoricalChatRoom,
+  });
 
   final bool enableTagWidget;
   final bool enableMatch;
-  final bool enablePreviousChatRoom;
+  final bool enableHistoricalChatRoom;
   final bool startMatching;
   final Function() matching;
+  final Function() goToHistoricalChatRoomPage;
   final void Function(TextEditingController, List<bool>) changeTagAndName;
   final double buttonPositionTop;
   final double buttonPositionLeft;
@@ -41,7 +45,7 @@ class AnimatedButtonsState extends State<AnimatedButtons>
   late AnimationController _controller;
   late Animation _animation;
 
-  TextEditingController _textEditingController = TextEditingController();
+  final TextEditingController _textEditingController = TextEditingController();
 
   bool toggle = true;
   late double top1;
@@ -55,13 +59,13 @@ class AnimatedButtonsState extends State<AnimatedButtons>
   double size2 = 20;
   double size3 = 20;
 
-  bool Initial = false;
+  bool initial = false;
 
   void _init() {
-    if (!Initial) {
+    if (!initial) {
       top1 = top2 = top3 = widget.buttonPositionTop + 10;
       left1 = left2 = left3 = widget.buttonPositionLeft + 10;
-      Initial = true;
+      initial = true;
     }
   }
 
@@ -71,8 +75,8 @@ class AnimatedButtonsState extends State<AnimatedButtons>
 
     _controller = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: 350),
-      reverseDuration: Duration(milliseconds: 275),
+      duration: const Duration(milliseconds: 350),
+      reverseDuration: const Duration(milliseconds: 275),
     );
 
     _animation = CurvedAnimation(
@@ -95,21 +99,19 @@ class AnimatedButtonsState extends State<AnimatedButtons>
   @override
   Widget build(BuildContext context) {
     _init();
-    return Container(
-        child: Stack(
+    return Stack(
       children: [
         AnimatedPositioned(
-          // todo 尚未串接
           duration: toggle
-              ? Duration(milliseconds: 275)
-              : Duration(milliseconds: 875),
+              ? const Duration(milliseconds: 275)
+              : const Duration(milliseconds: 875),
           top: top1,
           left: left1,
           curve: toggle ? Curves.easeIn : Curves.elasticOut,
           child: AnimatedContainer(
             duration: toggle
-                ? Duration(milliseconds: 275)
-                : Duration(milliseconds: 875),
+                ? const Duration(milliseconds: 275)
+                : const Duration(milliseconds: 875),
             curve: toggle ? Curves.easeIn : Curves.elasticOut,
             height: size1,
             width: size1,
@@ -117,9 +119,21 @@ class AnimatedButtonsState extends State<AnimatedButtons>
               color: Theme.of(context).colorScheme.primary.withRed(200),
               borderRadius: BorderRadius.circular(40.0),
             ),
-            child: widget.enablePreviousChatRoom
-                ? Icon(Icons.message,
-                color: Theme.of(context).colorScheme.onInverseSurface)
+            child: widget.enableHistoricalChatRoom
+                ? IconButton(
+                    onPressed: () {
+                      Navigator.of(context).pushNamed(
+                          HistoricalChatRoomPage.routeName,
+                          arguments: HistoricalChatRoomPageArguments(
+                            activityId: widget.currentActivityTags[0].activityId,
+                          )
+                      );
+                    },
+                    icon: Icon(
+                      Icons.chat,
+                      color: Theme.of(context).colorScheme.onInverseSurface,
+                    ),
+                  )
                 : IconButton(onPressed: () {}, icon: const Text("無效")),
           ),
         ),
@@ -127,13 +141,13 @@ class AnimatedButtonsState extends State<AnimatedButtons>
           top: top2,
           left: left2,
           duration: toggle
-              ? Duration(milliseconds: 275)
-              : Duration(milliseconds: 875),
+              ? const Duration(milliseconds: 275)
+              : const Duration(milliseconds: 875),
           curve: toggle ? Curves.easeIn : Curves.elasticOut,
           child: AnimatedContainer(
               duration: toggle
-                  ? Duration(milliseconds: 275)
-                  : Duration(milliseconds: 875),
+                  ? const Duration(milliseconds: 275)
+                  : const Duration(milliseconds: 875),
               curve: toggle ? Curves.easeIn : Curves.elasticOut,
               height: size2,
               width: size2,
@@ -158,19 +172,19 @@ class AnimatedButtonsState extends State<AnimatedButtons>
                               )),
                       onPressed: widget.matching,
                     )
-                  : IconButton(onPressed: () {}, icon: Text("無效"))),
+                  : IconButton(onPressed: () {}, icon: const Text("無效"))),
         ),
         AnimatedPositioned(
           top: top3,
           left: left3,
           duration: toggle
-              ? Duration(milliseconds: 275)
-              : Duration(milliseconds: 875),
+              ? const Duration(milliseconds: 275)
+              : const Duration(milliseconds: 875),
           curve: toggle ? Curves.easeIn : Curves.elasticOut,
           child: AnimatedContainer(
             duration: toggle
-                ? Duration(milliseconds: 275)
-                : Duration(milliseconds: 875),
+                ? const Duration(milliseconds: 275)
+                : const Duration(milliseconds: 875),
             curve: toggle ? Curves.easeIn : Curves.elasticOut,
             height: size3,
             width: size3,
@@ -185,7 +199,6 @@ class AnimatedButtonsState extends State<AnimatedButtons>
                           color: Theme.of(context).colorScheme.onInverseSurface,
                         )),
                     onPressed: () {
-                      var height = context.size!.height * 0.5;
                       var width = context.size!.width * 0.8;
 
                       showDialog(
@@ -209,12 +222,12 @@ class AnimatedButtonsState extends State<AnimatedButtons>
                               title: Column(
                                 // alignment: AlignmentDirectional.topStart,
                                 children: [
-                                  Text("匹配設定"),
-                                  SizedBox(height: 20),
+                                  const Text("匹配設定"),
+                                  const SizedBox(height: 20),
                                   Align(
                                     alignment: Alignment.center,
                                     child: Container(
-                                      padding: EdgeInsets.all(14),
+                                      padding: const EdgeInsets.all(14),
                                       height: 70,
                                       decoration: BoxDecoration(
                                         color: Theme.of(context)
@@ -256,8 +269,9 @@ class AnimatedButtonsState extends State<AnimatedButtons>
                                               child: TextField(
                                                 controller:
                                                     _textEditingController,
-                                                decoration: InputDecoration(
-                                                    isCollapsed: true),
+                                                decoration:
+                                                    const InputDecoration(
+                                                        isCollapsed: true),
                                                 maxLines: 1,
                                               )),
                                         ],
@@ -267,7 +281,7 @@ class AnimatedButtonsState extends State<AnimatedButtons>
                                 ],
                               ),
                               content: Container(
-                                padding: EdgeInsets.all(14),
+                                padding: const EdgeInsets.all(14),
                                 height: 300,
                                 decoration: BoxDecoration(
                                   color: Theme.of(context)
@@ -282,7 +296,7 @@ class AnimatedButtonsState extends State<AnimatedButtons>
                                     Align(
                                       alignment: Alignment.centerLeft,
                                       child: Container(
-                                        padding: EdgeInsets.symmetric(
+                                        padding: const EdgeInsets.symmetric(
                                             horizontal: 6, vertical: 2),
                                         decoration: BoxDecoration(
                                           color: Theme.of(context)
@@ -317,7 +331,7 @@ class AnimatedButtonsState extends State<AnimatedButtons>
                                     widget.changeTagAndName(
                                         _textEditingController, _tagTmp);
                                   },
-                                  child: Text('確定'),
+                                  child: const Text('確定'),
                                 ),
                                 TextButton(
                                   onPressed: () {
@@ -325,7 +339,7 @@ class AnimatedButtonsState extends State<AnimatedButtons>
                                         widget.currentUserName;
                                     Navigator.of(context).pop();
                                   },
-                                  child: Text('取消'),
+                                  child: const Text('取消'),
                                 ),
                               ],
                             );
@@ -340,7 +354,7 @@ class AnimatedButtonsState extends State<AnimatedButtons>
           child: Transform.rotate(
             angle: _animation.value * 3.14159 * (3 / 4),
             child: AnimatedContainer(
-                duration: Duration(milliseconds: 375),
+                duration: const Duration(milliseconds: 375),
                 curve: Curves.easeOut,
                 height: toggle ? 70.0 : 60.0,
                 width: toggle ? 70.0 : 60.0,
@@ -358,17 +372,20 @@ class AnimatedButtonsState extends State<AnimatedButtons>
                           if (toggle) {
                             toggle = !toggle;
                             _controller.forward();
-                            Future.delayed(Duration(milliseconds: 10), () {
+                            Future.delayed(const Duration(milliseconds: 10),
+                                () {
                               top1;
                               left1 = left1 - 100;
                               size1 = 50;
                             });
-                            Future.delayed(Duration(milliseconds: 100), () {
+                            Future.delayed(const Duration(milliseconds: 100),
+                                () {
                               top2 = top2 - 70;
                               left2 = left2 - 70;
                               size2 = 50;
                             });
-                            Future.delayed(Duration(milliseconds: 200), () {
+                            Future.delayed(const Duration(milliseconds: 200),
+                                () {
                               left3;
                               top3 = top3 - 100;
                               size3 = 50;
@@ -391,6 +408,6 @@ class AnimatedButtonsState extends State<AnimatedButtons>
           ),
         )
       ],
-    ));
+    );
   }
 }

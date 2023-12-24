@@ -20,9 +20,9 @@ import '../../widgets/src/input/widgets.dart';
 class ChatPageArguments {
   final String peerId;
   final String activityId;
-  final bool isPrevious;
+  final bool isHistorical;
 
-  ChatPageArguments({required this.isPrevious, required this.activityId, required this.peerId});
+  ChatPageArguments({required this.isHistorical, required this.activityId, required this.peerId});
 }
 
 class ChatPage extends StatefulWidget {
@@ -837,7 +837,7 @@ class _ChatPageState extends State<ChatPage> {
                                   )
                                 ],
                               ),
-                              child: args.isPrevious ? const SizedBox()
+                              child: args.isHistorical ? const SizedBox()
                               : IconButton(
                                 iconSize: 25,
                                 icon: Icon(isOn
@@ -908,7 +908,7 @@ class _ChatPageState extends State<ChatPage> {
                       ],
                     ),
                   ),
-                  _allTopics.isEmpty || args.isPrevious ? const SizedBox()
+                  _allTopics.isEmpty || args.isHistorical ? const SizedBox()
                       : StreamBuilder<DocumentSnapshot>(
                       stream: chatProvider.getRoomStream(
                           args.activityId, args.peerId),
@@ -1090,7 +1090,7 @@ class _ChatPageState extends State<ChatPage> {
                                   ),
                                 ),
                               ),
-                              !args.isPrevious ? Input(
+                              !args.isHistorical ? Input(
                                 onSendPressed: onSendMessage,
                                 nextTopic: nextTopic,
                                 enableSocialMedia: enableSocialMedia,

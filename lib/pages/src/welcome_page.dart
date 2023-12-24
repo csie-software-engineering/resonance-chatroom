@@ -14,6 +14,7 @@ class WelcomePage extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              SizedBox(height: MediaQuery.of(context).size.height * 0.03),
               Text(
                 '共鳴聚會',
                 style: TextStyle(
@@ -33,13 +34,11 @@ class WelcomePage extends StatelessWidget {
                   letterSpacing: 5,
                 ),
               ),
-              SizedBox(height: MediaQuery.of(context).size.height * 0.03),
               Image.asset(
                 'lib/assets/diversity.png',
                 width: MediaQuery.of(context).size.width * 0.6,
                 height: MediaQuery.of(context).size.height * 0.6,
               ),
-              SizedBox(height: MediaQuery.of(context).size.height * 0.03),
               FloatingActionButton.extended(
                 heroTag: 'welcomeFAB',
                 onPressed: () =>

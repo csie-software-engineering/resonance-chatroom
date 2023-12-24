@@ -64,10 +64,11 @@ class _MainPageState extends State<MainPage> {
           body: ActivityCarouselWidget(isHost: args.isHost),
           floatingActionButton: FloatingActionButton.extended(
             onPressed: () {
-              // Navigator.of(context).pushNamed(
-              //             HostActivitySetPage.routeName,
-              //             arguments: const HostActivitySetPage());
-              _joinActivity(context, user);
+              if(args.isHost) {
+                Navigator.of(context).pushNamed(HostActivitySetPage.routeName);
+              } else {
+                _joinActivity(context, user);
+              }
             },
             tooltip: 'Add Activity',
             label: const Icon(Icons.event),

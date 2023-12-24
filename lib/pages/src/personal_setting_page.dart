@@ -48,16 +48,16 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
                 foregroundImage:
                     user.photoUrl != null ? NetworkImage(user.photoUrl!) : null,
                 backgroundImage: const AssetImage('lib/assets/user.png'),
-                radius: MediaQuery.of(context).size.height * 0.07,
+                radius: MediaQuery.of(context).size.height * 0.06,
               ),
               SizedBox(height: MediaQuery.of(context).size.height * 0.02),
               SizedBox(
-                height: MediaQuery.of(context).size.height * 0.03,
+                height: MediaQuery.of(context).size.height * 0.06,
                 child: _NickNameWidget(user: user),
               ),
               SizedBox(height: MediaQuery.of(context).size.height * 0.01),
               SizedBox(
-                height: MediaQuery.of(context).size.height * 0.03,
+                height: MediaQuery.of(context).size.height * 0.06,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -81,7 +81,7 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
               ),
               SizedBox(height: MediaQuery.of(context).size.height * 0.01),
               SizedBox(
-                height: MediaQuery.of(context).size.height * 0.03,
+                height: MediaQuery.of(context).size.height * 0.06,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -316,7 +316,9 @@ class _NickNameWidgetState extends State<_NickNameWidget> {
                   },
                   onSubmitted: (_) => _rename(context),
                   textAlign: TextAlign.center,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
+                    contentPadding: EdgeInsets.all(
+                        3 + MediaQuery.of(context).size.height * 0.01),
                     border: InputBorder.none,
                     hintText: '輸入新的暱稱',
                   ),

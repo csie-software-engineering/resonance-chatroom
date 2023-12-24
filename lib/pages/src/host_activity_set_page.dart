@@ -222,20 +222,6 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
                       )
                     : Image.memory(base64ToImage(_selectedImage!)),
               ),
-              /*ElevatedButton(
-                onPressed: () async {
-                  final data = await setActivityProvider
-                      .getActivity("8a815b73-8fde-4564-8c11-e3d738f547d8");
-                  setState(() {
-                    _checkselectedImage = base64Decode(data!.activityPhoto);
-                  });
-                  // 跳至預覽頁面的邏輯
-                  // 傳遞createEvent()方法的回傳值給預覽頁面
-                  Navigator.of(context)
-                      .pushNamed(HostActivityTagPage.routeName);
-                },
-                child: Text('預覽'),
-              ),*/
             ],
           ),
         ),

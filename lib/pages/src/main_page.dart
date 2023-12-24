@@ -265,6 +265,7 @@ class RoomCardWidget extends StatelessWidget {
                     UserActivityMainPage.routeName,
                     arguments: UserActivityMainPageArguments(
                       activityId: activityId,
+                      isPreview: false,
                     ),
                   );
                 } else {

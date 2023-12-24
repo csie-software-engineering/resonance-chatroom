@@ -25,9 +25,11 @@ class PersonalSettingPage extends StatefulWidget {
 class _PersonalSettingPageState extends State<PersonalSettingPage> {
   late final double height = MediaQuery.of(context).size.height;
   late final double width = MediaQuery.of(context).size.width;
-  final AsyncMemoizer _userProfileMemoization = AsyncMemoizer<void>();
-  final AsyncMemoizer _userHoldActivity = AsyncMemoizer<void>();
+  final AsyncMemoizer _userProfileMemoizer = AsyncMemoizer<void>();
+  final AsyncMemoizer _userHoldActivityMemoizer = AsyncMemoizer<void>();
+  late final List<AsyncMemoizer> _activityNameMemoizerList;
   late final User user;
+  late final List<Activity?> activityList;
 
   late final args = ModalRoute.of(context)!.settings.arguments
   as PersonalSettingPageArguments;
@@ -44,6 +46,8 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
       context.read<ActivityProvider>(),
       context.read<UserProvider>(),
     );
+    _activityNameMemoizerList = List.generate(userActivities.length, (index) => AsyncMemoizer());
+    activityList = List.generate(userActivities.length, (index) => null);
   }
 
   @override
@@ -58,7 +62,7 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
         leading: const BackButton(),
       ),
       body: FutureBuilder(
-        future: _userProfileMemoization.runOnce(_initProfile),
+        future: _userProfileMemoizer.runOnce(_initProfile),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -142,7 +146,7 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
                           height: height * 0.01),
                       Expanded(
                         child: FutureBuilder(
-                          future: _userHoldActivity.runOnce(_initHoldActivity),
+                          future: _userHoldActivityMemoizer.runOnce(_initHoldActivity),
                           builder: (context, snapshot) {
                             if (snapshot.connectionState ==
                                 ConnectionState.waiting) {
@@ -153,10 +157,10 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
                               itemCount: userActivities.length,
                               itemBuilder: (context, index) {
                                 final userActivity = userActivities[index];
-                                return FutureBuilder<Activity>(
-                                  future: context
-                                      .read<ActivityProvider>()
-                                      .getActivity(userActivity.uid),
+                                return FutureBuilder(
+                                  future: _activityNameMemoizerList[index].runOnce(() async {
+                                    activityList[index] = await context.read<ActivityProvider>().getActivity(userActivity.uid);
+                                  }),
                                   builder: (context, snapshot) {
                                     if (snapshot.connectionState ==
                                         ConnectionState.waiting) {
@@ -164,7 +168,7 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
                                           child: CircularProgressIndicator());
                                     }
 
-                                    final activity = snapshot.requireData;
+                                    final activity = activityList[index];
                                     return ListTile(
                                       leading: Icon(
                                         Icons.event,
@@ -172,7 +176,7 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
                                             .colorScheme
                                             .primary,
                                       ),
-                                      title: Text(activity.activityName),
+                                      title: Text(activity!.activityName),
                                       subtitle: args.isHost
                                           ? FutureBuilder<User>(
                                               future: context

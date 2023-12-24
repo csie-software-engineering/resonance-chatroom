@@ -46,8 +46,9 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
             children: [
               SizedBox(height: MediaQuery.of(context).size.height * 0.01),
               CircleAvatar(
-                foregroundImage:
-                    user.photoUrl != null ? NetworkImage(user.photoUrl!) : null,
+                  foregroundImage: user.photoUrl != null
+                      ? NetworkImage(user.photoUrl!)
+                      : null,
                 backgroundImage: const AssetImage('lib/assets/user.png'),
                 radius: MediaQuery.of(context).size.height * 0.05,
               ),
@@ -184,7 +185,7 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
                                 color: Theme.of(context)
                                     .colorScheme
                                     .primary
-                                    .withOpacity(0.5),
+                                      .withOpacity(0.3),
                               ),
                             );
                           },
@@ -210,15 +211,16 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
                     context: context,
                     builder: (_) => AlertDialog(
                       title: const Text('確認身份切換'),
-                      content: Text('確定要切換成${args.isHost ? '參加者' : '主辦方'}角色嗎？'),
+                        content:
+                            Text('確定要切換成${args.isHost ? '參加者' : '主辦方'}角色嗎？'),
                       actions: confirmButtons(
                         context,
                         action: () {
                           context
                               .read<SharedPreferenceProvider>()
                               .setIsHost(!args.isHost)
-                              .then((_) =>
-                                  Navigator.of(context).pushNamedAndRemoveUntil(
+                                .then((_) => Navigator.of(context)
+                                        .pushNamedAndRemoveUntil(
                                     MainPage.routeName,
                                     ModalRoute.withName(LoginPage.routeName),
                                     arguments: MainPageArguments(

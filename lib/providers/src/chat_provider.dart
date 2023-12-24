@@ -443,7 +443,7 @@ class ChatProvider {
     final roomUser = room.users[roomUserIndex];
     assert(roomUser.shareSocialMedia, '對方未同意分享社群媒體');
 
-    return await UserProvider().getUserSocialMedium(peerId);
+    return await UserProvider().getUserSocialMedium(userId: peerId);
   }
 
   /// 取得使用者在某活動的聊天室列表

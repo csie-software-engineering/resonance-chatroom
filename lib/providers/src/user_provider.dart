@@ -332,7 +332,7 @@ class UserProvider {
     final user = fsUser.toUser();
 
     if (loadSocial) {
-      user.socialMedia.addAll(await getUserSocialMedium(userId));
+      user.socialMedia.addAll(await getUserSocialMedium(userId: userId));
     }
 
     if (loadActivityWithHosted != null) {
@@ -377,8 +377,9 @@ class UserProvider {
 
   /// 取得使用者所有社群媒體資料
   ///
-  /// [userId] 使用者ID
-  Future<List<UserSocialMedia>> getUserSocialMedium(String userId) async {
+  /// [userId] 使用者ID，預設為目前登入者
+  Future<List<UserSocialMedia>> getUserSocialMedium({String? userId}) async {
+    userId ??= AuthProvider().currentUserId;
     final userRef = db
         .collection(FireStoreUserConstants.userCollectionPath.value)
         .doc(userId);

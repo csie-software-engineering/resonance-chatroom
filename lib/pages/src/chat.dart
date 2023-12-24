@@ -183,6 +183,7 @@ class _ChatPageState extends State<ChatPage> {
       }
       peerUser = await userProvider.getUser(
           userId: args.peerId); // todo 我可以直接載入對方的 social media?
+
       room = await chatProvider.getRoom(args.activityId, args.peerId);
       currentUser = await authProvider.currentUser;
       _tagName =
@@ -817,7 +818,9 @@ class _ChatPageState extends State<ChatPage> {
                             },
                           ),
                         ),
-                        Align(
+                        args.isHistorical
+                            ? const SizedBox()
+                        : Align(
                           alignment: Alignment.centerRight,
                           child: Padding(
                             padding: const EdgeInsets.only(right: 20),
@@ -842,9 +845,7 @@ class _ChatPageState extends State<ChatPage> {
                                   )
                                 ],
                               ),
-                              child: args.isHistorical
-                                  ? const SizedBox()
-                                  : IconButton(
+                              child: IconButton(
                                       iconSize: 25,
                                       icon: Icon(isOn
                                           ? Icons.lightbulb

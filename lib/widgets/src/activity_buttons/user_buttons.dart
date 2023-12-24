@@ -7,15 +7,13 @@ import '../../../pages/routes.dart';
 import '../../widgets.dart';
 import '../activity_card/tag_list.dart';
 
-class AnimatedButtons extends StatefulWidget {
-  const AnimatedButtons({
+class UserButtons extends StatefulWidget {
+  const UserButtons({
     super.key,
     required this.enableTagWidget,
     required this.matching,
     required this.startMatching,
     required this.goToHistoricalChatRoomPage,
-    required this.buttonPositionTop,
-    required this.buttonPositionLeft,
     required this.tagSelected,
     required this.currentActivityTags,
     required this.changeTagAndName,

@@ -13,12 +13,14 @@ class HostButtons extends StatefulWidget {
       required this.enableStopActivity,
       required this.enableStatistic,
       required this.enableUpdateActivity,
-      required this.activityId});
+      required this.activityId,
+      required this.isEnableActivity});
 
   final String activityId;
   final bool enableStopActivity;
   final bool enableStatistic;
   final bool enableUpdateActivity;
+  final bool isEnableActivity;
 
   @override
   State<HostButtons> createState() => HostButtonsState();
@@ -27,7 +29,7 @@ class HostButtons extends StatefulWidget {
 class HostButtonsState extends State<HostButtons>
     with SingleTickerProviderStateMixin {
   late final ActivityProvider activityProvider =
-  context.read<ActivityProvider>();
+      context.read<ActivityProvider>();
   late AnimationController _controller;
   late Animation _animation;
 
@@ -48,7 +50,7 @@ class HostButtonsState extends State<HostButtons>
 
   bool Initial = false;
   bool isPushButton = false;
-  bool isTryDisableActivity = false;
+  bool isTryChangeActivityState = false;
 
   void _init() {
     if (!Initial) {
@@ -112,24 +114,45 @@ class HostButtonsState extends State<HostButtons>
               borderRadius: BorderRadius.circular(40.0),
             ),
             child: widget.enableStopActivity
-                ? IconButton(
-                    icon: Text("停用",
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurface,
-                        )),
-                    onPressed: () async {
-                      if(!isTryDisableActivity){
-                        isTryDisableActivity = true;
-                        try {
-                          await activityProvider.deleteActivity(widget.activityId);
-                          Fluttertoast.showToast(msg: "活動已停用");
-                        } catch (e) {
-                          debugPrint("disableActivityError: $e");
-                        }
-                        isTryDisableActivity = false;
-                      }
-                    },
-                  )
+                ? widget.isEnableActivity
+                    ? IconButton(
+                        icon: Text("停用",
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface,
+                            )),
+                        onPressed: () async {
+                          if (!isTryChangeActivityState) {
+                            isTryChangeActivityState = true;
+                            try {
+                              await activityProvider
+                                  .deleteActivity(widget.activityId);
+                              Fluttertoast.showToast(msg: "活動已停用");
+                            } catch (e) {
+                              debugPrint("disableActivityError: $e");
+                            }
+                            isTryChangeActivityState = false;
+                          }
+                        },
+                      )
+                    : IconButton(
+                        icon: Text("啟用",
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface,
+                            )),
+                        onPressed: () async {
+                          if (!isTryChangeActivityState) {
+                            isTryChangeActivityState = true;
+                            try {
+                              await activityProvider
+                                  .enableActivity(widget.activityId);
+                              Fluttertoast.showToast(msg: "活動已啟用");
+                            } catch (e) {
+                              debugPrint("enableActivityError: $e");
+                            }
+                            isTryChangeActivityState = false;
+                          }
+                        },
+                      )
                 : IconButton(onPressed: () {}, icon: const Text("無效")),
           ),
         ),
@@ -192,8 +215,7 @@ class HostButtonsState extends State<HostButtons>
                         )),
                     onPressed: () {
                       // Navigator.of(context).pushNamed(HostActivitySetPage);
-                    }
-                  )
+                    })
                 : IconButton(onPressed: () {}, icon: const Text("無效")),
           ),
         ),

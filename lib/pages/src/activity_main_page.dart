@@ -54,8 +54,6 @@ class _ActivityMainPageState extends State<ActivityMainPage>
   FloatingActionButtonLocation buttonPosition =
       FloatingActionButtonLocation.centerFloat;
 
-  bool isStartMatching = false;
-
   double _height = 0;
   Timer? _timer;
   int timeShowUp = 0;
@@ -65,9 +63,10 @@ class _ActivityMainPageState extends State<ActivityMainPage>
 
   late final List<Tag> _currentActivityTags;
   late List<bool> _tagSelected;
+
   bool _enableTagWidget = false;
   bool _enableMatch = false;
-
+  bool isStartMatching = false;
   bool initial = false;
 
   void _onTimerTick(Timer timer) {
@@ -411,23 +410,33 @@ class _ActivityMainPageState extends State<ActivityMainPage>
                               child: Container(
                                 height: kToolbarHeight,
                                 child: Center(
-                                  child: ClipRRect(
-                                    borderRadius: const BorderRadius.all(
-                                        Radius.circular(16)),
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 2, horizontal: 20.0),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 2, horizontal: 20.0),
+                                    child: Text(_currentActivity.activityName,
+                                        style: TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.w700,
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onInverseSurface)),
+                                    decoration: BoxDecoration(
                                       color: Theme.of(context)
                                           .colorScheme
                                           .primary
                                           .withOpacity(0.8),
-                                      child: Text(_currentActivity.activityName,
-                                          style: TextStyle(
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.w700,
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .onInverseSurface)),
+                                      borderRadius: BorderRadius.circular(16),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurface
+                                              .withOpacity(0.2),
+                                          offset: const Offset(2, 2),
+                                          blurRadius: 2,
+                                          spreadRadius: 1,
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ),
@@ -466,20 +475,26 @@ class _ActivityMainPageState extends State<ActivityMainPage>
                   ),
                 ],
               ),
-              floatingActionButton: AnimatedButtons(
-                enableTagWidget: _enableTagWidget && !args.isPreview,
-                enableHistoricalChatRoom: !args.isPreview,
-                enableMatch: _enableMatch && !args.isPreview,
-                matching: matching,
-                goToHistoricalChatRoomPage: _goToHistoricalChatRoomPage,
-                startMatching: isStartMatching,
-                buttonPositionTop: buttonPositionTop,
-                buttonPositionLeft: buttonPositionLeft,
-                tagSelected: _tagSelected,
-                currentActivityTags: _currentActivityTags,
-                changeTagAndName: changeTagAndName,
-                currentUserName: _currentUser.displayName,
-              ),
+              floatingActionButton: args.isHost
+                  ? HostButtons(
+                      enableStopActivity: true,
+                      enableStatistic: true,
+                      enableUpdateActivity: true,
+                      activityId: args.activityId,
+                      isEnableActivity: _currentActivity.isEnabled,
+                    )
+                  : UserButtons(
+                      enableTagWidget: _enableTagWidget,
+                      enableHistoricalChatRoom: true,
+                      enableMatch: _enableMatch,
+                      matching: matching,
+                      goToHistoricalChatRoomPage: _goToHistoricalChatRoomPage,
+                      startMatching: isStartMatching,
+                      tagSelected: _tagSelected,
+                      currentActivityTags: _currentActivityTags,
+                      changeTagAndName: changeTagAndName,
+                      currentUserName: _currentUser.displayName,
+                    ),
               backgroundColor: Theme.of(context).colorScheme.background,
               // floatingActionButtonLocation: buttonPosition,
             );

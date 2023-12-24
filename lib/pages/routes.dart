@@ -10,6 +10,7 @@ import 'src/host_question_statistic.dart';
 import 'src/login_page.dart';
 import 'src/main_page.dart';
 import 'src/personal_setting_page.dart';
+import 'src/social_media_page.dart';
 import 'src/activity_main_page.dart';
 import 'src/welcome_page.dart';
 import 'src/manager_page.dart';
@@ -24,6 +25,7 @@ export 'src/host_question_statistic.dart';
 export 'src/login_page.dart';
 export 'src/main_page.dart';
 export 'src/personal_setting_page.dart';
+export 'src/social_media_page.dart';
 export 'src/activity_main_page.dart';
 export 'src/welcome_page.dart';
 export 'src/manager_page.dart';
@@ -39,6 +41,7 @@ Map<String, Widget Function(BuildContext)> routes = {
   LoginPage.routeName: (_) => const LoginPage(),
   MainPage.routeName: (_) => const MainPage(),
   PersonalSettingPage.routeName: (_) => const PersonalSettingPage(),
+  SocialMediaPage.routeName: (_) => const SocialMediaPage(),
   ActivityMainPage.routeName: (_) => const ActivityMainPage(),
   WelcomePage.routeName: (_) => const WelcomePage(),
   ManagerPage.routeName: (_) => const ManagerPage(),

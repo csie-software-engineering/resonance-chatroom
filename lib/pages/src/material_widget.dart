@@ -22,7 +22,7 @@ class MaterialWidget extends StatelessWidget {
             theme: ThemeData(
               colorSchemeSeed: (instance.getBool('isHost') ?? false)
                   ? Colors.pink
-                  : const Color(0xffA7D073),
+                  :  const Color(0xffA7D073),
             ),
             initialRoute: LoginPage.routeName,
             routes: routes,

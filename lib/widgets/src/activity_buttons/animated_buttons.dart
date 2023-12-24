@@ -17,10 +17,12 @@ class AnimatedButtons extends StatefulWidget {
       required this.currentActivityTags,
       required this.changeTagAndName,
       required this.enableMatch,
-      required this.currentUserName});
+      required this.currentUserName,
+      required this.enablePreviousChatRoom});
 
   final bool enableTagWidget;
   final bool enableMatch;
+  final bool enablePreviousChatRoom;
   final bool startMatching;
   final Function() matching;
   final void Function(TextEditingController, List<bool>) changeTagAndName;
@@ -97,6 +99,7 @@ class AnimatedButtonsState extends State<AnimatedButtons>
         child: Stack(
       children: [
         AnimatedPositioned(
+          // todo 尚未串接
           duration: toggle
               ? Duration(milliseconds: 275)
               : Duration(milliseconds: 875),
@@ -114,8 +117,10 @@ class AnimatedButtonsState extends State<AnimatedButtons>
               color: Theme.of(context).colorScheme.primary.withRed(200),
               borderRadius: BorderRadius.circular(40.0),
             ),
-            child: Icon(Icons.message,
-                color: Theme.of(context).colorScheme.onInverseSurface),
+            child: widget.enablePreviousChatRoom
+                ? Icon(Icons.message,
+                color: Theme.of(context).colorScheme.onInverseSurface)
+                : IconButton(onPressed: () {}, icon: const Text("無效")),
           ),
         ),
         AnimatedPositioned(
@@ -198,7 +203,8 @@ class AnimatedButtonsState extends State<AnimatedButtons>
                             return AlertDialog(
                               insetPadding: const EdgeInsets.symmetric(
                                   vertical: 10.0, horizontal: 40.0),
-                              actionsPadding: const EdgeInsets.only(top: 0, right: 20, bottom: 10),
+                              actionsPadding: const EdgeInsets.only(
+                                  top: 0, right: 20, bottom: 10),
                               scrollable: true,
                               title: Column(
                                 // alignment: AlignmentDirectional.topStart,
@@ -225,8 +231,10 @@ class AnimatedButtonsState extends State<AnimatedButtons>
                                             padding: const EdgeInsets.only(
                                                 right: 10),
                                             child: Container(
-                                              padding: const EdgeInsets.symmetric(
-                                                  horizontal: 6, vertical: 2),
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 6,
+                                                      vertical: 2),
                                               decoration: BoxDecoration(
                                                 color: Theme.of(context)
                                                     .colorScheme
@@ -313,7 +321,8 @@ class AnimatedButtonsState extends State<AnimatedButtons>
                                 ),
                                 TextButton(
                                   onPressed: () {
-                                    _textEditingController.text = widget.currentUserName;
+                                    _textEditingController.text =
+                                        widget.currentUserName;
                                     Navigator.of(context).pop();
                                   },
                                   child: Text('取消'),

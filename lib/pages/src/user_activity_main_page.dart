@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:async/async.dart';
 
+import '../../widgets/src/public/quit_warning_dialog.dart';
 import '../routes.dart';
 import '../../models/models.dart';
 import '../../utils/utils.dart';
@@ -16,8 +17,10 @@ import '../../widgets/src/activity_buttons/animated_buttons.dart';
 class UserActivityMainPageArguments {
   // final ;
   final String activityId;
+  final bool isPreview;
 
-  UserActivityMainPageArguments({required this.activityId});
+  UserActivityMainPageArguments(
+      {required this.isPreview, required this.activityId});
 }
 
 class UserActivityMainPage extends StatefulWidget {
@@ -51,7 +54,7 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
   FloatingActionButtonLocation buttonPosition =
       FloatingActionButtonLocation.centerFloat;
 
-  bool startMatching = false;
+  bool isStartMatching = false;
 
   double _height = 0;
   Timer? _timer;
@@ -82,7 +85,7 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
       if (await chatProvider.isWaiting(args.activityId)) {
         await Future.delayed(const Duration(seconds: 1));
       } else {
-        if (startMatching) {
+        if (isStartMatching) {
           var peerId = await chatProvider.getChatToUserId(args.activityId);
           debugPrint("peerId:${peerId ?? "no"}, currentId:${_currentUser.uid}");
           return peerId;
@@ -94,20 +97,25 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
   }
 
   void matching() async {
-    if (startMatching) {
+    if (isStartMatching) {
       setState(() {
         _height = 0;
         timeShowUp = 0;
         _enableMatch = false;
-        startMatching = false;
+        isStartMatching = false;
       });
-      await chatProvider.cancelWaiting(args.activityId);
-      Future.delayed(Duration(seconds: 1), () {
-        setState(() {
-          _enableMatch = true;
-          _timer?.cancel();
+      try {
+        await chatProvider.cancelWaiting(args.activityId);
+      } catch (e) {
+        debugPrint("cancelWaitingError: $e");
+      } finally {
+        Future.delayed(Duration(seconds: 1), () {
+          setState(() {
+            _enableMatch = true;
+            _timer?.cancel();
+          });
         });
-      });
+      }
     } else {
       setState(() {
         _timer = Timer.periodic(const Duration(seconds: 1), _onTimerTick);
@@ -120,15 +128,13 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
       } catch (e) {
         debugPrint("$e"); // todo 暫時抓全部
       }
-      debugPrint("peerId1:${peerId}");
       if (peerId == null) {
         setState(() {
           _enableMatch = true;
-          startMatching = true;
+          isStartMatching = true;
         });
         // 在等待
         peerId = await _matchingChecker();
-        debugPrint("peerID2:${peerId}");
         if (peerId != null) {
           _getIntRoom(peerId);
         }
@@ -141,14 +147,16 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
   }
 
   void _getIntRoom(peerId) async {
-    startMatching = false;
+    isStartMatching = false;
     timeShowUp = 0;
     _timer?.cancel();
     setState(() {
       _height = 0;
       Navigator.of(context).pushNamed(ChatPage.routeName,
           arguments: ChatPageArguments(
-              activityId: _currentActivity.uid, peerId: peerId));
+              activityId: _currentActivity.uid,
+              peerId: peerId,
+              isPrevious: false));
     });
   }
 
@@ -187,7 +195,7 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
   }
 
   Widget? _subTitle() {
-    if (!startMatching) {
+    if (!isStartMatching) {
       return AnimatedContainer(
         duration: const Duration(milliseconds: 500),
         color: Theme.of(context).colorScheme.surface,
@@ -264,7 +272,8 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
     // set _currentUserActivity
 
     _currentUser = await authProvider.currentUser;
-    _currentUserActivity = await userProvider.getUserActivity(args.activityId, isManager: false);
+    _currentUserActivity =
+        await userProvider.getUserActivity(args.activityId, isManager: false);
     var getActivity = await activityProvider.getActivity(args.activityId);
 
     if (getActivity != null) {
@@ -363,7 +372,40 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
                         SizedBox(height: MediaQuery.of(context).padding.top),
                         Row(
                           children: [
-                            const BackButton(),
+                            BackButton(
+                              onPressed: () async {
+                                if (isStartMatching) {
+                                  await showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return QuitWarningDialog(
+                                          action: () async {
+                                            isStartMatching = false;
+                                            // _height = 0;
+                                            try {
+                                              await chatProvider.cancelWaiting(
+                                                  args.activityId);
+                                            } catch (e) {
+                                              debugPrint(
+                                                  "cancelWaitingError: $e");
+                                            }
+                                            setState(() {
+                                              Navigator.of(context).popUntil(
+                                                  ModalRoute.withName(
+                                                      MainPage.routeName));
+                                            });
+                                          },
+                                        );
+                                      });
+                                } else {
+                                  setState(() {
+                                    Navigator.of(context).popUntil(
+                                        ModalRoute.withName(
+                                            MainPage.routeName));
+                                  });
+                                }
+                              },
+                            ),
                             Expanded(
                               child: Container(
                                 height: kToolbarHeight,
@@ -424,14 +466,15 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
                 ],
               ),
               floatingActionButton: AnimatedButtons(
-                enableTagWidget: _enableTagWidget,
+                enableTagWidget: _enableTagWidget && !args.isPreview,
+                enablePreviousChatRoom: !args.isPreview,
+                enableMatch: _enableMatch && !args.isPreview,
                 matching: matching,
-                startMatching: startMatching,
+                startMatching: isStartMatching,
                 buttonPositionTop: buttonPositionTop,
                 buttonPositionLeft: buttonPositionLeft,
                 tagSelected: _tagSelected,
                 currentActivityTags: _currentActivityTags,
-                enableMatch: _enableMatch,
                 changeTagAndName: changeTagAndName,
                 currentUserName: _currentUser.displayName,
               ),

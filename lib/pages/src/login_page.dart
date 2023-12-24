@@ -245,7 +245,10 @@ class _SetIsHostWidgetState extends State<_SetIsHostWidget> {
               inactiveThumbColor: Colors.transparent,
               inactiveTrackColor: Colors.lightGreen,
               trackOutlineWidth: MaterialStateProperty.all(0.5),
-              trackOutlineColor: MaterialStateProperty.all(Colors.black),
+              trackOutlineColor: MaterialStateProperty.all(Theme.of(context)
+                  .colorScheme
+                  .onBackground
+                  .withOpacity(0.5)),
               thumbIcon: MaterialStateProperty.all(
                 Icon(
                   Icons.person,

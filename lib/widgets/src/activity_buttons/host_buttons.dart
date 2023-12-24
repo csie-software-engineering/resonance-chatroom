@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 import 'package:resonance_chatroom/pages/routes.dart';
 
@@ -47,6 +48,7 @@ class HostButtonsState extends State<HostButtons>
 
   bool Initial = false;
   bool isPushButton = false;
+  bool isTryDisableActivity = false;
 
   void _init() {
     if (!Initial) {
@@ -116,7 +118,16 @@ class HostButtonsState extends State<HostButtons>
                           color: Theme.of(context).colorScheme.onSurface,
                         )),
                     onPressed: () async {
-                      await activityProvider.deleteActivity(widget.activityId);
+                      if(!isTryDisableActivity){
+                        isTryDisableActivity = true;
+                        try {
+                          await activityProvider.deleteActivity(widget.activityId);
+                          Fluttertoast.showToast(msg: "活動已停用");
+                        } catch (e) {
+                          debugPrint("disableActivityError: $e");
+                        }
+                        isTryDisableActivity = false;
+                      }
                     },
                   )
                 : IconButton(onPressed: () {}, icon: const Text("無效")),
@@ -180,8 +191,8 @@ class HostButtonsState extends State<HostButtons>
                           color: Theme.of(context).colorScheme.onSurface,
                         )),
                     onPressed: () {
-                      Navigatior.of(context).pushNamed(HostActivitySetPage)
-                    },
+                      // Navigator.of(context).pushNamed(HostActivitySetPage);
+                    }
                   )
                 : IconButton(onPressed: () {}, icon: const Text("無效")),
           ),

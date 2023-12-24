@@ -417,7 +417,7 @@ class ActivityProvider {
         .collection(FirestoreConstants.questionCollectionPath.value)
         .doc(questionData.uid);
 
-    questionDoc.set(questionData.toJson());
+    await questionDoc.set(questionData.toJson());
 
     return await getQuestion(activityId, questionData.uid);
   }
@@ -509,7 +509,7 @@ class ActivityProvider {
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityId)
         .collection(FirestoreConstants.questionCollectionPath.value)
-        .where(QuestionConstants.topicId.value, isEqualTo: topicId);
+        .where(QuestionConstants.questionId.value, isEqualTo: questionId);
 
     final questionDocs = (await questionQuery.get()).docs;
     assert(questionDocs.isNotEmpty, '該話題沒有問卷');

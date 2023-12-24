@@ -3,10 +3,23 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:resonance_chatroom/providers/providers.dart';
+import '../../models/models.dart';
 import '../routes.dart';
 
+class HostActivityTopicPageArguments {
+  // todo
+  // final ;
+  final String activityId;
+  final String tagId;
+
+  HostActivityTopicPageArguments(
+      {required this.activityId, required this.tagId});
+}
+
 class HostActivityTopicPage extends StatefulWidget {
-  const HostActivityTopicPage({Key? key}) : super(key: key);
+  const HostActivityTopicPage(
+      {Key? key, required String activityId, required String tagId})
+      : super(key: key);
 
   static const routeName = '/host_activity_topic_page';
 
@@ -15,8 +28,10 @@ class HostActivityTopicPage extends StatefulWidget {
 }
 
 class _HostActivityTopicPageState extends State<HostActivityTopicPage> {
-  late final SetActivityProvider setActivityProvider =
-      context.read<SetActivityProvider>();
+  late final args = ModalRoute.of(context)!.settings.arguments
+      as HostActivityTopicPageArguments;
+  late final ActivityProvider activityProvider =
+      context.read<ActivityProvider>();
   List<Widget> fields = [];
   @override
   Widget build(BuildContext context) {
@@ -42,11 +57,29 @@ class _HostActivityTopicPageState extends State<HostActivityTopicPage> {
                         "新增話題",
                       ),
                       onPressed: () async {
-                        String topicid = await setActivityProvider.AddNewTopic(
-                            "20231215-1110-8157-8970-4aec8768fa49",
-                            "",
-                            "20231215-1110-8158-9842-c402edc9f75e",
-                            "e9KcZWxQ9Uc1asxziKcGZf9POwJ3");
+                        Topic topic = Topic(
+                            activityId: "20231221-1345-8f43-9113-b1dd764c427f",
+                            //args.activityId,
+                            tagId: "20231221-1400-8418-8208-3535109ee14f",
+                            //args.tagId,
+                            topicName: "");
+                        Topic tmp = await activityProvider.addNewTopic(
+                          "20231221-1345-8f43-9113-b1dd764c427f",
+                          //  args.activityId,
+                          topic,
+                        );
+                        print("topic測試");
+                        Question questiontmp = Question(
+                            activityId: "20231221-1345-8f43-9113-b1dd764c427f",
+                            tagId: "20231221-1400-8418-8208-3535109ee14f",
+                            topicId: tmp.uid,
+                            questionName: "questionName",
+                            choices: []);
+                        Question question =
+                            await activityProvider.addNewQuestion(
+                                "20231221-1345-8f43-9113-b1dd764c427f",
+                                questiontmp);
+                                print("question測試");
                         setState(() {
                           fields.add(NewTopicField(
                             onDelete: () {
@@ -54,7 +87,8 @@ class _HostActivityTopicPageState extends State<HostActivityTopicPage> {
                                 fields.removeAt(fields.length - 1);
                               });
                             },
-                            id: topicid,
+                            id: tmp.uid,
+                            questionid: question.uid,
                           ));
                         });
                       },
@@ -86,21 +120,25 @@ class NewTopicField extends StatefulWidget {
     super.key,
     required this.onDelete,
     required this.id,
+    required this.questionid,
   });
   final VoidCallback? onDelete;
+  String questionid;
   String id;
   @override
   _NewTopicFieldState createState() => _NewTopicFieldState();
 }
 
 class _NewTopicFieldState extends State<NewTopicField> {
+  late final args = ModalRoute.of(context)!.settings.arguments
+      as HostActivityTopicPageArguments;
   bool isEditing = false; // 定義一個bool變量來控制按鈕的狀態
   late String topic; // 定義一個String變量來儲存按鈕的文字
   final TextEditingController _controller =
       TextEditingController(); // 定義一個TextEditingController
   final FocusNode _focusNode = FocusNode(); // 定義一個FocusNode
-  late final SetActivityProvider setActivityProvider =
-      context.read<SetActivityProvider>();
+  late final ActivityProvider activityProvider =
+      context.read<ActivityProvider>();
 
   @override
   Widget build(BuildContext context) {
@@ -121,11 +159,16 @@ class _NewTopicFieldState extends State<NewTopicField> {
                   : Text(_controller.text.isEmpty
                       ? "新話題"
                       : _controller.text), // 如果isEditing為false，就顯示Text
-              onPressed: () {
+              onPressed: () async {
                 // 跳至預覽頁面的邏輯
                 // 傳遞createEvent()方法的回傳值給預覽頁面
                 Navigator.of(context)
-                    .pushNamed(HostActivityQuestionPage.routeName);
+                    .pushNamed(HostActivityQuestionPage.routeName,
+                        arguments: HostActivityQuestionPage(
+                          activityId: "20231221-1345-8f43-9113-b1dd764c427f",
+                          //args.activityId,
+                          questionId: widget.questionid,
+                        ));
               },
             ),
           ),
@@ -144,9 +187,9 @@ class _NewTopicFieldState extends State<NewTopicField> {
                   _focusNode.requestFocus(); // 將焦點賦值給TextField
                 }
               });
-              await setActivityProvider.EditTopic(
-                  "20231215-1110-8157-8970-4aec8768fa49",
-                  "e9KcZWxQ9Uc1asxziKcGZf9POwJ3",
+              await activityProvider.editTopic(
+                  "20231221-1345-8f43-9113-b1dd764c427f",
+                  //args.activityId,
                   widget.id,
                   topic);
             },

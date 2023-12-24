@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:resonance_chatroom/models/models.dart';
 import 'package:resonance_chatroom/providers/providers.dart';
+import 'package:resonance_chatroom/utils/src/time.dart';
 
 import '../routes.dart';
 
@@ -234,18 +235,22 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
                   SizedBox(width: 16.0),
                   ElevatedButton(
                     onPressed: () async {
+                      print("測試");
                       Activity activitydata = Activity(
                           activityPhoto:
                               base64Encode(_selectedImage!.readAsBytesSync()),
                           activityInfo: _infoController.text,
                           activityName: _nameController.text,
-                          startDate: _selectedDates[0].toString(),
-                          endDate: _selectedDates[1].toString(),
+                          startDate: _selectedDates[0].toEpochString(),
+                          endDate: _selectedDates[1].toEpochString(),
                           );
-                      await setActivityProvider.setNewActivity(
+                      Activity activity =  await setActivityProvider.setNewActivity(
                           activitydata);
                       // 跳至送出頁面的邏輯
                       // 傳遞createEvent()方法的回傳值給送出頁面
+                        List<Tag> tags= await setActivityProvider.getAllTags("20231221-1345-8f43-9113-b1dd764c427f");
+                      Navigator.of(context).pushNamed(HostActivityTagPage.routeName,
+          arguments: HostActivityTagPage(activityId: activity.uid, tag: tags));
                     },
                     child: Text('送出'),
                   ),

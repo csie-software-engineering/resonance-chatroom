@@ -1,9 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:resonance_chatroom/models/models.dart';
 import '../../providers/providers.dart';
 import '../routes.dart';
 
+class HostActivityQuestionPageArguments {
+  // todo
+  // final ;
+  final String activityId;
+  final String questionId;
+
+  HostActivityQuestionPageArguments(
+      {required this.activityId, required this.questionId});
+}
+
 class HostActivityQuestionPage extends StatefulWidget {
-  const HostActivityQuestionPage({Key? key}) : super(key: key);
+  const HostActivityQuestionPage(
+      {Key? key, required String activityId, required String questionId})
+      : super(key: key);
 
   static const routeName = '/host_activity_question_page';
 
@@ -15,6 +29,8 @@ class HostActivityQuestionPage extends StatefulWidget {
 class _HostActivityQuestionPageState extends State<HostActivityQuestionPage> {
   List<Widget> fields = [];
   TextEditingController _questionController = TextEditingController();
+  late final ActivityProvider setActivityProvider =
+      context.read<ActivityProvider>();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -66,10 +82,18 @@ class _HostActivityQuestionPageState extends State<HostActivityQuestionPage> {
               Container(
                 width: 100, // 使用Container來設定按鈕的寬度
                 child: ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
+                    List<String> choice = [];
                     // 跳至送出頁面的邏輯
                     // 傳遞createEvent()方法的回傳值給送出頁面
-
+                    Question question = await setActivityProvider.getQuestion(
+                        "20231221-1345-8f43-9113-b1dd764c427f",
+                        "20231221-1515-8441-b984-c81834926ea7");
+                    question.questionName = _questionController.text;
+                    await setActivityProvider.editQuestion(
+                        "20231221-1345-8f43-9113-b1dd764c427f",
+                        "20231221-1515-8441-b984-c81834926ea7",
+                        question);
                   },
                   child: Text('送出'),
                 ),
@@ -81,7 +105,7 @@ class _HostActivityQuestionPageState extends State<HostActivityQuestionPage> {
     );
   }
 }
-
+List<String> test = [];
 class NewChoiceField extends StatelessWidget {
   NewChoiceField({
     super.key,

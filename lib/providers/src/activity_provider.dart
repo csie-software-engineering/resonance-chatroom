@@ -424,14 +424,12 @@ class ActivityProvider {
     assert(await _checkTagAlive(activityId, questionData.tagId), "標籤不存在");
     assert(await _checkTopicAlive(activityId, questionData.topicId), "話題不存在");
     assert(await _isManager(activityId), '你不是管理者');
-    print("測試一");
-    /*  while (questionData.choices.remove("")) {}
-    assert(
-      questionData.choices.toSet().length == questionData.choices.length,
-      '選項重複',
-    );*/
-    print("測試二");
-    questionData.choices = ["", "", "", "", ""];
+    // while (questionData.choices.remove("")) {}
+    // assert(
+    //   questionData.choices.toSet().length == questionData.choices.length,
+    //   '選項重複',
+    // );
+
     final existQuestion = db
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityId)

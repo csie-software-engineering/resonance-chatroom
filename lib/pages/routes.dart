@@ -30,4 +30,7 @@ Map<String, Widget Function(BuildContext)> routes = {
   HostActivityTagPage.routeName: (_) => const HostActivityTagPage(),
   HostActivityTopicPage.routeName: (_) => const HostActivityTopicPage(),
   HostActivityQuestionPage.routeName: (_) => const HostActivityQuestionPage(),
+  HostQuestionStatisticPage.routeName: (_) => const HostQuestionStatisticPage(),
+  MainPage.routeName: (_) => const MainPage(),
+  PersonalSettingPage.routeName: (_) => const PersonalSettingPage(),
 };

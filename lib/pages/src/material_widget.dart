@@ -16,7 +16,7 @@ class MaterialWidget extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final instance = snapshot.data!;
+          final instance = snapshot.requireData;
           return MaterialApp(
             title: AppConstants.appTitle,
             theme: ThemeData(

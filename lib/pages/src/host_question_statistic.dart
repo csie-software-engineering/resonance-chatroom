@@ -77,7 +77,7 @@ class HostQuestionStatisticPage extends StatelessWidget {
                                 child: CircularProgressIndicator());
                           }
 
-                          final result = snapshot.data!;
+                          final result = snapshot.requireData;
                           final seriesList = [
                             charts.Series<int, String>(
                               id: question.uid,

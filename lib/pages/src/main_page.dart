@@ -35,10 +35,8 @@ class _MainPageState extends State<MainPage> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
-        if (snapshot.hasError) {
-          return Text('Error: ${snapshot.error}');
-        }
-        final user = snapshot.data!;
+
+        final user = snapshot.requireData;
         return Scaffold(
           backgroundColor: Theme.of(context).colorScheme.background,
           appBar: myAppBar(
@@ -70,7 +68,7 @@ class _MainPageState extends State<MainPage> {
                 _joinActivity(context, user);
               }
             },
-            tooltip: 'Add Activity',
+            tooltip: args.isHost ? '新增活動' : '加入活動',
             label: const Icon(Icons.event),
           ),
         );
@@ -109,7 +107,7 @@ class _MainPageState extends State<MainPage> {
                       child: ListView.builder(
                         itemCount: snapshot.data?.length ?? 0,
                         itemBuilder: (context, index) {
-                          final activity = snapshot.data![index];
+                          final activity = snapshot.requireData[index];
 
                           return ListTile(
                             leading: const Icon(Icons.event),
@@ -181,9 +179,7 @@ class _ActivityCarouselWidgetState extends State<ActivityCarouselWidget> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-          if (snapshot.hasError) {
-            return Text('Error: ${snapshot.error}');
-          }
+
           final userActivities = snapshot.requireData;
           return userActivities.isNotEmpty
               ? CarouselSlider.builder(
@@ -257,7 +253,7 @@ class RoomCardWidget extends StatelessWidget {
               return const Center(child: CircularProgressIndicator());
             }
 
-            final activity = snapshot.data!;
+            final activity = snapshot.requireData;
             return InkWell(
               onTap: () {
                 if (activity.isEnabled) {

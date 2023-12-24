@@ -40,7 +40,8 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-          final user = snapshot.data!;
+
+          final user = snapshot.requireData;
           return Column(
             children: [
               SizedBox(height: MediaQuery.of(context).size.height * 0.01),
@@ -131,7 +132,7 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
                               return const Center(
                                   child: CircularProgressIndicator());
                             }
-                            final activities = snapshot.data!;
+                            final activities = snapshot.requireData;
                             return ListView.separated(
                               itemCount: activities.length,
                               itemBuilder: (context, index) {
@@ -153,7 +154,7 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
                                         return const Center(
                                             child: CircularProgressIndicator());
                                       }
-                                      final tags = snapshot.data!;
+                                      final tags = snapshot.requireData;
                                       return Text(
                                         '標籤: ${tags.map((e) => e.tagName).join(', ')}',
                                         overflow: TextOverflow.ellipsis,

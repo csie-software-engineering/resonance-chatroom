@@ -193,7 +193,7 @@ class _LoginPageState extends State<LoginPage> {
                 );
               }
 
-              final instance = snapshot.data!;
+              final instance = snapshot.requireData;
               return _SetIsHostWidget(pref: instance);
             },
           ),

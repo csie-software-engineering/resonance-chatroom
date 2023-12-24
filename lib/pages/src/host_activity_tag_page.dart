@@ -30,19 +30,26 @@ class _HostActivityTagPageState extends State<HostActivityTagPage> {
       _origintag = getTags;
     }
     for (int i = 0; i < _origintag.length; i++) {
-      setState(() {
-        fields.add(NewTagField(
-          onDelete: () {
-            setState(() {
-              fields.removeAt(fields.length - 1);
-            });
-          },
-          id: _origintag[i].uid,
-          activityid: args.activityId,
-          tagname: _origintag[i].tagName,
-        ));
-      });
+      fields.add(NewTagField(
+        onDelete: () {
+          setState(() {
+            fields.removeAt(fields.length - 1);
+          });
+        },
+        id: _origintag[i].uid,
+        activityid: args.activityId,
+        tagname: _origintag[i].tagName,
+      ));
     }
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(Duration(milliseconds: 350), () {
+      this._initTagContent();
+   });
   }
 
   @override

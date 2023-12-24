@@ -42,14 +42,29 @@ class _HostActivityQuestionPageState extends State<HostActivityQuestionPage> {
   late final ActivityProvider questionProvider =
       context.read<ActivityProvider>();
 
-  Future<void> _initQuestionContent() async {
+  void _initQuestionContent() async {
+    print("初始問卷頁面");
     var getQuestion =
         await questionProvider.getQuestion(args.activityId, args.questionId);
     if (getQuestion != null) {
       _originquestion = getQuestion;
     }
     _questionController.text = _originquestion.questionName;
-    choice = _originquestion.choices;
+    _choice1Controller.text = _originquestion.choices[0];
+    _choice2Controller.text = _originquestion.choices[1];
+    _choice3Controller.text = _originquestion.choices[2];
+    _choice4Controller.text = _originquestion.choices[3];
+    _choice5Controller.text = _originquestion.choices[4];
+    print(_questionController.text);
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(Duration(milliseconds: 350), () {
+      this._initQuestionContent();
+   });
   }
 
   @override

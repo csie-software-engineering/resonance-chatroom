@@ -516,6 +516,19 @@ class ActivityProvider {
     return Question.fromDocument(questionDoc);
   }
 
+  /// 用話題ID取得問卷
+  Future<Question> getQuestionByTopic(String activityId, String topicId) async {
+    final questionQuery = db
+        .collection(FirestoreConstants.activityCollectionPath.value)
+        .doc(activityId)
+        .collection(FirestoreConstants.questionCollectionPath.value)
+        .where(QuestionConstants.topicId.value, isEqualTo: topicId);
+
+    final questionDocs = (await questionQuery.get()).docs;
+    assert(questionDocs.isNotEmpty, '該話題沒有問卷');
+    return Question.fromDocument(questionDocs.first);
+  }
+
   /// 刪除話題與問卷問題
   Future<void> deleteTopicAndQuestion(
     String activityId,

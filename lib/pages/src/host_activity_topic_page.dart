@@ -22,34 +22,44 @@ class HostActivityTopicPage extends StatefulWidget {
 }
 
 class _HostActivityTopicPageState extends State<HostActivityTopicPage> {
-  late final args = ModalRoute.of(context)!.settings.arguments
-      as HostActivityTopicPageArguments;
-  late final ActivityProvider topicProvider = context.read<ActivityProvider>();
   late final List<Topic> _origintopic;
   List<Widget> fields = [];
-
+    late final args = ModalRoute.of(context)!.settings.arguments
+        as HostActivityTopicPageArguments;
+    late final ActivityProvider topicProvider =
+        context.read<ActivityProvider>();
   Future<void> _initTopicContent() async {
-    var getTopic = await topicProvider.getTopicsByTag(args.activityId, args.tagId);
+    print("初始頁面");
+    var getTopic =
+        await topicProvider.getTopicsByTag(args.activityId, args.tagId);
     if (getTopic != null) {
       _origintopic = getTopic;
     }
     for (int i = 0; i < _origintopic.length; i++) {
-      
-      setState(() {
-        fields.add(NewTopicField(
-          onDelete: () {
-            setState(() {
-              fields.removeAt(fields.length - 1);
-            });
-          },
-          id: _origintopic[i].uid,
-          questionid: _origintopic[i].,
-          tagid: args.tagId,
-          activityid: args.activityId,
-          topicname: _origintopic[i].topicName,
-        ));
-      });
+      var questiontmp = await topicProvider.getQuestionByTopic(
+          args.activityId, _origintopic[i].uid);
+      fields.add(NewTopicField(
+        onDelete: () {
+          setState(() {
+            fields.removeAt(fields.length - 1);
+          });
+        },
+        id: _origintopic[i].uid,
+        questionid: questiontmp.uid,
+        tagid: args.tagId,
+        activityid: args.activityId,
+        topicname: _origintopic[i].topicName,
+      ));
     }
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(Duration(milliseconds: 350), () {
+      this._initTopicContent();
+   });
   }
 
   @override

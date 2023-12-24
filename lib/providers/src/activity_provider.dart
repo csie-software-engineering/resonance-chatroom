@@ -210,7 +210,9 @@ class ActivityProvider {
     final activityData = Activity.fromDocument(await documentReference.get());
 
     activityData.managers.add(addUserId);
-    await UserProvider().addUserActivity(UserActivity(uid: activityData.uid, isManager: true), userId: addUserId);
+    await UserProvider().addUserActivity(
+        UserActivity(uid: activityData.uid, isManager: true),
+        userId: addUserId);
     await documentReference.set(activityData.toJson());
   }
 
@@ -227,7 +229,8 @@ class ActivityProvider {
 
     assert(activityData.ownerId != deleteUserId, "不能刪除主辦者");
     assert(activityData.managers.remove(deleteUserId), '該用戶不是管理者');
-    await UserProvider().removeUserActivity(activityId, userId: deleteUserId, isManager: true);
+    await UserProvider()
+        .removeUserActivity(activityId, userId: deleteUserId, isManager: true);
     await documentReference.set(activityData.toJson());
   }
 
@@ -409,12 +412,14 @@ class ActivityProvider {
     assert(await _checkTagAlive(activityId, questionData.tagId), "標籤不存在");
     assert(await _checkTopicAlive(activityId, questionData.topicId), "話題不存在");
     assert(await _isManager(activityId), '你不是管理者');
-    while (questionData.choices.remove("")) {}
+    print("測試一");
+    /*  while (questionData.choices.remove("")) {}
     assert(
       questionData.choices.toSet().length == questionData.choices.length,
       '選項重複',
-    );
-
+    );*/
+    print("測試二");
+    questionData.choices = ["", "", "", "", ""];
     final existQuestion = db
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityId)

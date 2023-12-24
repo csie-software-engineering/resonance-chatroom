@@ -51,11 +51,26 @@ class _HostActivityQuestionPageState extends State<HostActivityQuestionPage> {
 
     _originQuestion = getQuestion;
     _questionController.text = _originQuestion.questionName;
-    _choice1Controller.text = _originQuestion.choices[0];
-    _choice2Controller.text = _originQuestion.choices[1];
-    _choice3Controller.text = _originQuestion.choices[2];
-    _choice4Controller.text = _originQuestion.choices[3];
-    _choice5Controller.text = _originQuestion.choices[4];
+    // 創建一個列表來存儲所有的_choiceiController
+    List<TextEditingController> choiceControllers = [
+      _choice1Controller,
+      _choice2Controller,
+      _choice3Controller,
+      _choice4Controller,
+      _choice5Controller
+    ];
+    // 使用for循環來遍歷_originQuestion.choices
+    for (int i = 0; i < _originQuestion.choices.length; i++) {
+      // 將每個元素賦值給對應的_choiceiController.text
+      choiceControllers[i].text = _originQuestion.choices[i];
+    }
+    // 如果_originQuestion.choices的長度小於5
+    if (_originQuestion.choices.length < 5) {
+      // 將剩下的_choiceiController.text賦值為空字符串
+      for (int i = _originQuestion.choices.length; i < 5; i++) {
+        choiceControllers[i].text = "";
+      }
+    }
     debugPrint(_questionController.text);
     setState(() {});
   }

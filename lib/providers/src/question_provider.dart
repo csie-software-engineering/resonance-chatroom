@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../constants/constants.dart';
 import '../../models/models.dart';
 import '../../providers/providers.dart';
-import '../../utils/utils.dart';
 
 class QuestionProvider {
   final FirebaseFirestore db;
@@ -36,15 +35,15 @@ class QuestionProvider {
         .collection(FirestoreConstants.replyCollectionPath.value)
         .doc(email);
 
-    final activityData = await ActivityProvider().getActivity(activityId);
-    assert(
-      activityData.startDate.toEpochTime().isBefore(DateTime.now()),
-      '活動尚未開始',
-    );
-    assert(
-      activityData.endDate.toEpochTime().isAfter(DateTime.now()),
-      '活動已經結束',
-    );
+    // final activityData = await ActivityProvider().getActivity(activityId);
+    // assert(
+    //   activityData.startDate.toEpochTime().isBefore(DateTime.now()),
+    //   '活動尚未開始',
+    // );
+    // assert(
+    //   activityData.endDate.toEpochTime().isAfter(DateTime.now()),
+    //   '活動已經結束',
+    // );
 
     ansRef.set({
       ReplyConstants.email.value: email,

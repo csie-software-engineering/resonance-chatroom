@@ -158,22 +158,51 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
                                             .primary,
                                       ),
                                       title: Text(activity.activityName),
-                                      subtitle: FutureBuilder<List<Tag>>(
+                                        subtitle: args.isHost
+                                            ? FutureBuilder<User>(
+                                                future: context
+                                                    .read<UserProvider>()
+                                                    .getUser(
+                                                        userId:
+                                                            activity.ownerId),
+                                                builder: (context, snapshot) {
+                                                  if (snapshot
+                                                          .connectionState ==
+                                                      ConnectionState.waiting) {
+                                                    return const Center(
+                                                        child:
+                                                            CircularProgressIndicator());
+                                                  }
+
+                                                  final host =
+                                                      snapshot.requireData;
+                                                  return Text(
+                                                    '創辦者暱稱: ${host.displayName}',
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  );
+                                                },
+                                              )
+                                            : FutureBuilder<List<Tag>>(
                                         future: context
                                             .read<ActivityProvider>()
-                                            .getAllTags(userActivity.uid),
+                                                    .getAllTags(
+                                                        userActivity.uid),
                                         builder: (context, snapshot) {
-                                          if (snapshot.connectionState ==
+                                                  if (snapshot
+                                                          .connectionState ==
                                               ConnectionState.waiting) {
                                             return const Center(
                                                 child:
                                                     CircularProgressIndicator());
                                           }
 
-                                          final tags = snapshot.requireData;
+                                                  final tags =
+                                                      snapshot.requireData;
                                           return Text(
                                             '標籤: ${userActivity.tagIds.map((utId) => tags.firstWhere((t) => t.uid == utId).tagName).join(', ')}',
-                                            overflow: TextOverflow.ellipsis,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
                                           );
                                         },
                                       ),

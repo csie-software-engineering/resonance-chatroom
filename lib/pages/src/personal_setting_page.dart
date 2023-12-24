@@ -48,16 +48,16 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
                 foregroundImage:
                     user.photoUrl != null ? NetworkImage(user.photoUrl!) : null,
                 backgroundImage: const AssetImage('lib/assets/user.png'),
-                radius: MediaQuery.of(context).size.height * 0.06,
+                radius: MediaQuery.of(context).size.height * 0.05,
               ),
               SizedBox(height: MediaQuery.of(context).size.height * 0.02),
               SizedBox(
-                height: MediaQuery.of(context).size.height * 0.06,
+                height: MediaQuery.of(context).size.height * 0.05,
                 child: _NickNameWidget(user: user),
               ),
               SizedBox(height: MediaQuery.of(context).size.height * 0.01),
               SizedBox(
-                height: MediaQuery.of(context).size.height * 0.06,
+                height: MediaQuery.of(context).size.height * 0.05,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -81,7 +81,7 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
               ),
               SizedBox(height: MediaQuery.of(context).size.height * 0.01),
               SizedBox(
-                height: MediaQuery.of(context).size.height * 0.06,
+                height: MediaQuery.of(context).size.height * 0.05,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -132,8 +132,7 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
                                   child: CircularProgressIndicator());
                             }
                             final activities = snapshot.data!;
-                            return ListView.builder(
-                              physics: const NeverScrollableScrollPhysics(),
+                            return ListView.separated(
                               itemCount: activities.length,
                               itemBuilder: (context, index) {
                                 final activity = activities[index];
@@ -163,6 +162,12 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
                                   ),
                                 );
                               },
+                              separatorBuilder: (context, index) => Divider(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withOpacity(0.5),
+                              ),
                             );
                           },
                         ),

@@ -428,7 +428,7 @@ class ActivityProvider {
     //   '選項重複',
     // );
 
-    if(questionData.choices.isEmpty) questionData.choices = List.filled(5, '');
+    questionData.choices = List.filled(5, '');
     final existQuestion = db
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityId)

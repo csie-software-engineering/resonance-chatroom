@@ -119,25 +119,27 @@ class UserButtonsState extends State<UserButtons>
             height: size1,
             width: size1,
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary.withRed(200),
+              color: widget.enableHistoricalChatRoom
+                  ? Theme.of(context).colorScheme.primary.withRed(200)
+                  : Colors.grey,
               borderRadius: BorderRadius.circular(40.0),
             ),
-            child: widget.enableHistoricalChatRoom
-                ? IconButton(
-                    onPressed: () {
-                      Navigator.of(context).pushNamed(
-                        HistoricalChatRoomPage.routeName,
-                        arguments: HistoricalChatRoomPageArguments(
-                          activityId: widget.currentActivityTags[0].activityId,
-                        ),
-                      );
-                    },
-                    icon: Icon(
-                      Icons.chat,
-                      color: Theme.of(context).colorScheme.onInverseSurface,
+            child: IconButton(
+              onPressed: () {
+                if (widget.enableHistoricalChatRoom) {
+                  Navigator.of(context).pushNamed(
+                    HistoricalChatRoomPage.routeName,
+                    arguments: HistoricalChatRoomPageArguments(
+                      activityId: widget.currentActivityTags[0].activityId,
                     ),
-                  )
-                : IconButton(onPressed: () {}, icon: const Text("無效")),
+                  );
+                }
+              },
+              icon: Icon(
+                Icons.chat,
+                color: Theme.of(context).colorScheme.onInverseSurface,
+              ),
+            ),
           ),
         ),
         AnimatedPositioned(
@@ -148,34 +150,35 @@ class UserButtonsState extends State<UserButtons>
               : const Duration(milliseconds: 875),
           curve: toggle ? Curves.easeIn : Curves.elasticOut,
           child: AnimatedContainer(
-              duration: toggle
-                  ? const Duration(milliseconds: 275)
-                  : const Duration(milliseconds: 875),
-              curve: toggle ? Curves.easeIn : Curves.elasticOut,
-              height: size2,
-              width: size2,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary.withRed(200),
-                borderRadius: BorderRadius.circular(40.0),
-              ),
-              child: widget.enableTagWidget && widget.enableMatch
-                  ? IconButton(
-                      icon: widget.startMatching
-                          ? Text("取消",
-                              style: TextStyle(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onInverseSurface,
-                              ))
-                          : Text("配對",
-                              style: TextStyle(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onInverseSurface,
-                              )),
-                      onPressed: widget.matching,
-                    )
-                  : IconButton(onPressed: () {}, icon: const Text("無效"))),
+            duration: toggle
+                ? const Duration(milliseconds: 275)
+                : const Duration(milliseconds: 875),
+            curve: toggle ? Curves.easeIn : Curves.elasticOut,
+            height: size2,
+            width: size2,
+            decoration: BoxDecoration(
+              color: widget.enableTagWidget && widget.enableMatch
+                  ? Theme.of(context).colorScheme.primary.withRed(200)
+                  : Colors.grey,
+              borderRadius: BorderRadius.circular(40.0),
+            ),
+            child: IconButton(
+              icon: widget.startMatching
+                  ? Text("取消",
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onInverseSurface,
+                      ))
+                  : Text("配對",
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onInverseSurface,
+                      )),
+              onPressed: () {
+                if (widget.enableTagWidget && widget.enableMatch) {
+                  widget.matching();
+                }
+              },
+            ),
+          ),
         ),
         AnimatedPositioned(
           top: top3,
@@ -192,154 +195,149 @@ class UserButtonsState extends State<UserButtons>
             height: size3,
             width: size3,
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary.withRed(200),
+              color: widget.enableTagWidget
+                  ? Theme.of(context).colorScheme.primary.withRed(200)
+                  : Colors.grey,
               borderRadius: BorderRadius.circular(40.0),
             ),
-            child: widget.enableTagWidget
-                ? IconButton(
-                    icon: Text("標籤",
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onInverseSurface,
-                        )),
-                    onPressed: () {
-                      var width = context.size!.width * 0.8;
+            child: IconButton(
+                icon: Text("標籤",
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onInverseSurface,
+                    )),
+                onPressed: () {
+                  var width = context.size!.width * 0.8;
+                  if (widget.enableTagWidget) {
+                    showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (BuildContext context) {
+                          List<bool> _tagTmp = List.generate(
+                              widget.currentActivityTags.length,
+                              (index) => false);
+                          for (int i = 0; i < widget.tagSelected.length; i++) {
+                            _tagTmp[i] = widget.tagSelected[i];
+                          }
 
-                      showDialog(
-                          context: context,
-                          barrierDismissible: false,
-                          builder: (BuildContext context) {
-                            List<bool> _tagTmp = List.generate(
-                                widget.currentActivityTags.length,
-                                (index) => false);
-                            for (int i = 0;
-                                i < widget.tagSelected.length;
-                                i++) {
-                              _tagTmp[i] = widget.tagSelected[i];
-                            }
-
-                            return AlertDialog(
-                              insetPadding: const EdgeInsets.symmetric(
-                                  vertical: 10.0, horizontal: 40.0),
-                              actionsPadding: const EdgeInsets.only(
-                                  top: 0, right: 20, bottom: 10),
-                              scrollable: true,
-                              title: Column(
-                                // alignment: AlignmentDirectional.topStart,
-                                children: [
-                                  const Text("匹配設定"),
-                                  const SizedBox(height: 20),
-                                  Align(
-                                    alignment: Alignment.center,
-                                    child: Container(
-                                      padding: const EdgeInsets.all(14),
-                                      height: 70,
-                                      decoration: BoxDecoration(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .inversePrimary
-                                            .withOpacity(0.3),
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
-                                          Padding(
-                                            padding: const EdgeInsets.only(
-                                                right: 10),
-                                            child: Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 6,
-                                                      vertical: 2),
-                                              decoration: BoxDecoration(
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .primary
-                                                    .withOpacity(0.3),
-                                                borderRadius:
-                                                    BorderRadius.circular(10),
-                                              ),
-                                              child: const Text(
-                                                "暱稱",
-                                                style: TextStyle(
-                                                  fontSize: 16,
-                                                ),
+                          return AlertDialog(
+                            insetPadding: const EdgeInsets.symmetric(
+                                vertical: 10.0, horizontal: 40.0),
+                            actionsPadding: const EdgeInsets.only(
+                                top: 0, right: 20, bottom: 10),
+                            scrollable: true,
+                            title: Column(
+                              // alignment: AlignmentDirectional.topStart,
+                              children: [
+                                const Text("匹配設定"),
+                                const SizedBox(height: 20),
+                                Align(
+                                  alignment: Alignment.center,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(14),
+                                    height: 70,
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .inversePrimary
+                                          .withOpacity(0.3),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      children: [
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(right: 10),
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 6, vertical: 2),
+                                            decoration: BoxDecoration(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .primary
+                                                  .withOpacity(0.3),
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                            ),
+                                            child: const Text(
+                                              "暱稱",
+                                              style: TextStyle(
+                                                fontSize: 16,
                                               ),
                                             ),
                                           ),
-                                          Container(
-                                              width: width * 0.5,
-                                              child: TextField(
-                                                controller:
-                                                    _textEditingController,
-                                                decoration:
-                                                    const InputDecoration(
-                                                        isCollapsed: true),
-                                                maxLines: 1,
-                                              )),
-                                        ],
+                                        ),
+                                        Container(
+                                            width: width * 0.5,
+                                            child: TextField(
+                                              controller:
+                                                  _textEditingController,
+                                              decoration: const InputDecoration(
+                                                  isCollapsed: true),
+                                              maxLines: 1,
+                                            )),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            content: Container(
+                              padding: const EdgeInsets.all(14),
+                              height: 300,
+                              decoration: BoxDecoration(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .inversePrimary
+                                    .withOpacity(0.3),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 6, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary
+                                            .withOpacity(0.3),
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: const Text(
+                                        "標籤",
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                        ),
                                       ),
                                     ),
                                   ),
+                                  const SizedBox(height: 10),
+                                  Container(
+                                    height: 230,
+                                    width: width,
+                                    child: TagsWidget(
+                                        tagList: widget.currentActivityTags,
+                                        tagSelectedTmp: _tagTmp),
+                                  )
                                 ],
                               ),
-                              content: Container(
-                                padding: const EdgeInsets.all(14),
-                                height: 300,
-                                decoration: BoxDecoration(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .inversePrimary
-                                      .withOpacity(0.3),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 6, vertical: 2),
-                                        decoration: BoxDecoration(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .primary
-                                              .withOpacity(0.3),
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                        ),
-                                        child: const Text(
-                                          "標籤",
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 10),
-                                    Container(
-                                      height: 230,
-                                      width: width,
-                                      child: TagsWidget(
-                                          tagList: widget.currentActivityTags,
-                                          tagSelectedTmp: _tagTmp),
-                                    )
-                                  ],
-                                ),
-                              ),
-                              actions: confirmButtons(
-                                context,
-                                action: () => widget.changeTagAndName(
-                                    _textEditingController, _tagTmp),
-                                cancel: () => _textEditingController.text =
-                                    widget.currentUserName,
-                              ),
-                            );
-                          });
-                    })
-                : IconButton(onPressed: () {}, icon: const Text("無效")),
+                            ),
+                            actions: confirmButtons(
+                              context,
+                              action: () => widget.changeTagAndName(
+                                  _textEditingController, _tagTmp),
+                              cancel: () => _textEditingController.text =
+                                  widget.currentUserName,
+                            ),
+                          );
+                        });
+                  }
+                }),
           ),
         ),
         Positioned(
@@ -362,7 +360,7 @@ class UserButtonsState extends State<UserButtons>
                       color: Theme.of(context).colorScheme.onInverseSurface,
                       splashColor: Colors.black54,
                       onPressed: () {
-                        if(!isPushButton) {
+                        if (!isPushButton) {
                           isPushButton = true;
                           setState(() {
                             if (toggle) {
@@ -387,12 +385,11 @@ class UserButtonsState extends State<UserButtons>
                               toggle = !toggle;
                               _controller.reverse();
                               top1 = top2 = top3 = buttonPositionTop + 10;
-                              left1 =
-                                  left2 = left3 = buttonPositionLeft + 10;
+                              left1 = left2 = left3 = buttonPositionLeft + 10;
                               size1 = size2 = size3 = 20.0;
                             }
                           });
-                          Future.delayed(Duration(milliseconds: 500), (){
+                          Future.delayed(Duration(milliseconds: 500), () {
                             isPushButton = false;
                           });
                         }

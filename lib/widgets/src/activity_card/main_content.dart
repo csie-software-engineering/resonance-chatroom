@@ -38,8 +38,10 @@ class ActivityMainContent extends StatelessWidget {
               clipBehavior: Clip.hardEdge,
               elevation: 10,
               shadowColor: Theme.of(context).colorScheme.primary,
-              child: Container(
-                child: image,
+              child: Center(
+                child: Container(
+                  child: image,
+                ),
               ),
             ),
           ],

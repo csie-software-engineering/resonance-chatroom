@@ -122,7 +122,7 @@ class _ActivityMainPageState extends State<ActivityMainPage>
       try {
         peerId = await chatProvider.getChatToUserId(args.activityId);
       } catch (e) {
-        debugPrint("$e"); // todo 暫時抓全部
+        debugPrint("$e");
       }
       if (peerId == null) {
         setState(() {
@@ -274,8 +274,8 @@ class _ActivityMainPageState extends State<ActivityMainPage>
     // set _currentUserActivity
 
     _currentUser = await authProvider.currentUser;
-    _currentUserActivity =
-        await userProvider.getUserActivity(args.activityId, isManager: false);
+    _currentUserActivity = await userProvider.getUserActivity(args.activityId,
+        isManager: args.isHost);
     var getActivity = await activityProvider.getActivity(args.activityId);
 
     if (getActivity != null) {
@@ -370,80 +370,103 @@ class _ActivityMainPageState extends State<ActivityMainPage>
                     child: Column(
                       children: [
                         SizedBox(height: MediaQuery.of(context).padding.top),
-                        Row(
-                          children: [
-                            BackButton(
-                              onPressed: () async {
-                                if (isStartMatching) {
-                                  await showDialog(
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return QuitWarningDialog(
-                                          action: () async {
-                                            isStartMatching = false;
-                                            // _height = 0;
-                                            try {
-                                              await chatProvider.cancelWaiting(
-                                                  args.activityId);
-                                            } catch (e) {
-                                              debugPrint(
-                                                  "cancelWaitingError: $e");
-                                            }
-                                            setState(() {
-                                              Navigator.of(context).popUntil(
-                                                  ModalRoute.withName(
-                                                      MainPage.routeName));
-                                            });
-                                          },
-                                        );
-                                      });
-                                } else {
-                                  setState(() {
-                                    Navigator.of(context).popUntil(
-                                        ModalRoute.withName(
-                                            MainPage.routeName));
-                                  });
-                                }
-                              },
-                            ),
-                            Expanded(
-                              child: Container(
-                                height: kToolbarHeight,
-                                child: Center(
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 2, horizontal: 20.0),
-                                    child: Text(_currentActivity.activityName,
-                                        style: TextStyle(
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.w700,
+                        Container(
+                          height: kToolbarHeight,
+                          child: Stack(
+                            alignment: AlignmentDirectional.centerStart,
+                            children: [
+                              BackButton(
+                                onPressed: () async {
+                                  if (isStartMatching) {
+                                    await showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return QuitWarningDialog(
+                                            action: () async {
+                                              isStartMatching = false;
+                                              // _height = 0;
+                                              try {
+                                                await chatProvider
+                                                    .cancelWaiting(
+                                                        args.activityId);
+                                              } catch (e) {
+                                                debugPrint(
+                                                    "cancelWaitingError: $e");
+                                              }
+                                              setState(() {
+                                                Navigator.of(context).popUntil(
+                                                    ModalRoute.withName(
+                                                        MainPage.routeName));
+                                              });
+                                            },
+                                          );
+                                        });
+                                  } else {
+                                    setState(() {
+                                      Navigator.of(context).popUntil(
+                                          ModalRoute.withName(
+                                              MainPage.routeName));
+                                    });
+                                  }
+                                },
+                              ),
+                              Align(
+                                alignment: Alignment.center,
+                                child: Container(
+                                  child: Center(
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 2, horizontal: 20.0),
+                                      child: Text(_currentActivity.activityName,
+                                          style: TextStyle(
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.w700,
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onInverseSurface)),
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary
+                                            .withOpacity(0.8),
+                                        borderRadius: BorderRadius.circular(16),
+                                        boxShadow: [
+                                          BoxShadow(
                                             color: Theme.of(context)
                                                 .colorScheme
-                                                .onInverseSurface)),
-                                    decoration: BoxDecoration(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .primary
-                                          .withOpacity(0.8),
-                                      borderRadius: BorderRadius.circular(16),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .onSurface
-                                              .withOpacity(0.2),
-                                          offset: const Offset(2, 2),
-                                          blurRadius: 2,
-                                          spreadRadius: 1,
-                                        ),
-                                      ],
+                                                .onSurface
+                                                .withOpacity(0.2),
+                                            offset: const Offset(2, 2),
+                                            blurRadius: 2,
+                                            spreadRadius: 1,
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
-                            const SizedBox(width: 50),
-                          ],
+                              // const SizedBox(width: 50),
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(right: 10.0),
+                                  child: IconButton(
+                                    color: Theme.of(context).colorScheme.primary,
+                                      iconSize: 30,
+                                      icon: const Icon(
+                                          Icons.person,
+                                      ),
+                                      onPressed: () {
+                                        Navigator.of(context).pushNamed(
+                                            ManagerPage.routeName,
+                                            arguments: ManagerArguments(
+                                                activityId: args.activityId));
+                                      }),
+                                ),
+                              )
+                            ],
+                          ),
                         ),
                       ],
                     ),

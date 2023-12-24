@@ -137,9 +137,7 @@ class ActivityProvider {
     if (!activityData.exists) {
       return false;
     }
-    if (!Activity.fromDocument(activityData).isEnabled) {
-      return false;
-    }
+
     return true;
   }
 

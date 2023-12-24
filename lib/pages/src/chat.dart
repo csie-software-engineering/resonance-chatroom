@@ -175,8 +175,12 @@ class _ChatPageState extends State<ChatPage> {
   Future<void> _init() async {
     if (!initial) {
       // await chatProvider.disagreeShareSocialMedia(args.activityId, args.peerId);
-      _isEnableSocialMedial = await chatProvider.getIsAgreeShareSocialMedia(
-          args.activityId, args.peerId);
+      try {
+        _isEnableSocialMedial = await chatProvider.getIsAgreeShareSocialMedia(
+            args.activityId, args.peerId);
+      } catch (e) {
+        debugPrint("_initgetIsAgreeShareSocialMediaError: $e");
+      }
       peerUser = await userProvider.getUser(
           userId: args.peerId); // todo 我可以直接載入對方的 social media?
       room = await chatProvider.getRoom(args.activityId, args.peerId);

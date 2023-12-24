@@ -51,10 +51,10 @@ class _ManagerPageState extends State<ManagerPage> {
                 ),
               ),
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   final newManagerId = _textEditingController.text;
                   if (newManagerId.isNotEmpty) {
-                    _addNewManager(args.activityId, newManagerId);
+                    await _addNewManager(args.activityId, newManagerId);
                   }
                 },
                 child: const Text('新增管理者'),
@@ -67,9 +67,9 @@ class _ManagerPageState extends State<ManagerPage> {
                       title: Text(managers[index]),
                       trailing: IconButton(
                         icon: const Icon(Icons.delete),
-                        onPressed: () {
+                        onPressed: () async {
                           final deleteUserId = managers[index];
-                          _deleteItem(args.activityId, deleteUserId);
+                          await _deleteItem(args.activityId, deleteUserId);
                         },
                       ),
                     );

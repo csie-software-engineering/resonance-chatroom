@@ -84,7 +84,7 @@ class UserProvider {
     return await getUser(userId: userId, loadSocial: true);
   }
 
-  /// 添加(覆寫)使用者活動資料(僅能添加自己的資料)
+  /// 添加(覆寫)使用者活動資料
   Future<UserActivity> addUserActivity(
     UserActivity activity, {
     String? userId,
@@ -111,7 +111,8 @@ class UserProvider {
         ? transaction.set(activityRef, fsUserActivity.toJson())
         : await activityRef.set(fsUserActivity.toJson());
 
-    return await getUserActivity(activity.uid, isManager: activity.isManager);
+    return await getUserActivity(activity.uid,
+        userId: userId, isManager: activity.isManager);
   }
 
   /// 刪除(停用)使用者資料(僅能停用自己的資料)
@@ -147,7 +148,7 @@ class UserProvider {
     await socialMediaRef.delete();
   }
 
-  /// 刪除使用者活動資料(僅能刪除自己的資料)
+  /// 刪除使用者活動資料
   Future<void> removeUserActivity(
     String activityId, {
     String? userId,
@@ -399,12 +400,13 @@ class UserProvider {
     }).toList();
   }
 
-  /// 取得使用者活動資料(僅能取得自己的資料)
+  /// 取得使用者活動資料
   Future<UserActivity> getUserActivity(
     String activityId, {
+    String? userId,
     required bool isManager,
   }) async {
-    final userId = AuthProvider().currentUserId;
+    userId ??= AuthProvider().currentUserId;
     final userRef = db
         .collection(FireStoreUserConstants.userCollectionPath.value)
         .doc(userId);
@@ -481,7 +483,8 @@ class UserProvider {
         .collection(FireStoreUserConstants.userCollectionPath.value)
         .doc(userId);
     final userActivitiesData = await userRef
-        .collection(FireStoreUserConstants.userJoinedActivityCollectionPath.value)
+        .collection(
+            FireStoreUserConstants.userJoinedActivityCollectionPath.value)
         .get();
 
     final allActivities = await ActivityProvider().getAllActivities();
@@ -505,13 +508,13 @@ class UserProvider {
   }
 
   ///取得使用者活動點數(僅能取得自己的資料)
-  Future<int> getUserActivityPoint(String activityId) async{
+  Future<int> getUserActivityPoint(String activityId) async {
     final activity = await getUserActivity(activityId, isManager: false);
     return activity.point;
   }
 
   ///增加使用者活動點數
-  Future<void> addUserActivityPoint(String activityId) async{
+  Future<void> addUserActivityPoint(String activityId) async {
     final userId = AuthProvider().currentUserId;
     final userRef = db
         .collection(FireStoreUserConstants.userCollectionPath.value)
@@ -522,7 +525,8 @@ class UserProvider {
     assert(userData.get(FSUserConstants.isEnabled.value), "使用者已被停用");
 
     final userActivityRef = userRef
-        .collection(FireStoreUserConstants.userJoinedActivityCollectionPath.value)
+        .collection(
+            FireStoreUserConstants.userJoinedActivityCollectionPath.value)
         .doc(activityId);
 
     assert((await userActivityRef.get()).exists, "使用者未參加該活動");
@@ -533,7 +537,7 @@ class UserProvider {
   }
 
   ///扣除使用者活動點數
-  Future<void> minusUserActivityPoint(String activityId, int val) async{
+  Future<void> minusUserActivityPoint(String activityId, int val) async {
     assert(val > 0, "不能扣除小於1的值");
     final userId = AuthProvider().currentUserId;
     final userRef = db
@@ -545,12 +549,14 @@ class UserProvider {
     assert(userData.get(FSUserConstants.isEnabled.value), "使用者已被停用");
 
     final userActivityRef = userRef
-        .collection(FireStoreUserConstants.userJoinedActivityCollectionPath.value)
+        .collection(
+            FireStoreUserConstants.userJoinedActivityCollectionPath.value)
         .doc(activityId);
 
     final activity = await userActivityRef.get();
     assert(activity.exists, "使用者未參加該活動");
-    assert(activity.get(FSUserActivityConstants.point.value) >= val, "使用者沒有足夠多的點數");
+    assert(activity.get(FSUserActivityConstants.point.value) >= val,
+        "使用者沒有足夠多的點數");
 
     await userActivityRef.update({
       FSUserActivityConstants.point.value: FieldValue.increment(-val),

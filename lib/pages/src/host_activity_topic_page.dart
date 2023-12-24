@@ -1,9 +1,19 @@
 import 'package:flutter/material.dart';
-import '../../providers/providers.dart';
+import 'package:provider/provider.dart';
+import 'package:resonance_chatroom/providers/providers.dart';
+import '../../models/models.dart';
 import '../routes.dart';
 
+class HostActivityTopicPageArguments {
+  final String activityId;
+  final String tagId;
+
+  HostActivityTopicPageArguments(
+      {required this.activityId, required this.tagId});
+}
+
 class HostActivityTopicPage extends StatefulWidget {
-  const HostActivityTopicPage({Key? key}) : super(key: key);
+  const HostActivityTopicPage({super.key});
 
   static const routeName = '/host_activity_topic_page';
 
@@ -12,7 +22,46 @@ class HostActivityTopicPage extends StatefulWidget {
 }
 
 class _HostActivityTopicPageState extends State<HostActivityTopicPage> {
+  late final List<Topic> _origintopic;
   List<Widget> fields = [];
+    late final args = ModalRoute.of(context)!.settings.arguments
+        as HostActivityTopicPageArguments;
+    late final ActivityProvider topicProvider =
+        context.read<ActivityProvider>();
+  Future<void> _initTopicContent() async {
+    print("初始頁面");
+    var getTopic =
+        await topicProvider.getTopicsByTag(args.activityId, args.tagId);
+    if (getTopic != null) {
+      _origintopic = getTopic;
+    }
+    for (int i = 0; i < _origintopic.length; i++) {
+      var questiontmp = await topicProvider.getQuestionByTopic(
+          args.activityId, _origintopic[i].uid);
+      fields.add(NewTopicField(
+        onDelete: () {
+          setState(() {
+            fields.removeAt(fields.length - 1);
+          });
+        },
+        id: _origintopic[i].uid,
+        questionid: questiontmp.uid,
+        tagid: args.tagId,
+        activityid: args.activityId,
+        topicname: _origintopic[i].topicName,
+      ));
+    }
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(Duration(milliseconds: 350), () {
+      this._initTopicContent();
+   });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,12 +80,30 @@ class _HostActivityTopicPageState extends State<HostActivityTopicPage> {
                   Text('標籤話題'),
                   SizedBox(width: 16.0),
                   Container(
-                    width: 280, // 使用Container來設定按鈕的寬度
+                    width: 280,
                     child: ElevatedButton(
                       child: const Text(
                         "新增話題",
                       ),
-                      onPressed: () {
+                      onPressed: () async {
+                        print("新增話題");
+                        Topic topic = Topic(
+                            activityId: args.activityId,
+                            tagId: args.tagId,
+                            topicName: "");
+                        Topic tmp = await topicProvider.addNewTopic(
+                          args.activityId,
+                          topic,
+                        );
+                        Question questiontmp = Question(
+                          activityId: args.activityId,
+                          tagId: args.tagId,
+                          topicId: tmp.uid,
+                          questionName: "",
+                        );
+                        Question question = await topicProvider.addNewQuestion(
+                            args.activityId, questiontmp);
+                        print("question測試");
                         setState(() {
                           fields.add(NewTopicField(
                             onDelete: () {
@@ -44,6 +111,11 @@ class _HostActivityTopicPageState extends State<HostActivityTopicPage> {
                                 fields.removeAt(fields.length - 1);
                               });
                             },
+                            id: tmp.uid,
+                            questionid: question.uid,
+                            activityid: args.activityId,
+                            tagid: args.tagId,
+                            topicname: "",
                           ));
                         });
                       },
@@ -53,11 +125,16 @@ class _HostActivityTopicPageState extends State<HostActivityTopicPage> {
               ),
               ...fields,
               Container(
-                width: 100, // 使用Container來設定按鈕的寬度
+                width: 100,
                 child: ElevatedButton(
                   onPressed: () {
                     // 跳至送出頁面的邏輯
                     // 傳遞createEvent()方法的回傳值給送出頁面
+                    print("topic跳至主畫面");
+                    Navigator.of(context).pushNamed(
+                      MainPage.routeName,
+                      arguments: MainPageArguments(isHost: true),
+                    );
                   },
                   child: Text('完成'),
                 ),
@@ -74,19 +151,28 @@ class NewTopicField extends StatefulWidget {
   NewTopicField({
     super.key,
     required this.onDelete,
+    required this.id,
+    required this.questionid,
+    required this.activityid,
+    required this.tagid,
+    required this.topicname,
   });
   final VoidCallback? onDelete;
-
+  String questionid;
+  String id;
+  String activityid;
+  String tagid;
+  String topicname;
   @override
   _NewTopicFieldState createState() => _NewTopicFieldState();
 }
 
 class _NewTopicFieldState extends State<NewTopicField> {
-  bool isEditing = false; // 定義一個bool變量來控制按鈕的狀態
-  late String topic; // 定義一個String變量來儲存按鈕的文字
-  final TextEditingController _controller =
-      TextEditingController(); // 定義一個TextEditingController
-  final FocusNode _focusNode = FocusNode(); // 定義一個FocusNode
+  bool isEditing = false;
+  final TextEditingController _controller = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
+  late final ActivityProvider activityProvider =
+      context.read<ActivityProvider>();
 
   @override
   Widget build(BuildContext context) {
@@ -96,52 +182,51 @@ class _NewTopicFieldState extends State<NewTopicField> {
         children: [
           Expanded(
             child: ElevatedButton(
-              // 將TextFormField改成ElevatedButton
               child: isEditing
                   ? TextField(
-                      // 如果isEditing為true，就顯示TextField
-                      controller: _controller, // 使用TextEditingController來控制欄位的輸入值
-                      focusNode: _focusNode, // 使用FocusNode來控制欄位的焦點
+                      controller: _controller,
+                      focusNode: _focusNode,
                     )
-                  : Text(_controller.text.isEmpty
-                      ? "新話題"
-                      : _controller.text), // 如果isEditing為false，就顯示Text
-              onPressed: () {
-                // 跳至預覽頁面的邏輯
-                // 傳遞createEvent()方法的回傳值給預覽頁面
-                Navigator.of(context).pushNamed(HostActivityQuestionPage.routeName);
+                  : Text(widget.topicname),
+              onPressed: () async {
+                print("跳至問卷頁面");
+                print(widget.questionid);
+                Navigator.of(context)
+                    .pushNamed(HostActivityQuestionPage.routeName,
+                        arguments: HostActivityQuestionPageArguments(
+                          activityId: widget.activityid,
+                          tagId: widget.tagid,
+                          topicId: widget.id,
+                          questionId: widget.questionid,
+                        ));
               },
             ),
           ),
           IconButton(
-            icon: isEditing
-                ? Icon(Icons.check)
-                : Icon(Icons.edit), // 根據isEditing的值顯示不同的icon
-            onPressed: () {
+            icon: isEditing ? Icon(Icons.check) : Icon(Icons.edit),
+            onPressed: () async {
               setState(() {
-                isEditing = !isEditing; // 改變isEditing的值
+                isEditing = !isEditing;
                 if (isEditing == false) {
-                  // 如果isEditing為false，表示編輯完成
-                  topic = _controller.text; // 將TextEditingController的文字賦值給tag變量
+                  widget.topicname = _controller.text;
                 } else {
-                  // 如果isEditing為true，表示開始編輯
-                  _focusNode.requestFocus(); // 將焦點賦值給TextField
+                  _focusNode.requestFocus();
                 }
               });
+              await activityProvider.editTopic(
+                  widget.activityid, widget.id, widget.topicname);
             },
           ),
           IconButton(
-            icon: isEditing
-                ? Icon(Icons.close)
-                : Icon(Icons.delete_forever), // 根據isEditing的值顯示不同的icon
+            icon: isEditing ? Icon(Icons.close) : Icon(Icons.delete_forever),
             onPressed: isEditing
                 ? () {
                     setState(() {
-                      isEditing = false; // 如果isEditing為true，表示取消編輯
+                      isEditing = false;
                     });
                   }
                 : () {
-                    widget.onDelete!(); // 如果isEditing為false，表示刪除按鈕，並傳遞索引值給onDelete方法
+                    widget.onDelete!();
                   },
           ),
         ],

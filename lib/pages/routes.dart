@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:resonance_chatroom/models/models.dart';
 
 import 'src/chat.dart';
 import 'src/user_activity_main_page.dart';

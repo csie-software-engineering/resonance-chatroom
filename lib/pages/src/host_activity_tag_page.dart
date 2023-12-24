@@ -102,8 +102,6 @@ class _HostActivityTagPageState extends State<HostActivityTagPage> {
                 width: 100,
                 child: ElevatedButton(
                   onPressed: () {
-                    // 跳至送出頁面的邏輯
-                    // 傳遞createEvent()方法的回傳值給送出頁面
                     debugPrint('跳至主畫面');
                     Navigator.of(context).pushNamed(
                       MainPage.routeName,
@@ -200,7 +198,7 @@ class _NewTagFieldState extends State<NewTagField> {
                   }
                 : () async {
                     widget.onDelete!();
-                    await context.read<ActivityProvider>().deleteTag(widget.activityId,widget.userId,widget.id);
+                    await context.read<ActivityProvider>().deleteTag(widget.activityId,widget.id);
                   },
           ),
         ],

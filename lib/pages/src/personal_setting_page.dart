@@ -120,7 +120,7 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
                       SizedBox(
                           height: MediaQuery.of(context).size.height * 0.01),
                       Expanded(
-                        child: FutureBuilder<List<Activity>>(
+                        child: FutureBuilder<List<UserActivity>>(
                           future: _getRelateActivities(
                             args.isHost,
                             context.read<ActivityProvider>(),
@@ -132,35 +132,52 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
                               return const Center(
                                   child: CircularProgressIndicator());
                             }
-                            final activities = snapshot.requireData;
+                            final userActivities = snapshot.requireData;
                             return ListView.separated(
-                              itemCount: activities.length,
+                              itemCount: userActivities.length,
                               itemBuilder: (context, index) {
-                                final activity = activities[index];
-                                return ListTile(
-                                  leading: Icon(
-                                    Icons.event,
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                  ),
-                                  title: Text(activity.activityName),
-                                  subtitle: FutureBuilder<List<Tag>>(
-                                    future: context
-                                        .read<ActivityProvider>()
-                                        .getAllTags(activity.uid),
-                                    builder: (context, snapshot) {
-                                      if (snapshot.connectionState ==
-                                          ConnectionState.waiting) {
-                                        return const Center(
-                                            child: CircularProgressIndicator());
-                                      }
-                                      final tags = snapshot.requireData;
-                                      return Text(
-                                        '標籤: ${tags.map((e) => e.tagName).join(', ')}',
-                                        overflow: TextOverflow.ellipsis,
-                                      );
-                                    },
-                                  ),
+                                final userActivity = userActivities[index];
+                                return FutureBuilder<Activity>(
+                                  future: context
+                                      .read<ActivityProvider>()
+                                      .getActivity(userActivity.uid),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState ==
+                                        ConnectionState.waiting) {
+                                      return const Center(
+                                          child: CircularProgressIndicator());
+                                    }
+
+                                    final activity = snapshot.requireData;
+                                    return ListTile(
+                                      leading: Icon(
+                                        Icons.event,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary,
+                                      ),
+                                      title: Text(activity.activityName),
+                                      subtitle: FutureBuilder<List<Tag>>(
+                                        future: context
+                                            .read<ActivityProvider>()
+                                            .getAllTags(userActivity.uid),
+                                        builder: (context, snapshot) {
+                                          if (snapshot.connectionState ==
+                                              ConnectionState.waiting) {
+                                            return const Center(
+                                                child:
+                                                    CircularProgressIndicator());
+                                          }
+
+                                          final tags = snapshot.requireData;
+                                          return Text(
+                                            '標籤: ${userActivity.tagIds.map((utId) => tags.firstWhere((t) => t.uid == utId).tagName).join(', ')}',
+                                            overflow: TextOverflow.ellipsis,
+                                          );
+                                        },
+                                      ),
+                                    );
+                                  },
                                 );
                               },
                               separatorBuilder: (context, index) => Divider(
@@ -262,7 +279,7 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
     );
   }
 
-  Future<List<Activity>> _getRelateActivities(
+  Future<List<UserActivity>> _getRelateActivities(
     bool isHost,
     ActivityProvider activityProvider,
     UserProvider userProvider,
@@ -272,12 +289,12 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
     final userActivities =
         await userProvider.getUserActivities(isManager: isHost);
 
-    final activities = <Activity>[];
+    final activities = <UserActivity>[];
 
-    for (final activity in allActivities) {
-      for (final userActivity in userActivities) {
+    for (final userActivity in userActivities) {
+      for (final activity in allActivities) {
         if (userActivity.uid == activity.uid) {
-          activities.add(activity);
+          activities.add(userActivity);
           break;
         }
       }

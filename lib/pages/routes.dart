@@ -11,6 +11,7 @@ import 'src/host_activity_question_page.dart';
 import 'src/host_question_statistic.dart';
 import 'src/main_page.dart';
 import 'src/personal_setting.dart';
+import 'src/manager.dart';
 
 export 'src/chat.dart';
 export 'src/host_activity_set_page.dart';
@@ -21,6 +22,7 @@ export 'src/host_activity_question_page.dart';
 export 'src/host_question_statistic.dart';
 export 'src/main_page.dart';
 export 'src/personal_setting.dart';
+export 'src/manager.dart';
 
 Map<String, Widget Function(BuildContext)> routes = {
   HostActivitySetPage.routeName: (_) => const HostActivitySetPage(),
@@ -33,4 +35,5 @@ Map<String, Widget Function(BuildContext)> routes = {
   HostQuestionStatisticPage.routeName: (_) => const HostQuestionStatisticPage(),
   MainPage.routeName: (_) => const MainPage(),
   PersonalSettingPage.routeName: (_) => const PersonalSettingPage(),
+  ManagerPage.routeName: (_) => const ManagerPage(),
 };

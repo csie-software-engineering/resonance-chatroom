@@ -23,7 +23,7 @@ class ActivityProvider {
         activityData.endDate
             .toEpochTime()
             .isAfter(activityData.startDate.toEpochTime()),
-        '活動結束時間需要在開始之間之後');
+        '活動結束時間需要在開始時間之後');
 
     activityData.uid = generateUuid();
     final documentReference = db
@@ -183,10 +183,23 @@ class ActivityProvider {
     return false;
   }
 
+  Future<List<String>> getAllManagers(String activityId) async {
+    assert(await _checkActivityAlive(activityId), "活動不存在");
+    assert(await _isManager(activityId), "你不是管理者");
+
+    final documentReference = db
+        .collection(FirestoreConstants.activityCollectionPath.value)
+        .doc(activityId);
+
+    final activityData = Activity.fromDocument(await documentReference.get());
+
+    return activityData.managers;
+  }
+
   /// 增加管理者
   Future<void> addManagers(String activityId, String addUserId) async {
     assert(await _checkActivityAlive(activityId), "活動不存在");
-    assert(await _isHost(activityId), '你不是主辦方');
+    assert(await _isHost(activityId), '你不是主辦者');
     assert(!await _isManager(activityId, userId: addUserId), '該用戶已經是管理者');
 
     final documentReference = db
@@ -196,15 +209,14 @@ class ActivityProvider {
     final activityData = Activity.fromDocument(await documentReference.get());
 
     activityData.managers.add(addUserId);
-    UserProvider()
-        .addUserActivity(UserActivity(uid: activityData.uid, isManager: true));
+    await UserProvider().addUserActivity(UserActivity(uid: activityData.uid, isManager: true), userId: addUserId);
     await documentReference.set(activityData.toJson());
   }
 
   /// 刪除管理者
   Future<void> deleteManagers(String activityId, String deleteUserId) async {
     assert(await _checkActivityAlive(activityId), "活動不存在");
-    assert(await _isHost(activityId), '你不是主辦方');
+    assert(await _isHost(activityId), '你不是主辦者');
 
     final documentReference = db
         .collection(FirestoreConstants.activityCollectionPath.value)
@@ -212,8 +224,9 @@ class ActivityProvider {
 
     final activityData = Activity.fromDocument(await documentReference.get());
 
+    assert(activityData.ownerId != deleteUserId, "不能刪除主辦者");
     assert(activityData.managers.remove(deleteUserId), '該用戶不是管理者');
-    UserProvider().removeUserActivity(activityId, isManager: true);
+    await UserProvider().removeUserActivity(activityId, userId: deleteUserId, isManager: true);
     await documentReference.set(activityData.toJson());
   }
 
@@ -492,6 +505,8 @@ class ActivityProvider {
 
   /// 取得問卷
   Future<Question> getQuestion(String activityId, String questionId) async {
+    assert(await _checkActivityAlive(activityId), "活動不存在");
+
     final questionRef = db
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityId)
@@ -506,6 +521,8 @@ class ActivityProvider {
 
   /// 用話題取得問卷
   Future<Question> getQuestionByTopic(String activityId, String topicId) async {
+    assert(await _checkActivityAlive(activityId), "活動不存在");
+    assert(await _checkTopicAlive(activityId, topicId), "話題不存在");
     final questionQuery = db
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityId)

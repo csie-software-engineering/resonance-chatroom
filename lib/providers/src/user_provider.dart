@@ -54,7 +54,6 @@ class UserProvider {
     });
 
     return await getUser(
-      userId: user.uid,
       loadSocial: addSocial,
       loadActivityWithHosted: addActivity,
     );
@@ -81,7 +80,7 @@ class UserProvider {
         ? transaction.set(socialMediaRef, fsUserSocialMedia.toJson())
         : await socialMediaRef.set(fsUserSocialMedia.toJson());
 
-    return await getUser(userId: userId, loadSocial: true);
+    return await getUser(loadSocial: true);
   }
 
   /// 添加(覆寫)使用者活動資料
@@ -218,7 +217,6 @@ class UserProvider {
     });
 
     return await getUser(
-      userId: user.uid,
       loadSocial: updateSocial,
       loadActivityWithHosted: updateActivity,
     );
@@ -250,7 +248,7 @@ class UserProvider {
         ? transaction.update(socialMediaRef, fsUserSocialMedia.toJson())
         : await socialMediaRef.update(fsUserSocialMedia.toJson());
 
-    return await getUser(userId: userId, loadSocial: true);
+    return await getUser(loadSocial: true);
   }
 
   /// 修改使用者活動資料(僅能修改自己的資料)
@@ -307,7 +305,7 @@ class UserProvider {
       FSUserActivityConstants.tagIds.value: tagIds,
     });
 
-    return await getUser(userId: userId, loadActivityWithHosted: true);
+    return await getUser(loadActivityWithHosted: true);
   }
 
   /// 取得使用者資料

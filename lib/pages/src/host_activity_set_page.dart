@@ -11,53 +11,6 @@ import 'package:resonance_chatroom/providers/providers.dart';
 import '../routes.dart';
 
 // 定義一個類別來儲存活動的所有內容
-class Event {
-  String name; // 活動名稱
-  late int startTime; // 活動起始時間
-  late int endTime; // 活動結束時間
-  String info; // 活動資訊
-  String? image; // 活動圖片的base64字串
-  // 新增一個Tag的陣列
-  List<Tag> tags; // 活動的標籤
-
-  Event(this.name, DateTime start, DateTime end, this.info, File? image,
-      this.tags) {
-    // 改為File? image
-    // 將DateTime物件轉換為millisecondsSinceEpoch
-    startTime = start.millisecondsSinceEpoch;
-    endTime = end.millisecondsSinceEpoch;
-
-    // 將File物件轉換為base64字串
-    if (image != null) {
-      image = base64Encode(image.readAsBytesSync()) as File?;
-    }
-  }
-
-  // 將Event物件轉換為字串
-  @override
-  String toString() {
-    return 'Event(name: $name, startTime: $startTime, endTime: $endTime, info: $info, image: $image, tags: $tags)';
-  }
-}
-//
-// class Tag {
-//   late String tagdata;
-//   late List<Topic> topics;
-//   Tag.construct(this.tagdata) {}
-// }
-
-// class Topic {
-//   late String topicdata;
-//   late String questiondata;
-//   late List<String> choices;
-//   Topic(this.topicdata, this.questiondata, this.choices);
-//   // 使用一個無參數的建構式，並指派預設值給屬性
-//   Topic.empty() {
-//     topicdata = "";
-//     questiondata = "";
-//     choices = [];
-//   }
-// }
 
 class HostActivitySetPage extends StatefulWidget {
   const HostActivitySetPage({Key? key}) : super(key: key);
@@ -149,18 +102,6 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
         });
       }
     }
-  }
-
-  // 建立一個Event物件，並將使用者輸入的資料傳遞給它
-  Event createEvent() {
-    return Event(
-      _nameController.text,
-      _selectedDates[0], // 活動起始時間
-      _selectedDates[1], // 活動結束時間
-      _infoController.text,
-      _selectedImage,
-      tags,
-    );
   }
 
   @override

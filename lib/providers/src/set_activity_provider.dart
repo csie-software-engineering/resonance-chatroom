@@ -263,14 +263,15 @@ class SetActivityProvider {
   }
 
   ///新增話題
-  Future<void> AddNewTopic(
-      String activityid, Topic topicdata, String UserId) async {
+  Future<String> AddNewTopic(
+      String activityid, String topicname, String tagid, String UserId) async {
     if (!await IsManager(activityid, UserId)) {
       log("You are not manager.");
-      return;
+      return "";
     }
 
     String topicid = generateUuid();
+    Topic topicdata = Topic(activityid: activityid, tagid: tagid, topicname: topicname, topicid: topicid);
     DocumentReference topicdoc = db
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityid)
@@ -278,7 +279,7 @@ class SetActivityProvider {
         .doc(topicid);
 
     await topicdoc.set(topicdata.toJson());
-    await topicdoc.update({Topicconstants.topicid.value: topicid});
+    return topicid;
   }
 
   ///取得話題
@@ -304,20 +305,18 @@ class SetActivityProvider {
 
   ///編輯話題
   Future<void> EditTopic(
-      String activityid, String UserId, String topicid, Topic topicdata) async {
+      String activityid, String UserId, String topicid, String topicname) async {
     if (!await IsManager(activityid, UserId)) {
       log("You are not manager.");
       return;
     }
-
     DocumentReference topicdoc = db
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityid)
         .collection(FirestoreConstants.topicCollectionPath.value)
         .doc(topicid);
 
-    await topicdoc
-        .update({Topicconstants.topicname.value: topicdata.topicname});
+    await topicdoc.update({Topicconstants.topicname.value: topicname});
   }
 
   ///新增問卷題目

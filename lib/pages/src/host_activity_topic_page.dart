@@ -1,5 +1,8 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
-import '../../providers/providers.dart';
+import 'package:provider/provider.dart';
+import 'package:resonance_chatroom/providers/providers.dart';
 import '../routes.dart';
 
 class HostActivityTopicPage extends StatefulWidget {
@@ -12,6 +15,8 @@ class HostActivityTopicPage extends StatefulWidget {
 }
 
 class _HostActivityTopicPageState extends State<HostActivityTopicPage> {
+  late final SetActivityProvider setActivityProvider =
+      context.read<SetActivityProvider>();
   List<Widget> fields = [];
   @override
   Widget build(BuildContext context) {
@@ -36,7 +41,12 @@ class _HostActivityTopicPageState extends State<HostActivityTopicPage> {
                       child: const Text(
                         "新增話題",
                       ),
-                      onPressed: () {
+                      onPressed: () async {
+                        String topicid = await setActivityProvider.AddNewTopic(
+                            "20231215-1110-8157-8970-4aec8768fa49",
+                            "",
+                            "20231215-1110-8158-9842-c402edc9f75e",
+                            "e9KcZWxQ9Uc1asxziKcGZf9POwJ3");
                         setState(() {
                           fields.add(NewTopicField(
                             onDelete: () {
@@ -44,6 +54,7 @@ class _HostActivityTopicPageState extends State<HostActivityTopicPage> {
                                 fields.removeAt(fields.length - 1);
                               });
                             },
+                            id: topicid,
                           ));
                         });
                       },
@@ -74,9 +85,10 @@ class NewTopicField extends StatefulWidget {
   NewTopicField({
     super.key,
     required this.onDelete,
+    required this.id,
   });
   final VoidCallback? onDelete;
-
+  String id;
   @override
   _NewTopicFieldState createState() => _NewTopicFieldState();
 }
@@ -87,6 +99,8 @@ class _NewTopicFieldState extends State<NewTopicField> {
   final TextEditingController _controller =
       TextEditingController(); // 定義一個TextEditingController
   final FocusNode _focusNode = FocusNode(); // 定義一個FocusNode
+  late final SetActivityProvider setActivityProvider =
+      context.read<SetActivityProvider>();
 
   @override
   Widget build(BuildContext context) {
@@ -100,7 +114,8 @@ class _NewTopicFieldState extends State<NewTopicField> {
               child: isEditing
                   ? TextField(
                       // 如果isEditing為true，就顯示TextField
-                      controller: _controller, // 使用TextEditingController來控制欄位的輸入值
+                      controller:
+                          _controller, // 使用TextEditingController來控制欄位的輸入值
                       focusNode: _focusNode, // 使用FocusNode來控制欄位的焦點
                     )
                   : Text(_controller.text.isEmpty
@@ -109,7 +124,8 @@ class _NewTopicFieldState extends State<NewTopicField> {
               onPressed: () {
                 // 跳至預覽頁面的邏輯
                 // 傳遞createEvent()方法的回傳值給預覽頁面
-                Navigator.of(context).pushNamed(HostActivityQuestionPage.routeName);
+                Navigator.of(context)
+                    .pushNamed(HostActivityQuestionPage.routeName);
               },
             ),
           ),
@@ -117,7 +133,7 @@ class _NewTopicFieldState extends State<NewTopicField> {
             icon: isEditing
                 ? Icon(Icons.check)
                 : Icon(Icons.edit), // 根據isEditing的值顯示不同的icon
-            onPressed: () {
+            onPressed: () async {
               setState(() {
                 isEditing = !isEditing; // 改變isEditing的值
                 if (isEditing == false) {
@@ -128,6 +144,11 @@ class _NewTopicFieldState extends State<NewTopicField> {
                   _focusNode.requestFocus(); // 將焦點賦值給TextField
                 }
               });
+              await setActivityProvider.EditTopic(
+                  "20231215-1110-8157-8970-4aec8768fa49",
+                  "e9KcZWxQ9Uc1asxziKcGZf9POwJ3",
+                  widget.id,
+                  topic);
             },
           ),
           IconButton(
@@ -141,7 +162,8 @@ class _NewTopicFieldState extends State<NewTopicField> {
                     });
                   }
                 : () {
-                    widget.onDelete!(); // 如果isEditing為false，表示刪除按鈕，並傳遞索引值給onDelete方法
+                    widget
+                        .onDelete!(); // 如果isEditing為false，表示刪除按鈕，並傳遞索引值給onDelete方法
                   },
           ),
         ],

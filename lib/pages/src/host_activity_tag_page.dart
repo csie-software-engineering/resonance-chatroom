@@ -1,8 +1,5 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:resonance_chatroom/models/models.dart';
 import 'package:resonance_chatroom/providers/providers.dart';
 import '../routes.dart';
 
@@ -47,7 +44,6 @@ class _HostActivityTagPageState extends State<HostActivityTagPage> {
                             "20231215-0916-8a22-9073-4055400dbd48",
                             "",
                             "zCgg4AnXJGgayN3ssQ56cBYQRQ03");
-
                         setState(() {
                           fields.add(NewTagField(
                             onDelete: () {
@@ -134,7 +130,6 @@ class _NewTagFieldState extends State<NewTagField> {
                 ? Icon(Icons.check)
                 : Icon(Icons.edit), // 根據isEditing的值顯示不同的icon
             onPressed: () async {
-              
               setState(() {
                 isEditing = !isEditing; // 改變isEditing的值
                 if (isEditing == false) {
@@ -144,7 +139,6 @@ class _NewTagFieldState extends State<NewTagField> {
                   // 如果isEditing為true，表示開始編輯
                   _focusNode.requestFocus(); // 將焦點賦值給TextField
                 }
-                
               });
               await setActivityProvider.EditTag(
                   "20231215-0916-8a22-9073-4055400dbd48",

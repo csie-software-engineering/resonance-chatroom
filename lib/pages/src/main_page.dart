@@ -63,7 +63,10 @@ class _MainPageState extends State<MainPage> {
                     const EdgeInsets.only(top: 5.0, bottom: 5.0, left: 10.0),
                 child: InkWell(
                   onTap: () {
-                    Navigator.of(context).pushNamed(PersonalSettingPage.routeName, arguments: PersonalSettingArguments(isHost: args.isHost));
+                    Navigator.of(context).pushNamed(
+                        PersonalSettingPage.routeName,
+                        arguments:
+                            PersonalSettingArguments(isHost: args.isHost));
                   },
                   child: CircleAvatar(
                     foregroundImage: user.photoUrl != null
@@ -328,7 +331,9 @@ class RoomCard extends StatelessWidget {
     return InkWell(
       onTap: () {
         // todo
-        Navigator.of(context).pushNamed(UserActivityMainPage.routeName, arguments: UserActivityMainPageArguments(activityId: activityId));
+        Navigator.of(context).pushNamed(UserActivityMainPage.routeName,
+            arguments: UserActivityMainPageArguments(
+                activityId: activityId, isPreview: false));
       },
       child: Card(
         elevation: 4.0,

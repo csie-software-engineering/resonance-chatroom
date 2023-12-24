@@ -17,8 +17,9 @@ import '../../widgets/src/activity_buttons/animated_buttons.dart';
 class UserActivityMainPageArguments {
   // final ;
   final String activityId;
+  final bool isPreview;
 
-  UserActivityMainPageArguments({required this.activityId});
+  UserActivityMainPageArguments({required this.isPreview, required this.activityId});
 }
 
 class UserActivityMainPage extends StatefulWidget {
@@ -457,14 +458,14 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
                 ],
               ),
               floatingActionButton: AnimatedButtons(
-                enableTagWidget: _enableTagWidget,
+                enableTagWidget: _enableTagWidget && !args.isPreview,
                 matching: matching,
                 startMatching: isStartMatching,
                 buttonPositionTop: buttonPositionTop,
                 buttonPositionLeft: buttonPositionLeft,
                 tagSelected: _tagSelected,
                 currentActivityTags: _currentActivityTags,
-                enableMatch: _enableMatch,
+                enableMatch: _enableMatch && !args.isPreview,
                 changeTagAndName: changeTagAndName,
                 currentUserName: _currentUser.displayName,
               ),

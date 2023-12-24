@@ -1,3 +1,4 @@
+import 'package:async/async.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -22,10 +23,32 @@ class PersonalSettingPage extends StatefulWidget {
 }
 
 class _PersonalSettingPageState extends State<PersonalSettingPage> {
+  late final double height = MediaQuery.of(context).size.height;
+  late final double width = MediaQuery.of(context).size.width;
+  final AsyncMemoizer _userProfileMemoization = AsyncMemoizer<void>();
+  final AsyncMemoizer _userHoldActivity = AsyncMemoizer<void>();
+  late final User user;
+
+  late final args = ModalRoute.of(context)!.settings.arguments
+  as PersonalSettingPageArguments;
+
+  late final List<UserActivity> userActivities;
+
+  Future<void> _initProfile() async {
+    user = await context.read<AuthProvider>().currentUser;
+  }
+
+  Future<void> _initHoldActivity() async {
+    userActivities = await _getRelateActivities(
+      args.isHost,
+      context.read<ActivityProvider>(),
+      context.read<UserProvider>(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final args = ModalRoute.of(context)!.settings.arguments
-        as PersonalSettingPageArguments;
+
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
@@ -34,77 +57,75 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
         title: const Text('使用者頁面'),
         leading: const BackButton(),
       ),
-      body: FutureBuilder<User>(
-        future: context.read<AuthProvider>().currentUser,
+      body: FutureBuilder(
+        future: _userProfileMemoization.runOnce(_initProfile),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-
-          final user = snapshot.requireData;
           return Column(
             children: [
-              SizedBox(height: MediaQuery.of(context).size.height * 0.01),
+              SizedBox(height: height * 0.01),
               CircleAvatar(
                 foregroundImage:
                     user.photoUrl != null ? NetworkImage(user.photoUrl!) : null,
                 backgroundImage: const AssetImage('lib/assets/user.png'),
-                radius: MediaQuery.of(context).size.height * 0.05,
+                radius: height * 0.05,
               ),
-              SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+              SizedBox(height: height * 0.02),
               SizedBox(
-                height: MediaQuery.of(context).size.height * 0.05,
-                child: _NickNameWidget(user: user),
+                height: height * 0.05,
+                child: _NickNameWidget(user: user, width: width, height: width,),
               ),
-              SizedBox(height: MediaQuery.of(context).size.height * 0.01),
+              SizedBox(height: height * 0.01),
               SizedBox(
-                height: MediaQuery.of(context).size.height * 0.05,
+                height: height * 0.05,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.2,
+                      width: width * 0.2,
                       child: const Text(
                         'Email : ',
                         textAlign: TextAlign.right,
                       ),
                     ),
                     SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.55,
+                      width: width * 0.55,
                       child: Text(
                         user.email ?? '匿名使用',
                         textAlign: TextAlign.center,
                       ),
                     ),
-                    SizedBox(width: MediaQuery.of(context).size.width * 0.2)
+                    SizedBox(width: width * 0.2)
                   ],
                 ),
               ),
-              SizedBox(height: MediaQuery.of(context).size.height * 0.01),
+              SizedBox(height: height * 0.01),
               SizedBox(
-                height: MediaQuery.of(context).size.height * 0.05,
+                height: height * 0.05,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.2,
+                      width: width * 0.2,
                       child: const Text(
                         '目前身份 : ',
                         textAlign: TextAlign.right,
                       ),
                     ),
                     SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.55,
+                      width: width * 0.55,
                       child: Text(
                         args.isHost ? '主辦方' : '參加者',
                         textAlign: TextAlign.center,
                       ),
                     ),
-                    SizedBox(width: MediaQuery.of(context).size.width * 0.2)
+                    SizedBox(width: width * 0.2)
                   ],
                 ),
               ),
-              Divider(height: MediaQuery.of(context).size.height * 0.03),
+              Divider(height: height * 0.03),
               Expanded(
                 child: Scrollbar(
                   child: Column(
@@ -118,21 +139,16 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
                         textAlign: TextAlign.center,
                       ),
                       SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.01),
+                          height: height * 0.01),
                       Expanded(
-                        child: FutureBuilder<List<UserActivity>>(
-                          future: _getRelateActivities(
-                            args.isHost,
-                            context.read<ActivityProvider>(),
-                            context.read<UserProvider>(),
-                          ),
+                        child: FutureBuilder(
+                          future: _userHoldActivity.runOnce(_initHoldActivity),
                           builder: (context, snapshot) {
                             if (snapshot.connectionState ==
                                 ConnectionState.waiting) {
                               return const Center(
                                   child: CircularProgressIndicator());
                             }
-                            final userActivities = snapshot.requireData;
                             return ListView.separated(
                               itemCount: userActivities.length,
                               itemBuilder: (context, index) {
@@ -226,23 +242,7 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
       bottomNavigationBar: BottomAppBar(
         child: Row(
           children: [
-            SizedBox(width: MediaQuery.of(context).size.width * 0.02),
-            FloatingActionButton.extended(
-              heroTag: 'editSocialMediaFAB',
-              backgroundColor: Theme.of(context).colorScheme.tertiaryContainer,
-              onPressed: () {
-                Navigator.of(context).pushNamed(SocialMediaPage.routeName);
-              },
-              label: Text(
-                '社群媒體',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-            ),
-            SizedBox(width: MediaQuery.of(context).size.width * 0.05),
+            SizedBox(width: width * 0.02),
             Expanded(
               child: FloatingActionButton.extended(
                 heroTag: 'changeRoleFAB',
@@ -281,7 +281,7 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
                 ),
               ),
             ),
-            SizedBox(width: MediaQuery.of(context).size.width * 0.05),
+            SizedBox(width: width * 0.05),
             Expanded(
               child: FloatingActionButton.extended(
                 heroTag: 'logoutFAB',
@@ -313,7 +313,7 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
                 ),
               ),
             ),
-            SizedBox(width: MediaQuery.of(context).size.width * 0.02),
+            SizedBox(width: width * 0.02),
           ],
         ),
       ),
@@ -347,8 +347,10 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
 
 class _NickNameWidget extends StatefulWidget {
   final User user;
+  final double width;
+  final double height;
 
-  const _NickNameWidget({Key? key, required this.user}) : super(key: key);
+  const _NickNameWidget({Key? key, required this.user, required this.width, required this.height}) : super(key: key);
 
   @override
   State<_NickNameWidget> createState() => _NickNameWidgetState();
@@ -364,14 +366,14 @@ class _NickNameWidgetState extends State<_NickNameWidget> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         SizedBox(
-          width: MediaQuery.of(context).size.width * 0.2,
+          width: widget.width * 0.2,
           child: const Text(
             '暱稱 : ',
             textAlign: TextAlign.right,
           ),
         ),
         SizedBox(
-          width: MediaQuery.of(context).size.width * 0.55,
+          width: widget.width * 0.55,
           child: _setNickname
               ? TextField(
                   controller:
@@ -384,7 +386,7 @@ class _NickNameWidgetState extends State<_NickNameWidget> {
                   textAlign: TextAlign.center,
                   decoration: InputDecoration(
                     contentPadding: EdgeInsets.all(
-                        3 + MediaQuery.of(context).size.height * 0.01),
+                        3 + widget.height * 0.01),
                     border: InputBorder.none,
                     hintText: '輸入新的暱稱',
                   ),
@@ -395,7 +397,7 @@ class _NickNameWidgetState extends State<_NickNameWidget> {
                 ),
         ),
         SizedBox(
-          width: MediaQuery.of(context).size.width * 0.2,
+          width: widget.width * 0.2,
           child: IconButton(
             tooltip: '修改暱稱',
             icon:

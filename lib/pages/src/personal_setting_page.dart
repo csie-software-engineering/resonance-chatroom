@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 import '../../models/models.dart';
 import '../../pages/routes.dart';
@@ -46,9 +48,8 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
             children: [
               SizedBox(height: MediaQuery.of(context).size.height * 0.01),
               CircleAvatar(
-                  foregroundImage: user.photoUrl != null
-                      ? NetworkImage(user.photoUrl!)
-                      : null,
+                foregroundImage:
+                    user.photoUrl != null ? NetworkImage(user.photoUrl!) : null,
                 backgroundImage: const AssetImage('lib/assets/user.png'),
                 radius: MediaQuery.of(context).size.height * 0.05,
               ),
@@ -158,54 +159,50 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
                                             .primary,
                                       ),
                                       title: Text(activity.activityName),
-                                        subtitle: args.isHost
-                                            ? FutureBuilder<User>(
-                                                future: context
-                                                    .read<UserProvider>()
-                                                    .getUser(
-                                                        userId:
-                                                            activity.ownerId),
-                                                builder: (context, snapshot) {
-                                                  if (snapshot
-                                                          .connectionState ==
-                                                      ConnectionState.waiting) {
-                                                    return const Center(
-                                                        child:
-                                                            CircularProgressIndicator());
-                                                  }
+                                      subtitle: args.isHost
+                                          ? FutureBuilder<User>(
+                                              future: context
+                                                  .read<UserProvider>()
+                                                  .getUser(
+                                                      userId: activity.ownerId),
+                                              builder: (context, snapshot) {
+                                                if (snapshot.connectionState ==
+                                                    ConnectionState.waiting) {
+                                                  return const Center(
+                                                      child:
+                                                          CircularProgressIndicator());
+                                                }
 
-                                                  final host =
-                                                      snapshot.requireData;
-                                                  return Text(
-                                                    '創辦者暱稱: ${host.displayName}',
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                  );
-                                                },
-                                              )
-                                            : FutureBuilder<List<Tag>>(
-                                        future: context
-                                            .read<ActivityProvider>()
-                                                    .getAllTags(
-                                                        userActivity.uid),
-                                        builder: (context, snapshot) {
-                                                  if (snapshot
-                                                          .connectionState ==
-                                              ConnectionState.waiting) {
-                                            return const Center(
-                                                child:
-                                                    CircularProgressIndicator());
-                                          }
+                                                final host =
+                                                    snapshot.requireData;
+                                                return Text(
+                                                  '創辦者暱稱: ${host.displayName}',
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                );
+                                              },
+                                            )
+                                          : FutureBuilder<List<Tag>>(
+                                              future: context
+                                                  .read<ActivityProvider>()
+                                                  .getAllTags(userActivity.uid),
+                                              builder: (context, snapshot) {
+                                                if (snapshot.connectionState ==
+                                                    ConnectionState.waiting) {
+                                                  return const Center(
+                                                      child:
+                                                          CircularProgressIndicator());
+                                                }
 
-                                                  final tags =
-                                                      snapshot.requireData;
-                                          return Text(
-                                            '標籤: ${userActivity.tagIds.map((utId) => tags.firstWhere((t) => t.uid == utId).tagName).join(', ')}',
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                          );
-                                        },
-                                      ),
+                                                final tags =
+                                                    snapshot.requireData;
+                                                return Text(
+                                                  '標籤: ${userActivity.tagIds.map((utId) => tags.firstWhere((t) => t.uid == utId).tagName).join(', ')}',
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                );
+                                              },
+                                            ),
                                     );
                                   },
                                 );
@@ -214,7 +211,7 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
                                 color: Theme.of(context)
                                     .colorScheme
                                     .primary
-                                      .withOpacity(0.3),
+                                    .withOpacity(0.3),
                               ),
                             );
                           },
@@ -232,6 +229,22 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
         child: Row(
           children: [
             SizedBox(width: MediaQuery.of(context).size.width * 0.02),
+            FloatingActionButton.extended(
+              heroTag: 'editSocialMediaFAB',
+              backgroundColor: Theme.of(context).colorScheme.tertiaryContainer,
+              onPressed: () {
+                Navigator.of(context).pushNamed(SocialMediaPage.routeName);
+              },
+              label: Text(
+                '社群媒體',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+            ),
+            SizedBox(width: MediaQuery.of(context).size.width * 0.05),
             Expanded(
               child: FloatingActionButton.extended(
                 heroTag: 'changeRoleFAB',
@@ -240,16 +253,15 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
                     context: context,
                     builder: (_) => AlertDialog(
                       title: const Text('確認身份切換'),
-                        content:
-                            Text('確定要切換成${args.isHost ? '參加者' : '主辦方'}角色嗎？'),
+                      content: Text('確定要切換成${args.isHost ? '參加者' : '主辦方'}角色嗎？'),
                       actions: confirmButtons(
                         context,
                         action: () {
                           context
                               .read<SharedPreferenceProvider>()
                               .setIsHost(!args.isHost)
-                                .then((_) => Navigator.of(context)
-                                        .pushNamedAndRemoveUntil(
+                              .then((_) =>
+                                  Navigator.of(context).pushNamedAndRemoveUntil(
                                     MainPage.routeName,
                                     ModalRoute.withName(LoginPage.routeName),
                                     arguments: MainPageArguments(
@@ -349,6 +361,7 @@ class _NickNameWidgetState extends State<_NickNameWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final nameController = TextEditingController(text: widget.user.displayName);
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -363,8 +376,7 @@ class _NickNameWidgetState extends State<_NickNameWidget> {
           width: MediaQuery.of(context).size.width * 0.55,
           child: _setNickname
               ? TextField(
-                  controller:
-                      TextEditingController(text: widget.user.displayName),
+                  controller: nameController,
                   onChanged: (value) {
                     widget.user.displayName = value;
                   },

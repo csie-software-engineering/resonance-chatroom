@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:resonance_chatroom/providers/providers.dart';
+import 'package:resonance_chatroom/widgets/src/my_app_bar.dart';
 
 class ManagerArguments {
   final String activityId;
@@ -36,8 +37,10 @@ class _ManagerPageState extends State<ManagerPage> {
         managers = snapshot.data!;
 
         return Scaffold(
-          appBar: AppBar(
+          appBar: myAppBar(
+            context,
             title: const Text('管理者名單'),
+            leading: const BackButton(),
           ),
           body: Column(
             children: [

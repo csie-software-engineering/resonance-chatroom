@@ -26,31 +26,36 @@ class _HostActivityTopicPageState extends State<HostActivityTopicPage> {
   List<Widget> fields = [];
   late final args = ModalRoute.of(context)!.settings.arguments
       as HostActivityTopicPageArguments;
-  late final ActivityProvider activityProvider = context.read<ActivityProvider>();
+  late final ActivityProvider activityProvider =
+      context.read<ActivityProvider>();
 
   void _initTopicContent() {
-    debugPrint("初始頁面");
-    activityProvider
-        .getTopicsByTag(args.activityId, args.tagId)
-        .then((value) {
+    debugPrint("初始話題頁面");
+    activityProvider.getTopicsByTag(args.activityId, args.tagId).then((value) {
       _originTopic = value;
+      print("_originTopic.length");
+      print(_originTopic.length);
       for (int i = 0; i < _originTopic.length; i++) {
         activityProvider
             .getQuestionByTopic(args.activityId, _originTopic[i].uid)
-            .then((questionTmp) => fields.add(NewTopicField(
-                  onDelete: () {
-                    setState(() {
-                      fields.removeAt(fields.length - 1);
-                    });
-                  },
-                  id: _originTopic[i].uid,
-                  questionId: questionTmp.uid,
-                  tagId: args.tagId,
-                  activityId: args.activityId,
-                  topicName: _originTopic[i].topicName,
-                )));
+            .then((questionTmp) {
+          fields.add(NewTopicField(
+            onDelete: () {
+              setState(() {
+                fields.removeAt(fields.length - 1);
+              });
+            },
+            id: _originTopic[i].uid,
+            questionId: questionTmp.uid,
+            tagId: args.tagId,
+            activityId: args.activityId,
+            topicName: _originTopic[i].topicName,
+          ));
+          setState(() {});
+          print("fields.length長度");
+          print(fields.length);
+        });
       }
-      setState(() {});
     });
   }
 
@@ -95,14 +100,16 @@ class _HostActivityTopicPageState extends State<HostActivityTopicPage> {
                           args.activityId,
                           topic,
                         );
+                        debugPrint("話題新增完成");
                         Question questionTmp = Question(
                           activityId: args.activityId,
                           tagId: args.tagId,
                           topicId: tmp.uid,
                           questionName: "",
                         );
-                        Question question = await activityProvider.addNewQuestion(
-                            args.activityId, questionTmp);
+                        debugPrint("題目新增");
+                        Question question = await activityProvider
+                            .addNewQuestion(args.activityId, questionTmp);
                         debugPrint("question測試");
                         setState(() {
                           fields.add(NewTopicField(
@@ -118,6 +125,8 @@ class _HostActivityTopicPageState extends State<HostActivityTopicPage> {
                             topicName: "",
                           ));
                         });
+                        print("長度");
+                        print(fields.length);
                       },
                     ),
                   ),
@@ -220,7 +229,9 @@ class _NewTopicFieldState extends State<NewTopicField> {
             },
           ),
           IconButton(
-            icon: isEditing ? const Icon(Icons.close) : const Icon(Icons.delete_forever),
+            icon: isEditing
+                ? const Icon(Icons.close)
+                : const Icon(Icons.delete_forever),
             onPressed: isEditing
                 ? () {
                     setState(() {

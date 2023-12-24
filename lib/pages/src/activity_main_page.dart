@@ -5,6 +5,7 @@ import 'dart:isolate';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:async/async.dart';
+import 'package:resonance_chatroom/widgets/src/activity_buttons/host_buttons.dart';
 
 import '../../widgets/src/public/quit_warning_dialog.dart';
 import '../routes.dart';
@@ -12,27 +13,26 @@ import '../../models/models.dart';
 import '../../utils/utils.dart';
 import '../../providers/providers.dart';
 import '../../widgets/src/activity_card/activity_card.dart';
-import '../../widgets/src/activity_buttons/animated_buttons.dart';
+import '../../widgets/src/activity_buttons/user_buttons.dart';
 
-class UserActivityMainPageArguments {
+class ActivityMainPageArguments {
   // final ;
   final String activityId;
-  final bool isPreview;
+  final bool isHost;
 
-  UserActivityMainPageArguments(
-      {required this.isPreview, required this.activityId});
+  ActivityMainPageArguments({required this.isHost, required this.activityId});
 }
 
-class UserActivityMainPage extends StatefulWidget {
-  const UserActivityMainPage({super.key});
+class ActivityMainPage extends StatefulWidget {
+  const ActivityMainPage({super.key});
 
-  static const routeName = "/user_activity_main_page";
+  static const routeName = "/activity_main_page";
 
   @override
-  State<UserActivityMainPage> createState() => _UserActivityMainPageState();
+  State<ActivityMainPage> createState() => _ActivityMainPageState();
 }
 
-class _UserActivityMainPageState extends State<UserActivityMainPage>
+class _ActivityMainPageState extends State<ActivityMainPage>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation _animation;
@@ -45,16 +45,14 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
   late final ActivityProvider activityProvider =
       context.read<ActivityProvider>();
 
-  late final args = ModalRoute.of(context)!.settings.arguments
-      as UserActivityMainPageArguments;
+  late final args =
+      ModalRoute.of(context)!.settings.arguments as ActivityMainPageArguments;
   late final _currentUser;
   late final _currentUserActivity;
   late final _image;
 
   FloatingActionButtonLocation buttonPosition =
       FloatingActionButtonLocation.centerFloat;
-
-  bool isStartMatching = false;
 
   double _height = 0;
   Timer? _timer;
@@ -65,13 +63,11 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
 
   late final List<Tag> _currentActivityTags;
   late List<bool> _tagSelected;
+
   bool _enableTagWidget = false;
   bool _enableMatch = false;
-
+  bool isStartMatching = false;
   bool initial = false;
-
-  late double buttonPositionTop;
-  late double buttonPositionLeft;
 
   void _onTimerTick(Timer timer) {
     setState(() {
@@ -126,7 +122,7 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
       try {
         peerId = await chatProvider.getChatToUserId(args.activityId);
       } catch (e) {
-        debugPrint("$e"); // todo 暫時抓全部
+        debugPrint("$e");
       }
       if (peerId == null) {
         setState(() {
@@ -278,8 +274,8 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
     // set _currentUserActivity
 
     _currentUser = await authProvider.currentUser;
-    _currentUserActivity =
-        await userProvider.getUserActivity(args.activityId, isManager: false);
+    _currentUserActivity = await userProvider.getUserActivity(args.activityId,
+        isManager: args.isHost);
     var getActivity = await activityProvider.getActivity(args.activityId);
 
     if (getActivity != null) {
@@ -298,8 +294,6 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
 
   Future<void> _init() async {
     if (!initial) {
-      buttonPositionTop = MediaQuery.of(context).size.height - 70; //70
-      buttonPositionLeft = MediaQuery.of(context).size.width - 100;
       await _initActivityContent();
       _initSetTag();
       _initImage();
@@ -376,56 +370,53 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
                     child: Column(
                       children: [
                         SizedBox(height: MediaQuery.of(context).padding.top),
-                        Row(
-                          children: [
-                            BackButton(
-                              onPressed: () async {
-                                if (isStartMatching) {
-                                  await showDialog(
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return QuitWarningDialog(
-                                          action: () async {
-                                            isStartMatching = false;
-                                            // _height = 0;
-                                            try {
-                                              await chatProvider.cancelWaiting(
-                                                  args.activityId);
-                                            } catch (e) {
-                                              debugPrint(
-                                                  "cancelWaitingError: $e");
-                                            }
-                                            setState(() {
-                                              Navigator.of(context).popUntil(
-                                                  ModalRoute.withName(
-                                                      MainPage.routeName));
-                                            });
-                                          },
-                                        );
-                                      });
-                                } else {
-                                  setState(() {
-                                    Navigator.of(context).popUntil(
-                                        ModalRoute.withName(
-                                            MainPage.routeName));
-                                  });
-                                }
-                              },
-                            ),
-                            Expanded(
-                              child: Container(
-                                height: kToolbarHeight,
-                                child: Center(
-                                  child: ClipRRect(
-                                    borderRadius: const BorderRadius.all(
-                                        Radius.circular(16)),
+                        Container(
+                          height: kToolbarHeight,
+                          child: Stack(
+                            alignment: AlignmentDirectional.centerStart,
+                            children: [
+                              BackButton(
+                                onPressed: () async {
+                                  if (isStartMatching) {
+                                    await showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return QuitWarningDialog(
+                                            action: () async {
+                                              isStartMatching = false;
+                                              // _height = 0;
+                                              try {
+                                                await chatProvider
+                                                    .cancelWaiting(
+                                                        args.activityId);
+                                              } catch (e) {
+                                                debugPrint(
+                                                    "cancelWaitingError: $e");
+                                              }
+                                              setState(() {
+                                                Navigator.of(context).popUntil(
+                                                    ModalRoute.withName(
+                                                        MainPage.routeName));
+                                              });
+                                            },
+                                          );
+                                        });
+                                  } else {
+                                    setState(() {
+                                      Navigator.of(context).popUntil(
+                                          ModalRoute.withName(
+                                              MainPage.routeName));
+                                    });
+                                  }
+                                },
+                              ),
+                              Align(
+                                alignment: Alignment.center,
+                                child: Container(
+                                  child: Center(
                                     child: Container(
                                       padding: const EdgeInsets.symmetric(
                                           vertical: 2, horizontal: 20.0),
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .primary
-                                          .withOpacity(0.8),
                                       child: Text(_currentActivity.activityName,
                                           style: TextStyle(
                                               fontSize: 20,
@@ -433,13 +424,49 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
                                               color: Theme.of(context)
                                                   .colorScheme
                                                   .onInverseSurface)),
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary
+                                            .withOpacity(0.8),
+                                        borderRadius: BorderRadius.circular(16),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onSurface
+                                                .withOpacity(0.2),
+                                            offset: const Offset(2, 2),
+                                            blurRadius: 2,
+                                            spreadRadius: 1,
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
-                            const SizedBox(width: 50),
-                          ],
+                              // const SizedBox(width: 50),
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(right: 10.0),
+                                  child: IconButton(
+                                    color: Theme.of(context).colorScheme.primary,
+                                      iconSize: 30,
+                                      icon: const Icon(
+                                          Icons.person,
+                                      ),
+                                      onPressed: () {
+                                        Navigator.of(context).pushNamed(
+                                            ManagerPage.routeName,
+                                            arguments: ManagerArguments(
+                                                activityId: args.activityId));
+                                      }),
+                                ),
+                              )
+                            ],
+                          ),
                         ),
                       ],
                     ),
@@ -471,20 +498,26 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
                   ),
                 ],
               ),
-              floatingActionButton: AnimatedButtons(
-                enableTagWidget: _enableTagWidget && !args.isPreview,
-                enableHistoricalChatRoom: !args.isPreview,
-                enableMatch: _enableMatch && !args.isPreview,
-                matching: matching,
-                goToHistoricalChatRoomPage: _goToHistoricalChatRoomPage,
-                startMatching: isStartMatching,
-                buttonPositionTop: buttonPositionTop,
-                buttonPositionLeft: buttonPositionLeft,
-                tagSelected: _tagSelected,
-                currentActivityTags: _currentActivityTags,
-                changeTagAndName: changeTagAndName,
-                currentUserName: _currentUser.displayName,
-              ),
+              floatingActionButton: args.isHost
+                  ? HostButtons(
+                      enableStopActivity: true,
+                      enableStatistic: true,
+                      enableUpdateActivity: true,
+                      activityId: args.activityId,
+                      isEnableActivity: _currentActivity.isEnabled,
+                    )
+                  : UserButtons(
+                      enableTagWidget: _enableTagWidget,
+                      enableHistoricalChatRoom: true,
+                      enableMatch: _enableMatch,
+                      matching: matching,
+                      goToHistoricalChatRoomPage: _goToHistoricalChatRoomPage,
+                      startMatching: isStartMatching,
+                      tagSelected: _tagSelected,
+                      currentActivityTags: _currentActivityTags,
+                      changeTagAndName: changeTagAndName,
+                      currentUserName: _currentUser.displayName,
+                    ),
               backgroundColor: Theme.of(context).colorScheme.background,
               // floatingActionButtonLocation: buttonPosition,
             );

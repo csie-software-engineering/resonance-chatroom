@@ -252,47 +252,49 @@ class RoomCardWidget extends StatelessWidget {
   Widget build(BuildContext context) => Card(
         elevation: 4.0,
         child: FutureBuilder<Activity>(
-          future: context.read<ActivityProvider>().getActivity(activityId),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
-            final activity = snapshot.requireData;
-            return InkWell(
-              onTap: () {
-                if (isHost || activity.isEnabled) {
-                  Navigator.of(context).pushNamed(
-                    UserActivityMainPage.routeName,
-                    arguments: UserActivityMainPageArguments(
-                      activityId: activityId,
-                      isPreview: false,
-                    ),
-                  );
-                } else {
-                  showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: const Text('發生錯誤'),
-                      content:
-                          const Text('活動可能已經取消或發生錯誤\n長按活動可以刪除該活動\n若有疑問請聯繫主辦方'),
-                      actions: [
-                        TextButton(
-                          child: const Text('了解'),
-                          onPressed: () => Navigator.of(context).pop(),
+            future: context.read<ActivityProvider>().getActivity(activityId),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                return const SizedBox();
+              } else {
+                final activity = snapshot.requireData;
+                return InkWell(
+                  onTap: () {
+                    if (isHost || activity.isEnabled) {
+                      Navigator.of(context).pushNamed(
+                        ActivityMainPage.routeName,
+                        arguments: ActivityMainPageArguments(
+                          activityId: activityId,
+                          isHost: isHost, //todo
                         ),
-                      ],
-                    ),
-                  );
-                }
-              },
-              child: Image.memory(
-                base64ToImage(activity.activityPhoto),
-                fit: BoxFit.contain,
-                opacity: AlwaysStoppedAnimation(activity.isEnabled ? 1 : 0.5),
-              ),
-            );
-          },
-        ),
+                      );
+                    } else {
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text('發生錯誤'),
+                          content: const Text(
+                              '活動可能已經取消或發生錯誤\n長按活動可以刪除該活動\n若有疑問請聯繫主辦方'),
+                          actions: [
+                            TextButton(
+                              child: const Text('了解'),
+                              onPressed: () => Navigator.of(context).pop(),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+                  },
+                  child: Image.memory(
+                    base64ToImage(activity.activityPhoto),
+                    fit: BoxFit.contain,
+                    opacity:
+                        AlwaysStoppedAnimation(activity.isEnabled ? 1 : 0.5),
+                  ),
+                );
+              }
+            }),
       );
 }

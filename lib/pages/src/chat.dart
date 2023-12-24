@@ -8,7 +8,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 // import 'package:url_launcher/url_launcher.dart';
 import 'package:provider/provider.dart';
 import 'package:resonance_chatroom/models/models.dart';
-import 'package:resonance_chatroom/pages/src/user_activity_main_page.dart';
+import 'package:resonance_chatroom/pages/src/activity_main_page.dart';
 import 'package:resonance_chatroom/widgets/src/public/quit_warning_dialog.dart';
 import 'package:resonance_chatroom/widgets/widgets.dart';
 import 'package:resonance_chatroom/providers/providers.dart';
@@ -183,6 +183,7 @@ class _ChatPageState extends State<ChatPage> {
       }
       peerUser = await userProvider.getUser(
           userId: args.peerId); // todo 我可以直接載入對方的 social media?
+
       room = await chatProvider.getRoom(args.activityId, args.peerId);
       currentUser = await authProvider.currentUser;
       _tagName =
@@ -808,7 +809,7 @@ class _ChatPageState extends State<ChatPage> {
                                           Navigator.popUntil(
                                               context,
                                               ModalRoute.withName(
-                                                  UserActivityMainPage
+                                                  ActivityMainPage
                                                       .routeName));
                                         });
                                       }
@@ -817,7 +818,9 @@ class _ChatPageState extends State<ChatPage> {
                             },
                           ),
                         ),
-                        Align(
+                        args.isHistorical
+                            ? const SizedBox()
+                        : Align(
                           alignment: Alignment.centerRight,
                           child: Padding(
                             padding: const EdgeInsets.only(right: 20),
@@ -842,9 +845,7 @@ class _ChatPageState extends State<ChatPage> {
                                   )
                                 ],
                               ),
-                              child: args.isHistorical
-                                  ? const SizedBox()
-                                  : IconButton(
+                              child: IconButton(
                                       iconSize: 25,
                                       icon: Icon(isOn
                                           ? Icons.lightbulb

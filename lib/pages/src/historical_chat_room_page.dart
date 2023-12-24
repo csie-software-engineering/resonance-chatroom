@@ -37,6 +37,7 @@ class HistoricalChatRoomPage extends StatelessWidget {
           }
 
           final rooms = snapshot.requireData;
+          debugPrint("rooms.length:${rooms.length}");
           return rooms.isNotEmpty
               ? ListView.separated(
                   itemCount: rooms.length,

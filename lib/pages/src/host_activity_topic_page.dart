@@ -54,6 +54,8 @@ class _HostActivityTopicPageState extends State<HostActivityTopicPage> {
           setState(() {});
           print("fields.length長度");
           print(fields.length);
+        }).onError((error, stackTrace) {
+          debugPrint("getQuestionByTopicError: $error");
         });
       }
     });

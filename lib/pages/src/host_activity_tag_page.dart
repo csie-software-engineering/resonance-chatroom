@@ -21,8 +21,7 @@ class HostActivityTagPage extends StatefulWidget {
 class _HostActivityTagPageState extends State<HostActivityTagPage> {
   late final args = ModalRoute.of(context)!.settings.arguments
       as HostActivityTagPageArguments;
-  late final ActivityProvider tagProvider =
-      context.read<ActivityProvider>();
+  late final ActivityProvider tagProvider = context.read<ActivityProvider>();
   List<Widget> fields = [];
 
   @override
@@ -77,6 +76,11 @@ class _HostActivityTagPageState extends State<HostActivityTagPage> {
                   onPressed: () {
                     // 跳至送出頁面的邏輯
                     // 傳遞createEvent()方法的回傳值給送出頁面
+                    print("跳至主畫面");
+                    Navigator.of(context).pushNamed(
+                      MainPage.routeName,
+                      arguments: MainPageArguments(isHost: true),
+                    );
                   },
                   child: Text('完成'),
                 ),
@@ -106,8 +110,7 @@ class NewTagField extends StatefulWidget {
 class _NewTagFieldState extends State<NewTagField> {
   bool isEditing = false;
   late String tag;
-  final TextEditingController _controller =
-      TextEditingController();
+  final TextEditingController _controller = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   late final ActivityProvider tagbuttonProvider =
       context.read<ActivityProvider>();

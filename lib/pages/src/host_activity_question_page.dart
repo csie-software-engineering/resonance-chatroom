@@ -6,10 +6,12 @@ import '../routes.dart';
 
 class HostActivityQuestionPageArguments {
   final String activityId;
+  final String tagId;
+  final String topicId;
   final String questionId;
 
   HostActivityQuestionPageArguments(
-      {required this.activityId, required this.questionId});
+      {required this.activityId,required this.tagId,required this.topicId, required this.questionId});
 }
 
 class HostActivityQuestionPage extends StatefulWidget {
@@ -187,6 +189,11 @@ class _HostActivityQuestionPageState extends State<HostActivityQuestionPage> {
                     question.choices = choice;
                     await setActivityProvider.editQuestion(
                         args.activityId, args.questionId, question);
+                    Navigator.of(context).pushNamed(HostActivityTopicPage.routeName,
+                    arguments: HostActivityTopicPageArguments(
+                      activityId: args.activityId,
+                      tagId: args.tagId,
+                    ));
                   },
                   child: Text('送出'),
                 ),

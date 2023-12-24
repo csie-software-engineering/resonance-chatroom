@@ -78,6 +78,7 @@ class _HostActivityTopicPageState extends State<HostActivityTopicPage> {
                             id: tmp.uid,
                             questionid: question.uid,
                             activityid: args.activityId,
+                            tagid: args.tagId,
                           ));
                         });
                       },
@@ -92,6 +93,11 @@ class _HostActivityTopicPageState extends State<HostActivityTopicPage> {
                   onPressed: () {
                     // 跳至送出頁面的邏輯
                     // 傳遞createEvent()方法的回傳值給送出頁面
+                    print("topic跳至主畫面");
+                    Navigator.of(context).pushNamed(
+                      MainPage.routeName,
+                      arguments: MainPageArguments(isHost: true),
+                    );
                   },
                   child: Text('完成'),
                 ),
@@ -111,11 +117,13 @@ class NewTopicField extends StatefulWidget {
     required this.id,
     required this.questionid,
     required this.activityid,
+    required this.tagid,
   });
   final VoidCallback? onDelete;
   String questionid;
   String id;
   String activityid;
+  String tagid;
   @override
   _NewTopicFieldState createState() => _NewTopicFieldState();
 }
@@ -149,6 +157,8 @@ class _NewTopicFieldState extends State<NewTopicField> {
                     .pushNamed(HostActivityQuestionPage.routeName,
                         arguments: HostActivityQuestionPageArguments(
                           activityId: widget.activityid,
+                          tagId: widget.tagid,
+                          topicId: widget.id,
                           questionId: widget.questionid,
                         ));
               },

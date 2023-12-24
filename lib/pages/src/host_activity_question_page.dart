@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:resonance_chatroom/models/models.dart';
+
+import '../../models/models.dart';
 import '../../providers/providers.dart';
 import '../routes.dart';
 
@@ -10,11 +11,12 @@ class HostActivityQuestionPageArguments {
   final String topicId;
   final String questionId;
 
-  HostActivityQuestionPageArguments(
-      {required this.activityId,
-      required this.tagId,
-      required this.topicId,
-      required this.questionId});
+  HostActivityQuestionPageArguments({
+    required this.activityId,
+    required this.tagId,
+    required this.topicId,
+    required this.questionId,
+  });
 }
 
 class HostActivityQuestionPage extends StatefulWidget {
@@ -29,42 +31,41 @@ class HostActivityQuestionPage extends StatefulWidget {
 
 class _HostActivityQuestionPageState extends State<HostActivityQuestionPage> {
   List<String> choice = ["", "", "", "", ""];
-  late final Question _originquestion;
+  late final Question _originQuestion;
   List<Widget> fields = [];
   late final args = ModalRoute.of(context)!.settings.arguments
       as HostActivityQuestionPageArguments;
-  TextEditingController _questionController = TextEditingController();
-  TextEditingController _choice1Controller = TextEditingController();
-  TextEditingController _choice2Controller = TextEditingController();
-  TextEditingController _choice3Controller = TextEditingController();
-  TextEditingController _choice4Controller = TextEditingController();
-  TextEditingController _choice5Controller = TextEditingController();
+  final TextEditingController _questionController = TextEditingController();
+  final TextEditingController _choice1Controller = TextEditingController();
+  final TextEditingController _choice2Controller = TextEditingController();
+  final TextEditingController _choice3Controller = TextEditingController();
+  final TextEditingController _choice4Controller = TextEditingController();
+  final TextEditingController _choice5Controller = TextEditingController();
   late final ActivityProvider questionProvider =
       context.read<ActivityProvider>();
 
   void _initQuestionContent() async {
-    print("初始問卷頁面");
+    debugPrint("初始問卷頁面");
     var getQuestion =
         await questionProvider.getQuestion(args.activityId, args.questionId);
-    if (getQuestion != null) {
-      _originquestion = getQuestion;
-    }
-    _questionController.text = _originquestion.questionName;
-    _choice1Controller.text = _originquestion.choices[0];
-    _choice2Controller.text = _originquestion.choices[1];
-    _choice3Controller.text = _originquestion.choices[2];
-    _choice4Controller.text = _originquestion.choices[3];
-    _choice5Controller.text = _originquestion.choices[4];
-    print(_questionController.text);
+
+    _originQuestion = getQuestion;
+    _questionController.text = _originQuestion.questionName;
+    _choice1Controller.text = _originQuestion.choices[0];
+    _choice2Controller.text = _originQuestion.choices[1];
+    _choice3Controller.text = _originQuestion.choices[2];
+    _choice4Controller.text = _originQuestion.choices[3];
+    _choice5Controller.text = _originQuestion.choices[4];
+    debugPrint(_questionController.text);
     setState(() {});
   }
 
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration(milliseconds: 350), () {
-      this._initQuestionContent();
-   });
+    Future.delayed(const Duration(milliseconds: 350), () {
+      _initQuestionContent();
+    });
   }
 
   @override
@@ -72,7 +73,7 @@ class _HostActivityQuestionPageState extends State<HostActivityQuestionPage> {
     final double height = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
-        title: Text('問卷頁面'),
+        title: const Text('問卷頁面'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -196,37 +197,42 @@ class _HostActivityQuestionPageState extends State<HostActivityQuestionPage> {
                 ),
               ),
               ...fields,*/
-              Container(
+              SizedBox(
                 width: 100,
                 child: ElevatedButton(
-                  onPressed: () async {
-                    print("問卷修改");
+                  onPressed: () {
+                    debugPrint("問卷修改");
                     // 跳至送出頁面的邏輯
                     // 傳遞createEvent()方法的回傳值給送出頁面
-                    Question question = await questionProvider.getQuestion(
+                    questionProvider
+                        .getQuestion(
                       args.activityId,
                       args.questionId,
-                    );
-                    print(question.choices);
-                    question.questionName = _questionController.text;
-                    print("===========");
-                    print(choice);
-                    choice[0] = _choice1Controller.text;
-                    choice[1] = _choice2Controller.text;
-                    choice[2] = _choice3Controller.text;
-                    choice[3] = _choice4Controller.text;
-                    choice[4] = _choice5Controller.text;
-                    question.choices = choice;
-                    await questionProvider.editQuestion(
-                        args.activityId, args.questionId, question);
-                    Navigator.of(context)
-                        .pushNamed(HostActivityTopicPage.routeName,
-                            arguments: HostActivityTopicPageArguments(
-                              activityId: args.activityId,
-                              tagId: args.tagId,
-                            ));
+                    )
+                        .then((question) {
+                      debugPrint(question.choices.toString());
+                      question.questionName = _questionController.text;
+                      debugPrint("===========");
+                      debugPrint(choice.toString());
+                      choice[0] = _choice1Controller.text;
+                      choice[1] = _choice2Controller.text;
+                      choice[2] = _choice3Controller.text;
+                      choice[3] = _choice4Controller.text;
+                      choice[4] = _choice5Controller.text;
+                      question.choices = choice;
+                      questionProvider
+                          .editQuestion(
+                              args.activityId, args.questionId, question)
+                          .then((_) => Navigator.of(context).pushNamed(
+                                HostActivityTopicPage.routeName,
+                                arguments: HostActivityTopicPageArguments(
+                                  activityId: args.activityId,
+                                  tagId: args.tagId,
+                                ),
+                              ));
+                    });
                   },
-                  child: Text('送出'),
+                  child: const Text('送出'),
                 ),
               ),
             ],

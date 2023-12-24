@@ -19,10 +19,31 @@ class HostActivityTagPage extends StatefulWidget {
 }
 
 class _HostActivityTagPageState extends State<HostActivityTagPage> {
+  late final List<Tag> _origintag;
   late final args = ModalRoute.of(context)!.settings.arguments
       as HostActivityTagPageArguments;
   late final ActivityProvider tagProvider = context.read<ActivityProvider>();
   List<Widget> fields = [];
+  Future<void> _initTagContent() async {
+    var getTags = await tagProvider.getAllTags(args.activityId);
+    if (getTags != null) {
+      _origintag = getTags;
+    }
+    for (int i = 0; i < _origintag.length; i++) {
+      setState(() {
+        fields.add(NewTagField(
+          onDelete: () {
+            setState(() {
+              fields.removeAt(fields.length - 1);
+            });
+          },
+          id: _origintag[i].uid,
+          activityid: args.activityId,
+          tagname: _origintag[i].tagName,
+        ));
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,6 +83,7 @@ class _HostActivityTagPageState extends State<HostActivityTagPage> {
                             },
                             id: tag.uid,
                             activityid: args.activityId,
+                            tagname: "",
                           ));
                         });
                       },
@@ -99,17 +121,18 @@ class NewTagField extends StatefulWidget {
     required this.onDelete,
     required this.id,
     required this.activityid,
+    required this.tagname,
   });
   final VoidCallback? onDelete;
   String id;
   String activityid;
+  String tagname;
   @override
   _NewTagFieldState createState() => _NewTagFieldState();
 }
 
 class _NewTagFieldState extends State<NewTagField> {
   bool isEditing = false;
-  late String tag;
   final TextEditingController _controller = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   late final ActivityProvider tagbuttonProvider =
@@ -127,7 +150,7 @@ class _NewTagFieldState extends State<NewTagField> {
                       controller: _controller,
                       focusNode: _focusNode,
                     )
-                  : Text(_controller.text.isEmpty ? "新標籤" : _controller.text),
+                  : Text(widget.tagname),
               onPressed: () {
                 print("跳至topic頁面");
                 Navigator.of(context).pushNamed(HostActivityTopicPage.routeName,
@@ -144,7 +167,7 @@ class _NewTagFieldState extends State<NewTagField> {
               setState(() {
                 isEditing = !isEditing;
                 if (isEditing == false) {
-                  tag = _controller.text;
+                  widget.tagname = _controller.text;
                 } else {
                   _focusNode.requestFocus();
                 }
@@ -153,7 +176,7 @@ class _NewTagFieldState extends State<NewTagField> {
               await tagbuttonProvider.editTag(
                 widget.activityid,
                 widget.id,
-                tag,
+                widget.tagname,
               );
             },
           ),
@@ -163,7 +186,7 @@ class _NewTagFieldState extends State<NewTagField> {
                 ? () {
                     setState(() {
                       isEditing = false;
-                      _controller.text = tag;
+                      _controller.text = widget.tagname;
                     });
                   }
                 : () {

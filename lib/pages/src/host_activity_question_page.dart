@@ -11,7 +11,10 @@ class HostActivityQuestionPageArguments {
   final String questionId;
 
   HostActivityQuestionPageArguments(
-      {required this.activityId,required this.tagId,required this.topicId, required this.questionId});
+      {required this.activityId,
+      required this.tagId,
+      required this.topicId,
+      required this.questionId});
 }
 
 class HostActivityQuestionPage extends StatefulWidget {
@@ -26,6 +29,7 @@ class HostActivityQuestionPage extends StatefulWidget {
 
 class _HostActivityQuestionPageState extends State<HostActivityQuestionPage> {
   List<String> choice = ["", "", "", "", ""];
+  late final Question _originquestion;
   List<Widget> fields = [];
   late final args = ModalRoute.of(context)!.settings.arguments
       as HostActivityQuestionPageArguments;
@@ -35,8 +39,19 @@ class _HostActivityQuestionPageState extends State<HostActivityQuestionPage> {
   TextEditingController _choice3Controller = TextEditingController();
   TextEditingController _choice4Controller = TextEditingController();
   TextEditingController _choice5Controller = TextEditingController();
-  late final ActivityProvider setActivityProvider =
+  late final ActivityProvider questionProvider =
       context.read<ActivityProvider>();
+
+  Future<void> _initQuestionContent() async {
+    var getQuestion =
+        await questionProvider.getQuestion(args.activityId, args.questionId);
+    if (getQuestion != null) {
+      _originquestion = getQuestion;
+    }
+    _questionController.text = _originquestion.questionName;
+    choice = _originquestion.choices;
+  }
+
   @override
   Widget build(BuildContext context) {
     final double height = MediaQuery.of(context).size.height;
@@ -173,7 +188,7 @@ class _HostActivityQuestionPageState extends State<HostActivityQuestionPage> {
                     print("問卷修改");
                     // 跳至送出頁面的邏輯
                     // 傳遞createEvent()方法的回傳值給送出頁面
-                    Question question = await setActivityProvider.getQuestion(
+                    Question question = await questionProvider.getQuestion(
                       args.activityId,
                       args.questionId,
                     );
@@ -187,13 +202,14 @@ class _HostActivityQuestionPageState extends State<HostActivityQuestionPage> {
                     choice[3] = _choice4Controller.text;
                     choice[4] = _choice5Controller.text;
                     question.choices = choice;
-                    await setActivityProvider.editQuestion(
+                    await questionProvider.editQuestion(
                         args.activityId, args.questionId, question);
-                    Navigator.of(context).pushNamed(HostActivityTopicPage.routeName,
-                    arguments: HostActivityTopicPageArguments(
-                      activityId: args.activityId,
-                      tagId: args.tagId,
-                    ));
+                    Navigator.of(context)
+                        .pushNamed(HostActivityTopicPage.routeName,
+                            arguments: HostActivityTopicPageArguments(
+                              activityId: args.activityId,
+                              tagId: args.tagId,
+                            ));
                   },
                   child: Text('送出'),
                 ),

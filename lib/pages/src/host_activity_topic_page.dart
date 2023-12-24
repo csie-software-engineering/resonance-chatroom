@@ -25,7 +25,33 @@ class _HostActivityTopicPageState extends State<HostActivityTopicPage> {
   late final args = ModalRoute.of(context)!.settings.arguments
       as HostActivityTopicPageArguments;
   late final ActivityProvider topicProvider = context.read<ActivityProvider>();
+  late final List<Topic> _origintopic;
   List<Widget> fields = [];
+
+  Future<void> _initTopicContent() async {
+    var getTopic = await topicProvider.getTopicsByTag(args.activityId, args.tagId);
+    if (getTopic != null) {
+      _origintopic = getTopic;
+    }
+    for (int i = 0; i < _origintopic.length; i++) {
+      
+      setState(() {
+        fields.add(NewTopicField(
+          onDelete: () {
+            setState(() {
+              fields.removeAt(fields.length - 1);
+            });
+          },
+          id: _origintopic[i].uid,
+          questionid: _origintopic[i].,
+          tagid: args.tagId,
+          activityid: args.activityId,
+          topicname: _origintopic[i].topicName,
+        ));
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -79,6 +105,7 @@ class _HostActivityTopicPageState extends State<HostActivityTopicPage> {
                             questionid: question.uid,
                             activityid: args.activityId,
                             tagid: args.tagId,
+                            topicname: "",
                           ));
                         });
                       },
@@ -118,19 +145,20 @@ class NewTopicField extends StatefulWidget {
     required this.questionid,
     required this.activityid,
     required this.tagid,
+    required this.topicname,
   });
   final VoidCallback? onDelete;
   String questionid;
   String id;
   String activityid;
   String tagid;
+  String topicname;
   @override
   _NewTopicFieldState createState() => _NewTopicFieldState();
 }
 
 class _NewTopicFieldState extends State<NewTopicField> {
   bool isEditing = false;
-  late String topic;
   final TextEditingController _controller = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   late final ActivityProvider activityProvider =
@@ -149,7 +177,7 @@ class _NewTopicFieldState extends State<NewTopicField> {
                       controller: _controller,
                       focusNode: _focusNode,
                     )
-                  : Text(_controller.text.isEmpty ? "新話題" : _controller.text),
+                  : Text(widget.topicname),
               onPressed: () async {
                 print("跳至問卷頁面");
                 print(widget.questionid);
@@ -170,13 +198,13 @@ class _NewTopicFieldState extends State<NewTopicField> {
               setState(() {
                 isEditing = !isEditing;
                 if (isEditing == false) {
-                  topic = _controller.text;
+                  widget.topicname = _controller.text;
                 } else {
                   _focusNode.requestFocus();
                 }
               });
               await activityProvider.editTopic(
-                  widget.activityid, widget.id, topic);
+                  widget.activityid, widget.id, widget.topicname);
             },
           ),
           IconButton(

@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 
-List<Widget> confirmButtons(BuildContext context, void Function() action) => [
+List<Widget> confirmButtons(
+  BuildContext context, {
+  void Function()? action,
+  void Function()? cancel,
+}) =>
+    [
       FilledButton.tonal(
         style: ButtonStyle(
           backgroundColor: MaterialStateProperty.all<Color>(
@@ -9,6 +14,7 @@ List<Widget> confirmButtons(BuildContext context, void Function() action) => [
         ),
         onPressed: () {
           Navigator.of(context).pop();
+          if(cancel != null) cancel();
         },
         child: Text(
           '取消',
@@ -25,7 +31,7 @@ List<Widget> confirmButtons(BuildContext context, void Function() action) => [
         ),
         onPressed: () {
           Navigator.of(context).pop();
-          action();
+          if(action != null) action();
         },
         child: Text(
           '確定',

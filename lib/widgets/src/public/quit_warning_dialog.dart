@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../widgets.dart';
+
 class QuitWarningDialog extends StatefulWidget {
   const QuitWarningDialog({super.key, required this.action});
 
@@ -13,13 +15,8 @@ class _QuitWarningDialogState extends State<QuitWarningDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text("確定要退出？"),
-      actions: [
-        TextButton(
-          child: Text("確定"),
-          onPressed: widget.action,
-        )
-      ],
+      title: const Text("確定要退出？"),
+      actions: confirmButtons(context, action: widget.action),
     );
   }
 }

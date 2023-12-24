@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../../models/models.dart';
 import '../../../pages/routes.dart';
+import '../../widgets.dart';
 import '../activity_card/tag_list.dart';
 
 class AnimatedButtons extends StatefulWidget {
@@ -123,10 +124,10 @@ class AnimatedButtonsState extends State<AnimatedButtons>
                 ? IconButton(
                     onPressed: () {
                       Navigator.of(context).pushNamed(
-                          HistoricalChatRoomPage.routeName,
-                          arguments: HistoricalChatRoomPageArguments(
-                            activityId: widget.currentActivityTags[0].activityId,
-                          )
+                        HistoricalChatRoomPage.routeName,
+                        arguments: HistoricalChatRoomPageArguments(
+                          activityId: widget.currentActivityTags[0].activityId,
+                        ),
                       );
                     },
                     icon: Icon(
@@ -213,6 +214,7 @@ class AnimatedButtonsState extends State<AnimatedButtons>
                                 i++) {
                               _tagTmp[i] = widget.tagSelected[i];
                             }
+
                             return AlertDialog(
                               insetPadding: const EdgeInsets.symmetric(
                                   vertical: 10.0, horizontal: 40.0),
@@ -325,23 +327,13 @@ class AnimatedButtonsState extends State<AnimatedButtons>
                                   ],
                                 ),
                               ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    widget.changeTagAndName(
-                                        _textEditingController, _tagTmp);
-                                  },
-                                  child: const Text('確定'),
-                                ),
-                                TextButton(
-                                  onPressed: () {
-                                    _textEditingController.text =
-                                        widget.currentUserName;
-                                    Navigator.of(context).pop();
-                                  },
-                                  child: const Text('取消'),
-                                ),
-                              ],
+                              actions: confirmButtons(
+                                context,
+                                action: () => widget.changeTagAndName(
+                                    _textEditingController, _tagTmp),
+                                cancel: () => _textEditingController.text =
+                                    widget.currentUserName,
+                              ),
                             );
                           });
                     })

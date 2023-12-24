@@ -62,7 +62,7 @@ class _MainPageState extends State<MainPage> {
           body: ActivityCarouselWidget(isHost: args.isHost),
           floatingActionButton: FloatingActionButton.extended(
             onPressed: () {
-              if(args.isHost) {
+              if (args.isHost) {
                 Navigator.of(context).pushNamed(HostActivitySetPage.routeName);
               } else {
                 _joinActivity(context, user);
@@ -121,16 +121,19 @@ class _MainPageState extends State<MainPage> {
                                   title: const Text('確認加入活動'),
                                   content: Text(
                                       '是否要加入「${activity.activityName}」活動？'),
-                                  actions: confirmButtons(context, () {
-                                    context
-                                        .read<UserProvider>()
-                                        .addUserActivity(UserActivity(
-                                          uid: activity.uid,
-                                          isManager: false,
-                                        ))
-                                        .then((_) => setState(() {}));
-                                    Navigator.of(context).pop();
-                                  }),
+                                  actions: confirmButtons(
+                                    context,
+                                    action: () {
+                                      context
+                                          .read<UserProvider>()
+                                          .addUserActivity(UserActivity(
+                                            uid: activity.uid,
+                                            isManager: false,
+                                          ))
+                                          .then((_) => setState(() {}));
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
                                 ),
                               );
                             },
@@ -201,14 +204,17 @@ class _ActivityCarouselWidgetState extends State<ActivityCarouselWidget> {
                               builder: (context) => AlertDialog(
                                 title: const Text('刪除活動'),
                                 content: const Text('是否要刪除該活動？'),
-                                actions: confirmButtons(context, () {
-                                  context
-                                      .read<UserProvider>()
-                                      .removeUserActivity(activityId,
-                                          isManager: false)
-                                      .then((value) => setState(() {}));
-                                  Navigator.of(context).pop();
-                                }),
+                                actions: confirmButtons(
+                                  context,
+                                  action: () {
+                                    context
+                                        .read<UserProvider>()
+                                        .removeUserActivity(activityId,
+                                            isManager: false)
+                                        .then((value) => setState(() {}));
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
                               ),
                             ),
                       child: RoomCardWidget(

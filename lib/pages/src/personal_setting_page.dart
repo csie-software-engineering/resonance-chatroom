@@ -213,7 +213,7 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
                       content: Text('確定要切換成${args.isHost ? '參加者' : '主辦方'}角色嗎？'),
                       actions: confirmButtons(
                         context,
-                        () {
+                        action: () {
                           context
                               .read<SharedPreferenceProvider>()
                               .setIsHost(!args.isHost)
@@ -253,7 +253,7 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
                       content: const Text('確定要登出嗎？'),
                       actions: confirmButtons(
                         context,
-                        () {
+                        action: () {
                           Navigator.of(context).popUntil(
                               ModalRoute.withName(LoginPage.routeName));
                           context.read<AuthProvider>().logout();

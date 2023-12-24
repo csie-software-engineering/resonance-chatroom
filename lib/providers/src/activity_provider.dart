@@ -104,7 +104,7 @@ class ActivityProvider {
     return await getActivity(activityData.uid);
   }
 
-  ///刪除活動
+  /// 刪除活動
   Future<void> deleteActivity(String activityId) async {
     assert(await _checkActivityAlive(activityId), "活動不存在");
     assert(await _isHost(activityId), '你不是主辦方');
@@ -114,6 +114,18 @@ class ActivityProvider {
         .doc(activityId);
 
     await documentReference.update({ActivityConstants.isEnabled.value: false});
+  }
+
+  /// 啟用活動
+  Future<void> enableActivity(String activityId) async {
+    assert(await _checkActivityAlive(activityId), "活動不存在");
+    assert(await _isHost(activityId), '你不是主辦方');
+
+    final documentReference = db
+        .collection(FirestoreConstants.activityCollectionPath.value)
+        .doc(activityId);
+
+    await documentReference.update({ActivityConstants.isEnabled.value: true});
   }
 
   Future<bool> _checkActivityAlive(String activityId) async {

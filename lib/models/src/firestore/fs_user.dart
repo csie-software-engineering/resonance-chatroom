@@ -110,6 +110,12 @@ class FSUserActivity {
         FSUserActivityConstants.tagIds.value: tagIds,
       };
 
+  Map<String, dynamic> toJsonWithOutPoint() => {
+        FSUserActivityConstants.uid.value: uid,
+        FSUserActivityConstants.isManager.value: isManager,
+        FSUserActivityConstants.tagIds.value: tagIds,
+      };
+
   factory FSUserActivity.fromDocument(
     DocumentSnapshot<Map<String, dynamic>> doc,
   ) =>

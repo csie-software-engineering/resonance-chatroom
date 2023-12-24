@@ -276,8 +276,8 @@ class UserProvider {
 
     final fsUserActivity = activity.toFSUserActivity();
     transaction != null
-        ? transaction.update(activityRef, fsUserActivity.toJson())
-        : await activityRef.update(fsUserActivity.toJson());
+        ? transaction.update(activityRef, fsUserActivity.toJsonWithOutPoint())
+        : await activityRef.update(fsUserActivity.toJsonWithOutPoint());
 
     return await getUserActivity(activity.uid, isManager: activity.isManager);
   }

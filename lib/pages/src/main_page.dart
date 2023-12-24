@@ -212,7 +212,6 @@ class _ActivityCarouselWidgetState extends State<ActivityCarouselWidget> {
                                         .removeUserActivity(activityId,
                                             isManager: false)
                                         .then((value) => setState(() {}));
-                                    Navigator.of(context).pop();
                                   },
                                 ),
                               ),
@@ -262,7 +261,7 @@ class RoomCardWidget extends StatelessWidget {
             final activity = snapshot.requireData;
             return InkWell(
               onTap: () {
-                if (activity.isEnabled) {
+                if (isHost || activity.isEnabled) {
                   Navigator.of(context).pushNamed(
                     UserActivityMainPage.routeName,
                     arguments: UserActivityMainPageArguments(

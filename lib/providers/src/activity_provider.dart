@@ -395,7 +395,7 @@ class ActivityProvider {
     assert(await _checkTagAlive(activityId, questionData.tagId), "標籤不存在");
     assert(await _checkTopicAlive(activityId, questionData.topicId), "話題不存在");
     assert(await _isManager(activityId), '你不是管理者');
-    while(questionData.choices.remove("")){}
+    while (questionData.choices.remove("")) {}
     assert(
       questionData.choices.toSet().length == questionData.choices.length,
       'There are two same choices',
@@ -480,11 +480,14 @@ class ActivityProvider {
     assert(
         activityData.startDate.toEpochTime().isAfter(DateTime.now()), '活動已經開始');
 
-    while(questionData.choices.remove("")){}
+    while (questionData.choices.remove("")) {}
 
     await questionDoc.update({
       QuestionConstants.questionName.value: questionData.questionName,
-      QuestionConstants.choices.value: questionData.choices});
+      QuestionConstants.choices.value: questionData.choices
+    });
+
+    return await getQuestion(activityId, questionId);
   }
 
   /// 用問券ID取得問卷

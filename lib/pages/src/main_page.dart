@@ -119,10 +119,10 @@ class _MainPageState extends State<MainPage> {
           ),
           floatingActionButton: FloatingActionButton(
             onPressed: () {
-              Navigator.of(context).pushNamed(
-                          HostActivitySetPage.routeName,
-                          arguments: const HostActivitySetPage());
-              //_joinActivity(context, user);
+              // Navigator.of(context).pushNamed(
+              //             HostActivitySetPage.routeName,
+              //             arguments: const HostActivitySetPage());
+              _joinActivity(context, user);
             },
             tooltip: 'Add Activity',
             child: const Icon(Icons.add_circle_outline),

@@ -9,6 +9,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 import 'package:resonance_chatroom/models/models.dart';
 import 'package:resonance_chatroom/pages/src/user_activity_main_page.dart';
+import 'package:resonance_chatroom/widgets/src/public/quit_warning_dialog.dart';
 import 'package:resonance_chatroom/widgets/widgets.dart';
 import 'package:resonance_chatroom/providers/providers.dart';
 
@@ -18,8 +19,9 @@ import '../../constants/src/firestore_constants.dart';
 class ChatPageArguments {
   final String peerId;
   final String activityId;
+  final bool isPrevious;
 
-  ChatPageArguments({required this.activityId, required this.peerId});
+  ChatPageArguments({required this.isPrevious, required this.activityId, required this.peerId});
 }
 
 class ChatPage extends StatefulWidget {
@@ -786,32 +788,25 @@ class _ChatPageState extends State<ChatPage> {
                               showDialog(
                                   context: context,
                                   builder: (BuildContext context) {
-                                    return AlertDialog(
-                                      title: Text("確定要退出？"),
-                                      actions: [
-                                        TextButton(
-                                          child: Text("確定"),
-                                          onPressed: () async {
-                                            // todo 抓錯誤
-                                            try{
-                                              await chatProvider.leaveRoom(
-                                                  args.activityId,
-                                                  args.peerId);
-                                            } catch (e) {
-                                              debugPrint("leaveRoomError:$e");
-                                            } finally {
-                                              setState(() {
-                                                Navigator.popUntil(
-                                                    context,
-                                                    ModalRoute.withName(
-                                                        UserActivityMainPage
-                                                            .routeName));
-                                              });
-                                            }
-                                          },
-                                        )
-                                      ],
-                                    );
+                                    return QuitWarningDialog(
+                                        action: () async {
+                                      // todo 抓錯誤
+                                      try{
+                                        await chatProvider.leaveRoom(
+                                            args.activityId,
+                                            args.peerId);
+                                      } catch (e) {
+                                        debugPrint("leaveRoomError:$e");
+                                      } finally {
+                                        setState(() {
+                                          Navigator.popUntil(
+                                              context,
+                                              ModalRoute.withName(
+                                                  UserActivityMainPage
+                                                      .routeName));
+                                        });
+                                      }
+                                    });
                                   });
                             },
                           ),
@@ -841,7 +836,8 @@ class _ChatPageState extends State<ChatPage> {
                                   )
                                 ],
                               ),
-                              child: IconButton(
+                              child: args.isPrevious ? const SizedBox()
+                              : IconButton(
                                 iconSize: 25,
                                 icon: Icon(isOn
                                     ? Icons.lightbulb
@@ -911,7 +907,7 @@ class _ChatPageState extends State<ChatPage> {
                       ],
                     ),
                   ),
-                  _allTopics.isEmpty ? const SizedBox()
+                  _allTopics.isEmpty || args.isPrevious ? const SizedBox()
                       : StreamBuilder<DocumentSnapshot>(
                       stream: chatProvider.getRoomStream(
                           args.activityId, args.peerId),
@@ -1093,11 +1089,11 @@ class _ChatPageState extends State<ChatPage> {
                                   ),
                                 ),
                               ),
-                              Input(
+                              !args.isPrevious ? Input(
                                 onSendPressed: onSendMessage,
                                 nextTopic: nextTopic,
                                 enableSocialMedia: enableSocialMedia,
-                              )
+                              ) : const SizedBox(),
                             ],
                           ),
                         ),

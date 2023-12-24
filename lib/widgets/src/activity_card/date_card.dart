@@ -55,7 +55,7 @@ class StartDateCard extends StatelessWidget {
         borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(15), bottomLeft: Radius.circular(15)),
         // color: const Color(0xFF8EA373),
-        color: Theme.of(context).colorScheme.primary.withOpacity(0.8),
+        color: Theme.of(context).colorScheme.inversePrimary.withOpacity(0.8),
         boxShadow: [
           BoxShadow(
             color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
@@ -71,7 +71,7 @@ class StartDateCard extends StatelessWidget {
           Text(
             monthToAbbreviation(date.month),
             style: TextStyle(
-              color: Theme.of(context).colorScheme.inversePrimary,
+              color: Theme.of(context).colorScheme.primary,
             ),
           ),
           const SizedBox(width: 10),
@@ -79,13 +79,13 @@ class StartDateCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: 30,
                 // fontWeight: FontWeight.w600
-                color: Theme.of(context).colorScheme.inversePrimary,
+                color: Theme.of(context).colorScheme.primary,
               )),
           const SizedBox(width: 10),
           Text(
             numberToChinese(date.weekday),
             style: TextStyle(
-              color: Theme.of(context).colorScheme.inversePrimary,
+              color: Theme.of(context).colorScheme.primary,
             ),
           ),
         ],
@@ -106,7 +106,7 @@ class EndDateCard extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.only(
             topRight: Radius.circular(15), bottomRight: Radius.circular(15)),
-        color: Theme.of(context).colorScheme.secondary.withOpacity(0.8),
+        color: Theme.of(context).colorScheme.inversePrimary.withOpacity(0.8),
         boxShadow: [
           BoxShadow(
             color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
@@ -122,7 +122,7 @@ class EndDateCard extends StatelessWidget {
           Text(
             monthToAbbreviation(date.month),
             style: TextStyle(
-              color: Theme.of(context).colorScheme.inversePrimary,
+              color: Theme.of(context).colorScheme.primary,
             ),
           ),
           const SizedBox(width: 10),
@@ -130,13 +130,13 @@ class EndDateCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: 30,
                 // fontWeight: FontWeight.w600
-                color: Theme.of(context).colorScheme.inversePrimary,
+                color: Theme.of(context).colorScheme.primary,
               )),
           const SizedBox(width: 10),
           Text(
           numberToChinese(date.weekday),
             style: TextStyle(
-              color: Theme.of(context).colorScheme.inversePrimary,
+              color: Theme.of(context).colorScheme.primary,
             ),
           ),
         ],

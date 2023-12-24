@@ -21,10 +21,12 @@ class MaterialWidget extends StatelessWidget {
             title: AppConstants.appTitle,
             theme: ThemeData(
               colorSchemeSeed: (instance.getBool('isHost') ?? false)
-                  ? Colors.pink
-                  :  const Color(0xffA7D073),
+                  ? Colors.lightBlue
+                  : Colors.lightGreen,
             ),
-            initialRoute: LoginPage.routeName,
+            initialRoute: (instance.getBool('isHost') == null)
+                ? WelcomePage.routeName
+                : LoginPage.routeName,
             routes: routes,
             debugShowCheckedModeBanner: false,
           );

@@ -15,6 +15,7 @@ import 'package:resonance_chatroom/providers/providers.dart';
 
 import '../../widgets/src/chat_components/questionDialog.dart';
 import '../../constants/src/firestore_constants.dart';
+import '../../widgets/src/input/widgets.dart';
 
 class ChatPageArguments {
   final String peerId;

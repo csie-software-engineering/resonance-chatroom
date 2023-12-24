@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:resonance_chatroom/models/models.dart';
-import 'package:resonance_chatroom/widgets/widgets.dart';
+
+import '../../../models/models.dart';
+import 'widgets.dart';
 
 /// A class that represents bottom bar widget with a text field, attachment and
 /// send buttons inside. By default hides send button when text field is empty.

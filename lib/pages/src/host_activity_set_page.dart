@@ -1,11 +1,10 @@
-import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:resonance_chatroom/models/models.dart';
-import 'package:resonance_chatroom/providers/providers.dart';
-import 'package:resonance_chatroom/utils/src/time.dart';
+
+import '../../models/models.dart';
+import '../../providers/providers.dart';
+import '../../utils/utils.dart';
+import '../../widgets/widgets.dart';
 import '../routes.dart';
 
 class HostActivitySetPage extends StatefulWidget {
@@ -14,84 +13,90 @@ class HostActivitySetPage extends StatefulWidget {
   static const routeName = '/host_activity_set_page';
 
   @override
-  _HostActivitySetPageState createState() => _HostActivitySetPageState();
+  State<HostActivitySetPage> createState() => _HostActivitySetPageState();
 }
 
 class _HostActivitySetPageState extends State<HostActivitySetPage> {
-  late final ActivityProvider setActivityProvider =
-      context.read<ActivityProvider>();
-  TextEditingController _nameController = TextEditingController();
-  TextEditingController _infoController = TextEditingController();
-  final List<DateTime> _selectedDates = [DateTime.now(), DateTime.now()];
-  File? _selectedImage;
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _infoController = TextEditingController();
+  final List<DateTime?> _selectedDates = [null, null];
+  String? _selectedImage;
 
-  Future<void> _pickImage() async {
-    final image = await ImagePicker().pickImage(source: ImageSource.gallery);
-    setState(() {
-      _selectedImage = File(image!.path);
+  void _pickStartDate() {
+    showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2048),
+    ).then((date) {
+      if (date != null) {
+        showTimePicker(
+          context: context,
+          initialTime: TimeOfDay.now(),
+        ).then((time) {
+          if (time != null) {
+            final start = DateTime(
+              date.year,
+              date.month,
+              date.day,
+              time.hour,
+              time.minute,
+            );
+            setState(() {
+              _selectedDates[0] = start;
+            });
+          }
+        });
+      }
     });
   }
 
-  Future<void> _pickStartDate() async {
-    final date = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2023),
-      lastDate: DateTime(2024),
-    );
-    if (date != null) {
-      final time = await showTimePicker(
-        context: context,
-        initialTime: TimeOfDay.now(),
+  void _pickEndDate(DateTime? start) {
+    if (start == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('請先選擇開始時間'),
+        ),
       );
-      if (time != null) {
-        final start = DateTime(
-          date.year,
-          date.month,
-          date.day,
-          time.hour,
-          time.minute,
-        );
-        setState(() {
-          _selectedDates[0] = start;
-        });
-      }
+      return;
     }
-  }
 
-  Future<void> _pickEndDate() async {
-    final date = await showDatePicker(
+    showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2023),
-      lastDate: DateTime(2024),
-    );
-    if (date != null) {
-      final time = await showTimePicker(
-        context: context,
-        initialTime: TimeOfDay.now(),
-      );
-      if (time != null) {
-        final end = DateTime(
-          date.year,
-          date.month,
-          date.day,
-          time.hour,
-          time.minute,
-        );
-        setState(() {
-          _selectedDates[1] = end;
+      initialDate: start,
+      firstDate: start,
+      lastDate: DateTime(2048),
+    ).then((date) {
+      if (date != null) {
+        showTimePicker(
+          context: context,
+          initialTime: TimeOfDay.now(),
+        ).then((time) {
+          if (time != null) {
+            final end = DateTime(
+              date.year,
+              date.month,
+              date.day,
+              time.hour,
+              time.minute,
+            );
+            setState(() {
+              _selectedDates[1] = end;
+            });
+          }
         });
       }
-    }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final double height = MediaQuery.of(context).size.height;
     return Scaffold(
-      appBar: AppBar(
-        title: Text('活動設定頁面'),
+      backgroundColor: Theme.of(context).colorScheme.background,
+      appBar: myAppBar(
+        context,
+        title: const Text('活動設定頁面'),
+        leading: const BackButton(),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -99,56 +104,68 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
           child: Column(
             children: [
               Row(
-                mainAxisAlignment:
-                    MainAxisAlignment.spaceEvenly,
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   SizedBox(
-                    height: height * 0.05,
+                    width: MediaQuery.of(context).size.width * 0.25,
+                    child: const Text(
+                      '活動名稱',
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                   Expanded(
-                    flex: 2,
                     child: TextFormField(
                       controller: _nameController,
-                      decoration: const InputDecoration(labelText: "活動名稱"),
                     ),
                   ),
                 ],
               ),
               Row(
                 children: [
-                  Text('活動開始時間'),
-                  SizedBox(width: 16.0),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.25,
+                    child: const Text(
+                      '活動開始時間',
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
                   Expanded(
                     child: ElevatedButton(
                       onPressed: _pickStartDate,
                       child: Text(_selectedDates[0] == null
                           ? '選擇日期和時間'
-                          : '${_selectedDates[0]}'),
+                          : _selectedDates[0].toString()),
                     ),
                   ),
                 ],
               ),
               Row(
                 children: [
-                  Text('活動結束時間'),
-                  SizedBox(width: 16.0),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.25,
+                    child: const Text(
+                      '活動結束時間',
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: _pickEndDate,
+                      onPressed: () => _pickEndDate(_selectedDates[0]),
                       child: Text(_selectedDates[1] == null
                           ? '選擇日期和時間'
-                          : '${_selectedDates[1]}'),
+                          : _selectedDates[1].toString()),
                     ),
                   ),
                 ],
               ),
-
-              const SizedBox(height: 16.0),
               Row(
                 children: [
-                  const Text('活動資訊'),
-                  const SizedBox(width: 16.0),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.25,
+                    child: const Text(
+                      '活動資訊',
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
                   Expanded(
                     child: TextField(
                       controller: _infoController,
@@ -160,80 +177,101 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
                   ),
                 ],
               ),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               Row(
                 children: [
-                  Text('活動圖片'),
-                  SizedBox(width: 16.0),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.25,
+                    child: const Text(
+                      '活動圖片',
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: _pickImage,
-                      child: Text('選擇圖片'),
+                      onPressed: () => pickImageToBase64().then((value) {
+                        setState(() {
+                          _selectedImage = value;
+                        });
+                      }),
+                      child: const Text('選擇圖片'),
                     ),
                   ),
                 ],
               ),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               Container(
                 height: null,
                 decoration: BoxDecoration(
+                  color: Colors.grey,
                   border: Border.all(color: Colors.grey),
                   borderRadius: BorderRadius.circular(8.0),
                 ),
                 child: _selectedImage == null
-                    ? Center(child: Text('沒有選擇圖片'))
-                    : SingleChildScrollView(
-                        child: Column(
-                          children: [
-                            Image.file(_selectedImage!),
-                          ],
+                    ? SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.9,
+                        height: MediaQuery.of(context).size.width * 0.2,
+                        child: const Center(
+                          child: Text(
+                            '尚未選擇圖片',
+                            style: TextStyle(
+                              fontSize: 20,
+                            ),
+                          ),
                         ),
-                      ),
-              ),
-
-              SizedBox(height: 16.0),
-              Row(
-                children: [
-                  /*ElevatedButton(
-                    onPressed: () async {
-                      final data = await setActivityProvider
-                          .getActivity("8a815b73-8fde-4564-8c11-e3d738f547d8");
-                      setState(() {
-                        _checkselectedImage = base64Decode(data!.activityPhoto);
-                      });
-                      // 跳至預覽頁面的邏輯
-                      // 傳遞createEvent()方法的回傳值給預覽頁面
-                      Navigator.of(context)
-                          .pushNamed(HostActivityTagPage.routeName);
-                    },
-                    child: Text('預覽'),
-                  ),*/
-                  ElevatedButton(
-                    onPressed: () async {
-                      print("活動送出");
-                      Activity activitydata = Activity(
-                        activityPhoto:
-                            base64Encode(_selectedImage!.readAsBytesSync()),
-                        activityInfo: _infoController.text,
-                        activityName: _nameController.text,
-                        startDate: _selectedDates[0].toEpochString(),
-                        endDate: _selectedDates[1].toEpochString(),
-                      );
-                      Activity activity = await setActivityProvider
-                          .setNewActivity(activitydata);
-                      Navigator.of(context).pushNamed(
-                          HostActivityTagPage.routeName,
-                          arguments: HostActivityTagPageArguments(
-                              activityId: activity.uid));
-                    },
-                    child: Text('送出'),
-                  ),
-                ],
+                      )
+                    : Image.memory(base64ToImage(_selectedImage!)),
               ),
             ],
           ),
         ),
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          if (_nameController.text.isEmpty) {
+            ScaffoldMessenger.of(context)
+                .showSnackBar(const SnackBar(content: Text('請填寫活動名稱')));
+            return;
+          }
+
+          if (_infoController.text.isEmpty) {
+            ScaffoldMessenger.of(context)
+                .showSnackBar(const SnackBar(content: Text('請填寫活動資訊')));
+            return;
+          }
+
+          if (_selectedDates[0] == null || _selectedDates[1] == null) {
+            ScaffoldMessenger.of(context)
+                .showSnackBar(const SnackBar(content: Text('請填寫活動時間')));
+            return;
+          }
+
+          if (_selectedImage == null) {
+            ScaffoldMessenger.of(context)
+                .showSnackBar(const SnackBar(content: Text('請選擇活動圖片')));
+            return;
+          }
+
+          debugPrint("活動送出");
+          final activityData = Activity(
+            activityName: _nameController.text,
+            activityInfo: _infoController.text,
+            startDate: _selectedDates[0]!.toEpochString(),
+            endDate: _selectedDates[1]!.toEpochString(),
+            activityPhoto: _selectedImage!,
+          );
+          context.read<ActivityProvider>().setNewActivity(activityData).then(
+                (activity) => Navigator.of(context).pushNamed(
+                  HostActivityTagPage.routeName,
+                  arguments: HostActivityTagPageArguments(
+                    activityId: activity.uid,
+                  ),
+                ),
+              );
+        },
+        label: const Row(children: [Icon(Icons.send), Text("新增活動")]),
+      ),
+      floatingActionButtonAnimator: FloatingActionButtonAnimator.scaling,
     );
   }
 }

@@ -17,13 +17,14 @@ class ActivityProvider {
 
   /// 設置新活動
   Future<Activity> setNewActivity(Activity activityData) async {
-    assert(activityData.startDate.toEpochTime().isAfter(DateTime.now()),
-        '活動開始時間需要在現在之後');
-    assert(
-        activityData.endDate
-            .toEpochTime()
-            .isAfter(activityData.startDate.toEpochTime()),
-        '活動結束時間需要在開始時間之後');
+    // assert(activityData.startDate.toEpochTime().isAfter(DateTime.now()),
+    //     '活動開始時間需要在現在之後');
+    // assert(
+    //   activityData.endDate
+    //       .toEpochTime()
+    //       .isAfter(activityData.startDate.toEpochTime()),
+    //   '活動結束時間需要在開始之間之後',
+    // );
 
     activityData.uid = generateUuid();
     final documentReference = db
@@ -80,17 +81,17 @@ class ActivityProvider {
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityData.uid);
 
-    final pastActivityData = await getActivity(activityData.uid);
-    assert(pastActivityData.startDate.toEpochTime().isAfter(DateTime.now()),
-        '活動開始時間需要在現在之後');
+    // final pastActivityData = await getActivity(activityData.uid);
+    // assert(pastActivityData.startDate.toEpochTime().isAfter(DateTime.now()),
+    //     '活動開始時間需要在現在之後');
 
-    assert(activityData.startDate.toEpochTime().isAfter(DateTime.now()),
-        '活動開始時間需要在現在之後');
-    assert(
-        activityData.endDate
-            .toEpochTime()
-            .isAfter(activityData.startDate.toEpochTime()),
-        '活動結束時間需要在開始之間之後');
+    // assert(activityData.startDate.toEpochTime().isAfter(DateTime.now()),
+    //     '活動開始時間需要在現在之後');
+    // assert(
+    //     activityData.endDate
+    //         .toEpochTime()
+    //         .isAfter(activityData.startDate.toEpochTime()),
+    //     '活動結束時間需要在開始之間之後');
 
     await documentReference.update({
       ActivityConstants.activityName.value: activityData.activityName,
@@ -411,7 +412,7 @@ class ActivityProvider {
     while (questionData.choices.remove("")) {}
     assert(
       questionData.choices.toSet().length == questionData.choices.length,
-      'There are two same choices',
+      '選項重複',
     );
 
     final existQuestion = db
@@ -435,7 +436,7 @@ class ActivityProvider {
     return await getQuestion(activityId, questionData.uid);
   }
 
-  /// 修改問卷選項(若活動已經開始，則不可修改)
+  /// 新增/修改問卷選項(若活動已經開始，則不可修改)
   Future<void> editQuestionChoices(
     String activityId,
     String questionId,
@@ -513,10 +514,10 @@ class ActivityProvider {
         .collection(FirestoreConstants.questionCollectionPath.value)
         .doc(questionId);
 
-    final questionDoc = await questionRef.get();
-    assert(questionDoc.exists, '問卷不存在');
+    final questionData = await questionRef.get();
+    assert(questionData.exists, '問卷不存在');
 
-    return Question.fromDocument(questionDoc);
+    return Question.fromDocument(questionData);
   }
 
   /// 用話題取得問卷
@@ -532,6 +533,17 @@ class ActivityProvider {
     final questionDocs = (await questionQuery.get()).docs;
     assert(questionDocs.isNotEmpty, '該話題沒有問卷');
     return Question.fromDocument(questionDocs.first);
+  }
+
+  /// 取得所有問卷
+  Future<List<Question>> getAllQuestions(String activityId) async {
+    final questionQuery = db
+        .collection(FirestoreConstants.activityCollectionPath.value)
+        .doc(activityId)
+        .collection(FirestoreConstants.questionCollectionPath.value);
+
+    final questionDocs = (await questionQuery.get()).docs;
+    return questionDocs.map((e) => Question.fromDocument(e)).toList();
   }
 
   /// 刪除話題與問卷問題

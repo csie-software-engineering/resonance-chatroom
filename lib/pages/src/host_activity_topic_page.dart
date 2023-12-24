@@ -22,88 +22,88 @@ class HostActivityTopicPage extends StatefulWidget {
 }
 
 class _HostActivityTopicPageState extends State<HostActivityTopicPage> {
-  late final List<Topic> _origintopic;
+  late final List<Topic> _originTopic;
   List<Widget> fields = [];
-    late final args = ModalRoute.of(context)!.settings.arguments
-        as HostActivityTopicPageArguments;
-    late final ActivityProvider topicProvider =
-        context.read<ActivityProvider>();
-  Future<void> _initTopicContent() async {
-    print("初始頁面");
-    var getTopic =
-        await topicProvider.getTopicsByTag(args.activityId, args.tagId);
-    if (getTopic != null) {
-      _origintopic = getTopic;
-    }
-    for (int i = 0; i < _origintopic.length; i++) {
-      var questiontmp = await topicProvider.getQuestionByTopic(
-          args.activityId, _origintopic[i].uid);
-      fields.add(NewTopicField(
-        onDelete: () {
-          setState(() {
-            fields.removeAt(fields.length - 1);
-          });
-        },
-        id: _origintopic[i].uid,
-        questionid: questiontmp.uid,
-        tagid: args.tagId,
-        activityid: args.activityId,
-        topicname: _origintopic[i].topicName,
-      ));
-    }
-    setState(() {});
+  late final args = ModalRoute.of(context)!.settings.arguments
+      as HostActivityTopicPageArguments;
+  late final ActivityProvider activityProvider = context.read<ActivityProvider>();
+
+  void _initTopicContent() {
+    debugPrint("初始頁面");
+    activityProvider
+        .getTopicsByTag(args.activityId, args.tagId)
+        .then((value) {
+      _originTopic = value;
+      for (int i = 0; i < _originTopic.length; i++) {
+        activityProvider
+            .getQuestionByTopic(args.activityId, _originTopic[i].uid)
+            .then((questionTmp) => fields.add(NewTopicField(
+                  onDelete: () {
+                    setState(() {
+                      fields.removeAt(fields.length - 1);
+                    });
+                  },
+                  id: _originTopic[i].uid,
+                  questionId: questionTmp.uid,
+                  tagId: args.tagId,
+                  activityId: args.activityId,
+                  topicName: _originTopic[i].topicName,
+                )));
+      }
+      setState(() {});
+    });
   }
 
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration(milliseconds: 350), () {
-      this._initTopicContent();
-   });
+    Future.delayed(const Duration(milliseconds: 350), () {
+      _initTopicContent();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('話題頁面'),
+        title: const Text('話題頁面'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
           child: Column(
             children: [
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('標籤話題'),
-                  SizedBox(width: 16.0),
-                  Container(
+                  const Text('標籤話題'),
+                  const SizedBox(width: 16.0),
+                  SizedBox(
                     width: 280,
                     child: ElevatedButton(
                       child: const Text(
                         "新增話題",
                       ),
                       onPressed: () async {
-                        print("新增話題");
+                        debugPrint("新增話題");
                         Topic topic = Topic(
                             activityId: args.activityId,
                             tagId: args.tagId,
                             topicName: "");
-                        Topic tmp = await topicProvider.addNewTopic(
+                        Topic tmp = await activityProvider.addNewTopic(
                           args.activityId,
                           topic,
                         );
-                        Question questiontmp = Question(
+                        Question questionTmp = Question(
                           activityId: args.activityId,
                           tagId: args.tagId,
                           topicId: tmp.uid,
                           questionName: "",
                         );
-                        Question question = await topicProvider.addNewQuestion(
-                            args.activityId, questiontmp);
-                        print("question測試");
+                        Question question = await activityProvider.addNewQuestion(
+                            args.activityId, questionTmp);
+                        debugPrint("question測試");
                         setState(() {
                           fields.add(NewTopicField(
                             onDelete: () {
@@ -112,10 +112,10 @@ class _HostActivityTopicPageState extends State<HostActivityTopicPage> {
                               });
                             },
                             id: tmp.uid,
-                            questionid: question.uid,
-                            activityid: args.activityId,
-                            tagid: args.tagId,
-                            topicname: "",
+                            questionId: question.uid,
+                            activityId: args.activityId,
+                            tagId: args.tagId,
+                            topicName: "",
                           ));
                         });
                       },
@@ -124,19 +124,19 @@ class _HostActivityTopicPageState extends State<HostActivityTopicPage> {
                 ],
               ),
               ...fields,
-              Container(
+              SizedBox(
                 width: 100,
                 child: ElevatedButton(
                   onPressed: () {
                     // 跳至送出頁面的邏輯
                     // 傳遞createEvent()方法的回傳值給送出頁面
-                    print("topic跳至主畫面");
+                    debugPrint("topic跳至主畫面");
                     Navigator.of(context).pushNamed(
                       MainPage.routeName,
-                      arguments: MainPageArguments(isHost: true),
+                      arguments: const MainPageArguments(isHost: true),
                     );
                   },
-                  child: Text('完成'),
+                  child: const Text('完成'),
                 ),
               ),
             ],
@@ -148,23 +148,25 @@ class _HostActivityTopicPageState extends State<HostActivityTopicPage> {
 }
 
 class NewTopicField extends StatefulWidget {
+  final VoidCallback? onDelete;
+  String questionId;
+  String id;
+  String activityId;
+  String tagId;
+  String topicName;
+
   NewTopicField({
     super.key,
     required this.onDelete,
     required this.id,
-    required this.questionid,
-    required this.activityid,
-    required this.tagid,
-    required this.topicname,
+    required this.questionId,
+    required this.activityId,
+    required this.tagId,
+    required this.topicName,
   });
-  final VoidCallback? onDelete;
-  String questionid;
-  String id;
-  String activityid;
-  String tagid;
-  String topicname;
+
   @override
-  _NewTopicFieldState createState() => _NewTopicFieldState();
+  State<NewTopicField> createState() => _NewTopicFieldState();
 }
 
 class _NewTopicFieldState extends State<NewTopicField> {
@@ -187,38 +189,38 @@ class _NewTopicFieldState extends State<NewTopicField> {
                       controller: _controller,
                       focusNode: _focusNode,
                     )
-                  : Text(widget.topicname),
+                  : Text(widget.topicName),
               onPressed: () async {
-                print("跳至問卷頁面");
-                print(widget.questionid);
+                debugPrint("跳至問卷頁面");
+                debugPrint(widget.questionId);
                 Navigator.of(context)
                     .pushNamed(HostActivityQuestionPage.routeName,
                         arguments: HostActivityQuestionPageArguments(
-                          activityId: widget.activityid,
-                          tagId: widget.tagid,
+                          activityId: widget.activityId,
+                          tagId: widget.tagId,
                           topicId: widget.id,
-                          questionId: widget.questionid,
+                          questionId: widget.questionId,
                         ));
               },
             ),
           ),
           IconButton(
-            icon: isEditing ? Icon(Icons.check) : Icon(Icons.edit),
+            icon: isEditing ? const Icon(Icons.check) : const Icon(Icons.edit),
             onPressed: () async {
               setState(() {
                 isEditing = !isEditing;
                 if (isEditing == false) {
-                  widget.topicname = _controller.text;
+                  widget.topicName = _controller.text;
                 } else {
                   _focusNode.requestFocus();
                 }
               });
               await activityProvider.editTopic(
-                  widget.activityid, widget.id, widget.topicname);
+                  widget.activityId, widget.id, widget.topicName);
             },
           ),
           IconButton(
-            icon: isEditing ? Icon(Icons.close) : Icon(Icons.delete_forever),
+            icon: isEditing ? const Icon(Icons.close) : const Icon(Icons.delete_forever),
             onPressed: isEditing
                 ? () {
                     setState(() {

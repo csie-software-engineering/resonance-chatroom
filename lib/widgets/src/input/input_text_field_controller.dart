@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:resonance_chatroom/models/models.dart';
+import '../../../models/models.dart';
 
 /// Controller for the [TextField] on [Input] widget
 /// To highlighting the matches for pattern.

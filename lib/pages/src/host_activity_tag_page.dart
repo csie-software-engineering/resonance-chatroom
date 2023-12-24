@@ -19,26 +19,25 @@ class HostActivityTagPage extends StatefulWidget {
 }
 
 class _HostActivityTagPageState extends State<HostActivityTagPage> {
-  late final List<Tag> _origintag;
+  late final List<Tag> _originTag;
   late final args = ModalRoute.of(context)!.settings.arguments
       as HostActivityTagPageArguments;
   late final ActivityProvider tagProvider = context.read<ActivityProvider>();
   List<Widget> fields = [];
   Future<void> _initTagContent() async {
     var getTags = await tagProvider.getAllTags(args.activityId);
-    if (getTags != null) {
-      _origintag = getTags;
-    }
-    for (int i = 0; i < _origintag.length; i++) {
+
+    _originTag = getTags;
+    for (int i = 0; i < _originTag.length; i++) {
       fields.add(NewTagField(
         onDelete: () {
           setState(() {
             fields.removeAt(fields.length - 1);
           });
         },
-        id: _origintag[i].uid,
-        activityid: args.activityId,
-        tagname: _origintag[i].tagName,
+        id: _originTag[i].uid,
+        activityId: args.activityId,
+        tagName: _originTag[i].tagName,
       ));
     }
     setState(() {});
@@ -47,40 +46,40 @@ class _HostActivityTagPageState extends State<HostActivityTagPage> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration(milliseconds: 350), () {
-      this._initTagContent();
-   });
+    Future.delayed(const Duration(milliseconds: 350), () {
+      _initTagContent();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('標籤頁面'),
+        title: const Text('標籤頁面'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
           child: Column(
             children: [
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('活動標籤'),
-                  SizedBox(width: 16.0),
-                  Container(
+                  const Text('活動標籤'),
+                  const SizedBox(width: 16.0),
+                  SizedBox(
                     width: 280,
                     child: ElevatedButton(
                       child: const Text(
-                        "新增標籤",
+                        '新增標籤',
                       ),
                       onPressed: () async {
                         Tag tag = await tagProvider.addNewTag(
                           args.activityId,
-                          "",
+                          '',
                         );
-                        print("活動id" + args.activityId);
+                        debugPrint('活動id${args.activityId}');
                         setState(() {
                           fields.add(NewTagField(
                             onDelete: () {
@@ -89,8 +88,8 @@ class _HostActivityTagPageState extends State<HostActivityTagPage> {
                               });
                             },
                             id: tag.uid,
-                            activityid: args.activityId,
-                            tagname: "",
+                            activityId: args.activityId,
+                            tagName: '',
                           ));
                         });
                       },
@@ -99,19 +98,19 @@ class _HostActivityTagPageState extends State<HostActivityTagPage> {
                 ],
               ),
               ...fields,
-              Container(
+              SizedBox(
                 width: 100,
                 child: ElevatedButton(
                   onPressed: () {
                     // 跳至送出頁面的邏輯
                     // 傳遞createEvent()方法的回傳值給送出頁面
-                    print("跳至主畫面");
+                    debugPrint('跳至主畫面');
                     Navigator.of(context).pushNamed(
                       MainPage.routeName,
-                      arguments: MainPageArguments(isHost: true),
+                      arguments: const MainPageArguments(isHost: true),
                     );
                   },
-                  child: Text('完成'),
+                  child: const Text('完成'),
                 ),
               ),
             ],
@@ -123,27 +122,28 @@ class _HostActivityTagPageState extends State<HostActivityTagPage> {
 }
 
 class NewTagField extends StatefulWidget {
+  final VoidCallback? onDelete;
+  final String id;
+  final String activityId;
+  String tagName;
+
   NewTagField({
     super.key,
     required this.onDelete,
     required this.id,
-    required this.activityid,
-    required this.tagname,
+    required this.activityId,
+    required this.tagName,
   });
-  final VoidCallback? onDelete;
-  String id;
-  String activityid;
-  String tagname;
+
   @override
-  _NewTagFieldState createState() => _NewTagFieldState();
+  State<NewTagField> createState() => _NewTagFieldState();
 }
 
 class _NewTagFieldState extends State<NewTagField> {
   bool isEditing = false;
   final TextEditingController _controller = TextEditingController();
   final FocusNode _focusNode = FocusNode();
-  late final ActivityProvider tagbuttonProvider =
-      context.read<ActivityProvider>();
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -157,43 +157,45 @@ class _NewTagFieldState extends State<NewTagField> {
                       controller: _controller,
                       focusNode: _focusNode,
                     )
-                  : Text(widget.tagname),
+                  : Text(widget.tagName),
               onPressed: () {
-                print("跳至topic頁面");
+                debugPrint('跳至topic頁面');
                 Navigator.of(context).pushNamed(HostActivityTopicPage.routeName,
                     arguments: HostActivityTopicPageArguments(
-                      activityId: widget.activityid,
+                      activityId: widget.activityId,
                       tagId: widget.id,
                     ));
               },
             ),
           ),
           IconButton(
-            icon: isEditing ? Icon(Icons.check) : Icon(Icons.edit),
+            icon: isEditing ? const Icon(Icons.check) : const Icon(Icons.edit),
             onPressed: () async {
               setState(() {
                 isEditing = !isEditing;
                 if (isEditing == false) {
-                  widget.tagname = _controller.text;
+                  widget.tagName = _controller.text;
                 } else {
                   _focusNode.requestFocus();
                 }
               });
-              print("更改標籤");
-              await tagbuttonProvider.editTag(
-                widget.activityid,
-                widget.id,
-                widget.tagname,
-              );
+              debugPrint('更改標籤');
+              await context.read<ActivityProvider>().editTag(
+                    widget.activityId,
+                    widget.id,
+                    widget.tagName,
+                  );
             },
           ),
           IconButton(
-            icon: isEditing ? Icon(Icons.close) : Icon(Icons.delete_forever),
+            icon: isEditing
+                ? const Icon(Icons.close)
+                : const Icon(Icons.delete_forever),
             onPressed: isEditing
                 ? () {
                     setState(() {
                       isEditing = false;
-                      _controller.text = widget.tagname;
+                      _controller.text = widget.tagName;
                     });
                   }
                 : () {

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../pages/routes.dart';
+
 class WelcomePage extends StatelessWidget {
   const WelcomePage({super.key});
 
@@ -7,30 +9,51 @@ class WelcomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // 大標題
-          Text(
-            '歡迎使用我的 App',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
+        backgroundColor: Theme.of(context).colorScheme.background,
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                '共鳴聚會',
+                style: TextStyle(
+                  fontSize: 42,
+                  color: Theme.of(context).colorScheme.primary,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 5,
+                ),
+              ),
+              SizedBox(height: MediaQuery.of(context).size.height * 0.03),
+              Text(
+                '一個讓你認識同好的地方',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Theme.of(context).colorScheme.secondary,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 5,
+                ),
+              ),
+              SizedBox(height: MediaQuery.of(context).size.height * 0.03),
+              Image.asset(
+                'lib/assets/diversity.png',
+                width: MediaQuery.of(context).size.width * 0.6,
+                height: MediaQuery.of(context).size.height * 0.6,
+              ),
+              SizedBox(height: MediaQuery.of(context).size.height * 0.03),
+              FloatingActionButton.extended(
+                heroTag: 'welcomeFAB',
+                onPressed: () =>
+                    Navigator.of(context).pushNamed(LoginPage.routeName),
+                icon: const Icon(Icons.arrow_forward),
+                label: const Text(
+                  '繼續',
+                  style: TextStyle(
+                    fontSize: 24,
+                  ),
+                ),
+              ),
+            ],
           ),
-
-          // 圖片
-          Image.asset('assets/images/logo.png'),
-
-          // 繼續使用的按鈕
-          ElevatedButton(
-            onPressed: () {
-              // 跳轉到下一個頁面
-              Navigator.pushNamed(context, '/home');
-            },
-            child: Text('繼續使用'),
-          ),
-        ],
-      ),
-    );
+        ),
+      );
 }

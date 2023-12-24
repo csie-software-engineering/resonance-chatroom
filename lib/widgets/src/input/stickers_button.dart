@@ -1,8 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:resonance_chatroom/constants/constants.dart';
-
-// import '../state/inherited_chat_theme.dart';
-// import '../state/inherited_l10n.dart';
 
 /// A class that represents attachment button widget.
 class StickerButton extends StatelessWidget {

@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 
-// import '../state/inherited_chat_theme.dart';
-// import '../state/inherited_l10n.dart';
-
 /// A class that represents send button widget.
 class SendButton extends StatelessWidget {
   /// Creates send button widget.

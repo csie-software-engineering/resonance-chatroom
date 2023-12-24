@@ -40,24 +40,26 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-          final user = snapshot.data!;
+
+          final user = snapshot.requireData;
           return Column(
             children: [
               SizedBox(height: MediaQuery.of(context).size.height * 0.01),
               CircleAvatar(
-                foregroundImage:
-                    user.photoUrl != null ? NetworkImage(user.photoUrl!) : null,
+                  foregroundImage: user.photoUrl != null
+                      ? NetworkImage(user.photoUrl!)
+                      : null,
                 backgroundImage: const AssetImage('lib/assets/user.png'),
-                radius: MediaQuery.of(context).size.height * 0.06,
+                radius: MediaQuery.of(context).size.height * 0.05,
               ),
               SizedBox(height: MediaQuery.of(context).size.height * 0.02),
               SizedBox(
-                height: MediaQuery.of(context).size.height * 0.06,
+                height: MediaQuery.of(context).size.height * 0.05,
                 child: _NickNameWidget(user: user),
               ),
               SizedBox(height: MediaQuery.of(context).size.height * 0.01),
               SizedBox(
-                height: MediaQuery.of(context).size.height * 0.06,
+                height: MediaQuery.of(context).size.height * 0.05,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -81,7 +83,7 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
               ),
               SizedBox(height: MediaQuery.of(context).size.height * 0.01),
               SizedBox(
-                height: MediaQuery.of(context).size.height * 0.06,
+                height: MediaQuery.of(context).size.height * 0.05,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -119,7 +121,7 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
                       SizedBox(
                           height: MediaQuery.of(context).size.height * 0.01),
                       Expanded(
-                        child: FutureBuilder<List<Activity>>(
+                        child: FutureBuilder<List<UserActivity>>(
                           future: _getRelateActivities(
                             args.isHost,
                             context.read<ActivityProvider>(),
@@ -131,38 +133,60 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
                               return const Center(
                                   child: CircularProgressIndicator());
                             }
-                            final activities = snapshot.data!;
-                            return ListView.builder(
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: activities.length,
+                            final userActivities = snapshot.requireData;
+                            return ListView.separated(
+                              itemCount: userActivities.length,
                               itemBuilder: (context, index) {
-                                final activity = activities[index];
-                                return ListTile(
-                                  leading: Icon(
-                                    Icons.event,
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                  ),
-                                  title: Text(activity.activityName),
-                                  subtitle: FutureBuilder<List<Tag>>(
-                                    future: context
-                                        .read<ActivityProvider>()
-                                        .getAllTags(activity.uid),
-                                    builder: (context, snapshot) {
-                                      if (snapshot.connectionState ==
-                                          ConnectionState.waiting) {
-                                        return const Center(
-                                            child: CircularProgressIndicator());
-                                      }
-                                      final tags = snapshot.data!;
-                                      return Text(
-                                        '標籤: ${tags.map((e) => e.tagName).join(', ')}',
-                                        overflow: TextOverflow.ellipsis,
-                                      );
-                                    },
-                                  ),
+                                final userActivity = userActivities[index];
+                                return FutureBuilder<Activity>(
+                                  future: context
+                                      .read<ActivityProvider>()
+                                      .getActivity(userActivity.uid),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState ==
+                                        ConnectionState.waiting) {
+                                      return const Center(
+                                          child: CircularProgressIndicator());
+                                    }
+
+                                    final activity = snapshot.requireData;
+                                    return ListTile(
+                                      leading: Icon(
+                                        Icons.event,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary,
+                                      ),
+                                      title: Text(activity.activityName),
+                                      subtitle: FutureBuilder<List<Tag>>(
+                                        future: context
+                                            .read<ActivityProvider>()
+                                            .getAllTags(userActivity.uid),
+                                        builder: (context, snapshot) {
+                                          if (snapshot.connectionState ==
+                                              ConnectionState.waiting) {
+                                            return const Center(
+                                                child:
+                                                    CircularProgressIndicator());
+                                          }
+
+                                          final tags = snapshot.requireData;
+                                          return Text(
+                                            '標籤: ${userActivity.tagIds.map((utId) => tags.firstWhere((t) => t.uid == utId).tagName).join(', ')}',
+                                            overflow: TextOverflow.ellipsis,
+                                          );
+                                        },
+                                      ),
+                                    );
+                                  },
                                 );
                               },
+                              separatorBuilder: (context, index) => Divider(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                      .withOpacity(0.3),
+                              ),
                             );
                           },
                         ),
@@ -187,15 +211,16 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
                     context: context,
                     builder: (_) => AlertDialog(
                       title: const Text('確認身份切換'),
-                      content: Text('確定要切換成${args.isHost ? '參加者' : '主辦方'}角色嗎？'),
+                        content:
+                            Text('確定要切換成${args.isHost ? '參加者' : '主辦方'}角色嗎？'),
                       actions: confirmButtons(
                         context,
-                        () {
+                        action: () {
                           context
                               .read<SharedPreferenceProvider>()
                               .setIsHost(!args.isHost)
-                              .then((_) =>
-                                  Navigator.of(context).pushNamedAndRemoveUntil(
+                                .then((_) => Navigator.of(context)
+                                        .pushNamedAndRemoveUntil(
                                     MainPage.routeName,
                                     ModalRoute.withName(LoginPage.routeName),
                                     arguments: MainPageArguments(
@@ -230,7 +255,7 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
                       content: const Text('確定要登出嗎？'),
                       actions: confirmButtons(
                         context,
-                        () {
+                        action: () {
                           Navigator.of(context).popUntil(
                               ModalRoute.withName(LoginPage.routeName));
                           context.read<AuthProvider>().logout();
@@ -256,7 +281,7 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
     );
   }
 
-  Future<List<Activity>> _getRelateActivities(
+  Future<List<UserActivity>> _getRelateActivities(
     bool isHost,
     ActivityProvider activityProvider,
     UserProvider userProvider,
@@ -266,12 +291,12 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
     final userActivities =
         await userProvider.getUserActivities(isManager: isHost);
 
-    final activities = <Activity>[];
+    final activities = <UserActivity>[];
 
-    for (final activity in allActivities) {
-      for (final userActivity in userActivities) {
+    for (final userActivity in userActivities) {
+      for (final activity in allActivities) {
         if (userActivity.uid == activity.uid) {
-          activities.add(activity);
+          activities.add(userActivity);
           break;
         }
       }

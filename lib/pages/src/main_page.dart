@@ -35,10 +35,8 @@ class _MainPageState extends State<MainPage> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
-        if (snapshot.hasError) {
-          return Text('Error: ${snapshot.error}');
-        }
-        final user = snapshot.data!;
+
+        final user = snapshot.requireData;
         return Scaffold(
           backgroundColor: Theme.of(context).colorScheme.background,
           appBar: myAppBar(
@@ -64,13 +62,13 @@ class _MainPageState extends State<MainPage> {
           body: ActivityCarouselWidget(isHost: args.isHost),
           floatingActionButton: FloatingActionButton.extended(
             onPressed: () {
-              if(args.isHost) {
+              if (args.isHost) {
                 Navigator.of(context).pushNamed(HostActivitySetPage.routeName);
               } else {
                 _joinActivity(context, user);
               }
             },
-            tooltip: 'Add Activity',
+            tooltip: args.isHost ? '新增活動' : '加入活動',
             label: const Icon(Icons.event),
           ),
         );
@@ -109,7 +107,7 @@ class _MainPageState extends State<MainPage> {
                       child: ListView.builder(
                         itemCount: snapshot.data?.length ?? 0,
                         itemBuilder: (context, index) {
-                          final activity = snapshot.data![index];
+                          final activity = snapshot.requireData[index];
 
                           return ListTile(
                             leading: const Icon(Icons.event),
@@ -123,16 +121,19 @@ class _MainPageState extends State<MainPage> {
                                   title: const Text('確認加入活動'),
                                   content: Text(
                                       '是否要加入「${activity.activityName}」活動？'),
-                                  actions: confirmButtons(context, () {
-                                    context
-                                        .read<UserProvider>()
-                                        .addUserActivity(UserActivity(
-                                          uid: activity.uid,
-                                          isManager: false,
-                                        ))
-                                        .then((_) => setState(() {}));
-                                    Navigator.of(context).pop();
-                                  }),
+                                  actions: confirmButtons(
+                                    context,
+                                    action: () {
+                                      context
+                                          .read<UserProvider>()
+                                          .addUserActivity(UserActivity(
+                                            uid: activity.uid,
+                                            isManager: false,
+                                          ))
+                                          .then((_) => setState(() {}));
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
                                 ),
                               );
                             },
@@ -181,9 +182,7 @@ class _ActivityCarouselWidgetState extends State<ActivityCarouselWidget> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-          if (snapshot.hasError) {
-            return Text('Error: ${snapshot.error}');
-          }
+
           final userActivities = snapshot.requireData;
           return userActivities.isNotEmpty
               ? CarouselSlider.builder(
@@ -205,14 +204,17 @@ class _ActivityCarouselWidgetState extends State<ActivityCarouselWidget> {
                               builder: (context) => AlertDialog(
                                 title: const Text('刪除活動'),
                                 content: const Text('是否要刪除該活動？'),
-                                actions: confirmButtons(context, () {
-                                  context
-                                      .read<UserProvider>()
-                                      .removeUserActivity(activityId,
-                                          isManager: false)
-                                      .then((value) => setState(() {}));
-                                  Navigator.of(context).pop();
-                                }),
+                                actions: confirmButtons(
+                                  context,
+                                  action: () {
+                                    context
+                                        .read<UserProvider>()
+                                        .removeUserActivity(activityId,
+                                            isManager: false)
+                                        .then((value) => setState(() {}));
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
                               ),
                             ),
                       child: RoomCardWidget(
@@ -257,7 +259,7 @@ class RoomCardWidget extends StatelessWidget {
               return const Center(child: CircularProgressIndicator());
             }
 
-            final activity = snapshot.data!;
+            final activity = snapshot.requireData;
             return InkWell(
               onTap: () {
                 if (activity.isEnabled) {

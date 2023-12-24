@@ -443,21 +443,20 @@ class ChatProvider {
     final roomUser = room.users[roomUserIndex];
     assert(roomUser.shareSocialMedia, '對方未同意分享社群媒體');
 
-    return await UserProvider().getUserSocialMedium(peerId);
+    return await UserProvider().getUserSocialMedium(userId: peerId);
   }
 
   /// 取得使用者在某活動的聊天室列表
   Future<List<Room>> getUserRooms(String activityId) async {
     final userId = AuthProvider().currentUserId;
-    final roomQuery = db
+    final roomsQuery = db
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityId)
-        .collection(FirestoreConstants.roomCollectionPath.value)
-        .where(RoomConstants.users.value, arrayContains: userId);
+        .collection(FirestoreConstants.roomCollectionPath.value);
 
-    final roomData = await roomQuery.get();
-    final rooms = roomData.docs.map((e) => Room.fromDocument(e)).toList();
-    return rooms;
+    final roomsData = await roomsQuery.get();
+    final rooms = roomsData.docs.map((e) => Room.fromDocument(e)).toList();
+    return rooms.where((e) => e.users.any((e) => e.id == userId)).toList();
   }
 
   /// 檢舉

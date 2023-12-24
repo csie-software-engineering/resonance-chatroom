@@ -154,22 +154,25 @@ class _LoginPageState extends State<LoginPage> {
                     title: const Text('注意'),
                     content:
                         const Text('匿名使用無法使用部分功能\n且無法轉移帳號資料\n也無法串辦活動\n確定要繼續嗎？'),
-                    actions: confirmButtons(context, () {
-                      context
-                          .read<AuthProvider>()
-                          .signInWithAnonymous()
-                          .then((_) {
-                        pref.then((instance) {
-                          Navigator.of(context).pushNamed(
-                            MainPage.routeName,
-                            arguments: const MainPageArguments(
-                              isHost: false,
-                            ),
-                          );
+                    actions: confirmButtons(
+                      context,
+                      action: () {
+                        context
+                            .read<AuthProvider>()
+                            .signInWithAnonymous()
+                            .then((_) {
+                          pref.then((instance) {
+                            Navigator.of(context).pushNamed(
+                              MainPage.routeName,
+                              arguments: const MainPageArguments(
+                                isHost: false,
+                              ),
+                            );
+                          });
                         });
-                      });
-                      Navigator.of(context).pop();
-                    }),
+                        Navigator.of(context).pop();
+                      },
+                    ),
                   ),
                 );
               },
@@ -193,7 +196,7 @@ class _LoginPageState extends State<LoginPage> {
                 );
               }
 
-              final instance = snapshot.data!;
+              final instance = snapshot.requireData;
               return _SetIsHostWidget(pref: instance);
             },
           ),
@@ -245,10 +248,8 @@ class _SetIsHostWidgetState extends State<_SetIsHostWidget> {
               inactiveThumbColor: Colors.transparent,
               inactiveTrackColor: Colors.lightGreen,
               trackOutlineWidth: MaterialStateProperty.all(0.5),
-              trackOutlineColor: MaterialStateProperty.all(Theme.of(context)
-                  .colorScheme
-                  .onBackground
-                  .withOpacity(0.5)),
+              trackOutlineColor: MaterialStateProperty.all(
+                  Theme.of(context).colorScheme.onBackground.withOpacity(0.5)),
               thumbIcon: MaterialStateProperty.all(
                 Icon(
                   Icons.person,

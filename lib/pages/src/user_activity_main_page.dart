@@ -156,8 +156,17 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
           arguments: ChatPageArguments(
               activityId: _currentActivity.uid,
               peerId: peerId,
-              isPrevious: false));
+              isHistorical: false));
     });
+  }
+
+  void _goToHistoricalChatRoomPage() {
+    Navigator.of(context).pushNamed(
+      HistoricalChatRoomPage.routeName,
+      arguments: HistoricalChatRoomPageArguments(
+        activityId: _currentActivity.uid,
+      ),
+    );
   }
 
   Future<void> changeTagAndName(
@@ -172,9 +181,6 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
       }
     }
     _enableMatch = false;
-    setState(() {
-      Navigator.of(context).pop();
-    });
     var newName = textEditingController.text;
     if (newName != _currentUser.displayName && newName.isNotEmpty) {
       _currentUser.displayName = textEditingController.text;
@@ -467,9 +473,10 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
               ),
               floatingActionButton: AnimatedButtons(
                 enableTagWidget: _enableTagWidget && !args.isPreview,
-                enablePreviousChatRoom: !args.isPreview,
+                enableHistoricalChatRoom: !args.isPreview,
                 enableMatch: _enableMatch && !args.isPreview,
                 matching: matching,
+                goToHistoricalChatRoomPage: _goToHistoricalChatRoomPage,
                 startMatching: isStartMatching,
                 buttonPositionTop: buttonPositionTop,
                 buttonPositionLeft: buttonPositionLeft,

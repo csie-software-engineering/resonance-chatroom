@@ -20,9 +20,12 @@ import '../../widgets/src/input/widgets.dart';
 class ChatPageArguments {
   final String peerId;
   final String activityId;
-  final bool isPrevious;
+  final bool isHistorical;
 
-  ChatPageArguments({required this.isPrevious, required this.activityId, required this.peerId});
+  ChatPageArguments(
+      {required this.isHistorical,
+      required this.activityId,
+      required this.peerId});
 }
 
 class ChatPage extends StatefulWidget {
@@ -130,9 +133,9 @@ class _ChatPageState extends State<ChatPage> {
 
   void _newQuestion() async {
     // todo 抓錯誤
-    try{
-      _currentQuestion =
-      await activityProvider.getQuestionByTopic(args.activityId, _previousTopicId);
+    try {
+      _currentQuestion = await activityProvider.getQuestionByTopic(
+          args.activityId, _previousTopicId);
       setState(() {
         isOn = true;
       });
@@ -172,8 +175,12 @@ class _ChatPageState extends State<ChatPage> {
   Future<void> _init() async {
     if (!initial) {
       // await chatProvider.disagreeShareSocialMedia(args.activityId, args.peerId);
-      _isEnableSocialMedial = await chatProvider.getIsAgreeShareSocialMedia(
-          args.activityId, args.peerId);
+      try {
+        _isEnableSocialMedial = await chatProvider.getIsAgreeShareSocialMedia(
+            args.activityId, args.peerId);
+      } catch (e) {
+        debugPrint("_initgetIsAgreeShareSocialMediaError: $e");
+      }
       peerUser = await userProvider.getUser(
           userId: args.peerId); // todo 我可以直接載入對方的 social media?
       room = await chatProvider.getRoom(args.activityId, args.peerId);
@@ -789,13 +796,11 @@ class _ChatPageState extends State<ChatPage> {
                               showDialog(
                                   context: context,
                                   builder: (BuildContext context) {
-                                    return QuitWarningDialog(
-                                        action: () async {
+                                    return QuitWarningDialog(action: () async {
                                       // todo 抓錯誤
-                                      try{
+                                      try {
                                         await chatProvider.leaveRoom(
-                                            args.activityId,
-                                            args.peerId);
+                                            args.activityId, args.peerId);
                                       } catch (e) {
                                         debugPrint("leaveRoomError:$e");
                                       } finally {
@@ -837,185 +842,213 @@ class _ChatPageState extends State<ChatPage> {
                                   )
                                 ],
                               ),
-                              child: args.isPrevious ? const SizedBox()
-                              : IconButton(
-                                iconSize: 25,
-                                icon: Icon(isOn
-                                    ? Icons.lightbulb
-                                    : Icons.lightbulb_outline),
-                                color: isOn
-                                    ? Colors.amber
-                                    : Theme.of(context).colorScheme.onSurface,
-                                onPressed: () {
-                                  if (isOn && _currentQuestion != null) {
-                                    setState(() {
-                                      isOn = false;
-                                    });
-                                    showDialog(
-                                        context: context,
-                                        builder: (BuildContext context) {
-                                          _questionAnswers = List.generate(
-                                              _currentQuestion!.choices.length,
-                                              (index) => false);
-                                          return AlertDialog(
-                                            title: Text(
-                                                _currentQuestion!.questionName),
-                                            content: Container(
-                                              width: 230,
-                                              height: 200,
-                                              child: QuestionDialog(
-                                                questionAnswers: _questionAnswers!,
-                                                currentQuestion: _currentQuestion!,
-                                              ),
-                                            ),
-                                            actions: [
-                                              TextButton(
-                                                onPressed: () async {
-                                                  Navigator.of(context).pop();
-                                                  // todo 不知道 choice 要傳什麼
-                                                  String? choice = "";
+                              child: args.isHistorical
+                                  ? const SizedBox()
+                                  : IconButton(
+                                      iconSize: 25,
+                                      icon: Icon(isOn
+                                          ? Icons.lightbulb
+                                          : Icons.lightbulb_outline),
+                                      color: isOn
+                                          ? Colors.amber
+                                          : Theme.of(context)
+                                              .colorScheme
+                                              .onSurface,
+                                      onPressed: () {
+                                        if (isOn && _currentQuestion != null) {
+                                          setState(() {
+                                            isOn = false;
+                                          });
+                                          showDialog(
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              _questionAnswers = List.generate(
+                                                  _currentQuestion!
+                                                      .choices.length,
+                                                  (index) => false);
+                                              return AlertDialog(
+                                                title: Text(_currentQuestion!
+                                                    .questionName),
+                                                content: Container(
+                                                  width: 230,
+                                                  height: 200,
+                                                  child: QuestionDialog(
+                                                    questionAnswers:
+                                                        _questionAnswers!,
+                                                    currentQuestion:
+                                                        _currentQuestion!,
+                                                  ),
+                                                ),
+                                                actions: [
+                                                  TextButton(
+                                                    onPressed: () async {
+                                                      Navigator.of(context)
+                                                          .pop();
+                                                      // todo 不知道 choice 要傳什麼
+                                                      String? choice = "";
 
-                                                  for(int i = 0; i < _questionAnswers!.length; i++){
-                                                    if(_questionAnswers![i]) choice = _currentQuestion!.choices[i];
-                                                  }
+                                                      for (int i = 0;
+                                                          i <
+                                                              _questionAnswers!
+                                                                  .length;
+                                                          i++) {
+                                                        if (_questionAnswers![
+                                                            i])
+                                                          choice =
+                                                              _currentQuestion!
+                                                                  .choices[i];
+                                                      }
 
-                                                  // todo 抓錯誤
-                                                  try {
-                                                    debugPrint("choice: ${choice}");
-                                                    await questionProvider.userAnswer(args.activityId, _currentQuestion!.uid, choice!);
-                                                  }
-                                                  catch (e) {
-                                                    debugPrint("answerQuesitonError:$e");
-                                                  }
-                                                },
-                                                child: Text('確定'),
-                                              ),
-                                              TextButton(
-                                                onPressed: () {
-                                                  Navigator.of(context).pop();
-                                                },
-                                                child: Text('算了'),
-                                              ),
-                                            ],
+                                                      // todo 抓錯誤
+                                                      try {
+                                                        debugPrint(
+                                                            "choice: ${choice}");
+                                                        await questionProvider
+                                                            .userAnswer(
+                                                                args.activityId,
+                                                                _currentQuestion!
+                                                                    .uid,
+                                                                choice!);
+                                                      } catch (e) {
+                                                        debugPrint(
+                                                            "answerQuesitonError:$e");
+                                                      }
+                                                    },
+                                                    child: Text('確定'),
+                                                  ),
+                                                  TextButton(
+                                                    onPressed: () {
+                                                      Navigator.of(context)
+                                                          .pop();
+                                                    },
+                                                    child: Text('算了'),
+                                                  ),
+                                                ],
+                                              );
+                                            },
                                           );
-                                        });
-                                  }
-                                },
-                              ),
+                                        }
+                                      },
+                                    ),
                             ),
                           ),
                         )
                       ],
                     ),
                   ),
-                  _allTopics.isEmpty || args.isPrevious ? const SizedBox()
+                  _allTopics.isEmpty || args.isHistorical
+                      ? const SizedBox()
                       : StreamBuilder<DocumentSnapshot>(
-                      stream: chatProvider.getRoomStream(
-                          args.activityId, args.peerId),
-                      builder: (BuildContext context,
-                          AsyncSnapshot<DocumentSnapshot> snapshot) {
-                        Map<String, dynamic>? room =
-                            snapshot.data?.data() as Map<String, dynamic>?;
-                        if (room != null &&
-                            room.isNotEmpty &&
-                            room["topicId"] != _currentTopicId) {
-                          _enableShowTopic = true;
-                          _previousTopicId = _currentTopicId;
-                          _currentTopicId = room["topicId"];
-                          _height = 50;
-                          _newQuestion();
-                        } else {
-                          if (_enableShowTopic) {
-                            _height = 50;
-                          } else {
-                            _height = 20;
-                          }
-                        }
-                        return GestureDetector(
-                          onTap: () {
-                            if (!_enableShowTopic) {
-                              setState(() {
-                                _enableShowTopic = true;
-                              });
+                          stream: chatProvider.getRoomStream(
+                              args.activityId, args.peerId),
+                          builder: (BuildContext context,
+                              AsyncSnapshot<DocumentSnapshot> snapshot) {
+                            Map<String, dynamic>? room =
+                                snapshot.data?.data() as Map<String, dynamic>?;
+                            if (room != null &&
+                                room.isNotEmpty &&
+                                room["topicId"] != _currentTopicId) {
+                              _enableShowTopic = true;
+                              _previousTopicId = _currentTopicId;
+                              _currentTopicId = room["topicId"];
+                              _height = 50;
+                              _newQuestion();
+                            } else {
+                              if (_enableShowTopic) {
+                                _height = 50;
+                              } else {
+                                _height = 20;
+                              }
                             }
-                          },
-                          child: AnimatedContainer(
-                            curve: Curves.easeIn,
-                            height: _height,
-                            duration: const Duration(milliseconds: 500),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onInverseSurface,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
-                                  spreadRadius: 2,
-                                  blurRadius: 2,
-                                  offset: const Offset(0, 5), // 阴影位置，可以调整阴影的方向
-                                ),
-                              ],
-                            ),
-                            child: AnimatedOpacity(
-                              opacity: 1,
-                              duration: const Duration(milliseconds: 1000),
-                              child: Stack(
-                                children: [
-                                  Center(
-                                    child: AnimatedSwitcher(
-                                      duration: Duration(milliseconds: 500),
-                                      child: Text(
-                                        key: UniqueKey(),
-                                        _enableShowTopic
-                                            ? _allTopics[_currentTopicId]!
-                                            : "",
-                                        style: TextStyle(
-                                          fontSize: 20,
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .secondary,
-                                          fontWeight: FontWeight.w300,
-                                        ),
-                                      ),
+                            return GestureDetector(
+                              onTap: () {
+                                if (!_enableShowTopic) {
+                                  setState(() {
+                                    _enableShowTopic = true;
+                                  });
+                                }
+                              },
+                              child: AnimatedContainer(
+                                curve: Curves.easeIn,
+                                height: _height,
+                                duration: const Duration(milliseconds: 500),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onInverseSurface,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.1),
+                                      spreadRadius: 2,
+                                      blurRadius: 2,
+                                      offset:
+                                          const Offset(0, 5), // 阴影位置，可以调整阴影的方向
                                     ),
-                                  ),
-                                  Align(
-                                    alignment: _enableShowTopic
-                                        ? Alignment.centerRight
-                                        : Alignment.center,
-                                    child: _enableShowTopic
-                                        ? IconButton(
-                                            onPressed: () {
-                                              setState(() {
-                                                _enableShowTopic = false;
-                                              });
-                                            },
-                                            icon: Icon(
-                                              Icons.arrow_drop_up_outlined,
-                                              size: 30,
+                                  ],
+                                ),
+                                child: AnimatedOpacity(
+                                  opacity: 1,
+                                  duration: const Duration(milliseconds: 1000),
+                                  child: Stack(
+                                    children: [
+                                      Center(
+                                        child: AnimatedSwitcher(
+                                          duration: Duration(milliseconds: 500),
+                                          child: Text(
+                                            key: UniqueKey(),
+                                            _enableShowTopic
+                                                ? _allTopics[_currentTopicId]!
+                                                : "",
+                                            style: TextStyle(
+                                              fontSize: 20,
                                               color: Theme.of(context)
                                                   .colorScheme
                                                   .secondary,
-                                            ))
-                                        : Icon(
-                                            Icons.arrow_drop_down_outlined,
-                                            size: 20,
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .secondary,
+                                              fontWeight: FontWeight.w300,
+                                            ),
                                           ),
+                                        ),
+                                      ),
+                                      Align(
+                                        alignment: _enableShowTopic
+                                            ? Alignment.centerRight
+                                            : Alignment.center,
+                                        child: _enableShowTopic
+                                            ? IconButton(
+                                                onPressed: () {
+                                                  setState(() {
+                                                    _enableShowTopic = false;
+                                                  });
+                                                },
+                                                icon: Icon(
+                                                  Icons.arrow_drop_up_outlined,
+                                                  size: 30,
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .secondary,
+                                                ))
+                                            : Icon(
+                                                Icons.arrow_drop_down_outlined,
+                                                size: 20,
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .secondary,
+                                              ),
+                                      ),
+                                    ],
                                   ),
-                                ],
+                                ),
                               ),
-                            ),
-                          ),
-                        );
-                      }),
+                            );
+                          }),
                   Expanded(
                     child: Stack(
                       children: [
                         Container(
-                          color: Theme.of(context).colorScheme.background.withOpacity(0.5),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .background
+                              .withOpacity(0.5),
                           child: Column(
                             children: [
                               Flexible(
@@ -1090,11 +1123,13 @@ class _ChatPageState extends State<ChatPage> {
                                   ),
                                 ),
                               ),
-                              !args.isPrevious ? Input(
-                                onSendPressed: onSendMessage,
-                                nextTopic: nextTopic,
-                                enableSocialMedia: enableSocialMedia,
-                              ) : const SizedBox(),
+                              !args.isHistorical
+                                  ? Input(
+                                      onSendPressed: onSendMessage,
+                                      nextTopic: nextTopic,
+                                      enableSocialMedia: enableSocialMedia,
+                                    )
+                                  : const SizedBox(),
                             ],
                           ),
                         ),

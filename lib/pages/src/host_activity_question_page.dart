@@ -22,15 +22,17 @@ class HostActivityQuestionPage extends StatefulWidget {
       _HostActivityQuestionPageState();
 }
 
-
-
 class _HostActivityQuestionPageState extends State<HostActivityQuestionPage> {
-  List<String> choice = [];
+  List<String> choice = ["", "", "", "", ""];
   List<Widget> fields = [];
-    late final args = ModalRoute.of(context)!.settings.arguments
+  late final args = ModalRoute.of(context)!.settings.arguments
       as HostActivityQuestionPageArguments;
   TextEditingController _questionController = TextEditingController();
   TextEditingController _choice1Controller = TextEditingController();
+  TextEditingController _choice2Controller = TextEditingController();
+  TextEditingController _choice3Controller = TextEditingController();
+  TextEditingController _choice4Controller = TextEditingController();
+  TextEditingController _choice5Controller = TextEditingController();
   late final ActivityProvider setActivityProvider =
       context.read<ActivityProvider>();
   @override
@@ -62,19 +64,81 @@ class _HostActivityQuestionPageState extends State<HostActivityQuestionPage> {
                 ],
               ),
               Row(
-                mainAxisAlignment:
-                    MainAxisAlignment.spaceEvenly, // 調整子元件的水平對齊方式
-                crossAxisAlignment: CrossAxisAlignment.center, // 調整子元件的垂直對齊方式
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   SizedBox(
                     height: height * 0.05,
                   ),
                   Expanded(
-                    // 使用Expanded Widget來包裹TextFormField
-                    flex: 2, // 指定flex因數為2
+                    flex: 2,
                     child: TextFormField(
                       controller: _choice1Controller,
                       decoration: const InputDecoration(labelText: "選項一"),
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    height: height * 0.05,
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: TextFormField(
+                      controller: _choice2Controller,
+                      decoration: const InputDecoration(labelText: "選項二"),
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    height: height * 0.05,
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: TextFormField(
+                      controller: _choice3Controller,
+                      decoration: const InputDecoration(labelText: "選項三"),
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    height: height * 0.05,
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: TextFormField(
+                      controller: _choice4Controller,
+                      decoration: const InputDecoration(labelText: "選項四"),
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    height: height * 0.05,
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: TextFormField(
+                      controller: _choice5Controller,
+                      decoration: const InputDecoration(labelText: "選項五"),
                     ),
                   ),
                 ],
@@ -101,7 +165,7 @@ class _HostActivityQuestionPageState extends State<HostActivityQuestionPage> {
               ),
               ...fields,*/
               Container(
-                width: 100, // 使用Container來設定按鈕的寬度
+                width: 100,
                 child: ElevatedButton(
                   onPressed: () async {
                     print("問卷修改");
@@ -110,21 +174,19 @@ class _HostActivityQuestionPageState extends State<HostActivityQuestionPage> {
                     Question question = await setActivityProvider.getQuestion(
                       args.activityId,
                       args.questionId,
-                //        "20231221-1345-8f43-9113-b1dd764c427f",
-                  //      "20231221-1515-8441-b984-c81834926ea7"
-                  );
-                  print(question.choices);
+                    );
+                    print(question.choices);
                     question.questionName = _questionController.text;
                     print("===========");
                     print(choice);
-                    choice.add(_choice1Controller.text);
+                    choice[0] = _choice1Controller.text;
+                    choice[1] = _choice2Controller.text;
+                    choice[2] = _choice3Controller.text;
+                    choice[3] = _choice4Controller.text;
+                    choice[4] = _choice5Controller.text;
                     question.choices = choice;
                     await setActivityProvider.editQuestion(
-                      args.activityId,
-                      args.questionId,
-                       // "20231221-1345-8f43-9113-b1dd764c427f",
-                       // "20231221-1515-8441-b984-c81834926ea7",
-                        question);
+                        args.activityId, args.questionId, question);
                   },
                   child: Text('送出'),
                 ),
@@ -136,10 +198,7 @@ class _HostActivityQuestionPageState extends State<HostActivityQuestionPage> {
     );
   }
 }
-
-List<String> test = [];
-
-class NewChoiceField extends StatelessWidget {
+/*class NewChoiceField extends StatelessWidget {
   NewChoiceField({
     super.key,
     required this.onDelete,
@@ -170,3 +229,4 @@ class NewChoiceField extends StatelessWidget {
     );
   }
 }
+*/

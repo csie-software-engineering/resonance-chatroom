@@ -19,7 +19,8 @@ class UserActivityMainPageArguments {
   final String activityId;
   final bool isPreview;
 
-  UserActivityMainPageArguments({required this.isPreview, required this.activityId});
+  UserActivityMainPageArguments(
+      {required this.isPreview, required this.activityId});
 }
 
 class UserActivityMainPage extends StatefulWidget {
@@ -103,7 +104,7 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
         _enableMatch = false;
         isStartMatching = false;
       });
-      try{
+      try {
         await chatProvider.cancelWaiting(args.activityId);
       } catch (e) {
         debugPrint("cancelWaitingError: $e");
@@ -153,7 +154,9 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
       _height = 0;
       Navigator.of(context).pushNamed(ChatPage.routeName,
           arguments: ChatPageArguments(
-              activityId: _currentActivity.uid, peerId: peerId, isPrevious: false));
+              activityId: _currentActivity.uid,
+              peerId: peerId,
+              isPrevious: false));
     });
   }
 
@@ -269,7 +272,8 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
     // set _currentUserActivity
 
     _currentUser = await authProvider.currentUser;
-    _currentUserActivity = await userProvider.getUserActivity(args.activityId, isManager: false);
+    _currentUserActivity =
+        await userProvider.getUserActivity(args.activityId, isManager: false);
     var getActivity = await activityProvider.getActivity(args.activityId);
 
     if (getActivity != null) {
@@ -370,30 +374,34 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
                           children: [
                             BackButton(
                               onPressed: () async {
-                                if(isStartMatching){
-                                  await showDialog(context: context, builder: (BuildContext context){
-                                    return QuitWarningDialog(
-                                      action: () async {
-                                        isStartMatching = false;
-                                        // _height = 0;
-                                        try{
-                                          await chatProvider.cancelWaiting(args.activityId);
-                                        } catch (e) {
-                                          debugPrint("cancelWaitingError: $e");
-                                        }
-                                        setState(() {
-                                          Navigator.of(context).popUntil(ModalRoute.withName(
-                                              MainPage.routeName
-                                          ));
-                                        });
-                                      },
-                                    );
-                                  });
+                                if (isStartMatching) {
+                                  await showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return QuitWarningDialog(
+                                          action: () async {
+                                            isStartMatching = false;
+                                            // _height = 0;
+                                            try {
+                                              await chatProvider.cancelWaiting(
+                                                  args.activityId);
+                                            } catch (e) {
+                                              debugPrint(
+                                                  "cancelWaitingError: $e");
+                                            }
+                                            setState(() {
+                                              Navigator.of(context).popUntil(
+                                                  ModalRoute.withName(
+                                                      MainPage.routeName));
+                                            });
+                                          },
+                                        );
+                                      });
                                 } else {
                                   setState(() {
-                                    Navigator.of(context).popUntil(ModalRoute.withName(
-                                        MainPage.routeName
-                                    ));
+                                    Navigator.of(context).popUntil(
+                                        ModalRoute.withName(
+                                            MainPage.routeName));
                                   });
                                 }
                               },
@@ -459,13 +467,14 @@ class _UserActivityMainPageState extends State<UserActivityMainPage>
               ),
               floatingActionButton: AnimatedButtons(
                 enableTagWidget: _enableTagWidget && !args.isPreview,
+                enablePreviousChatRoom: !args.isPreview,
+                enableMatch: _enableMatch && !args.isPreview,
                 matching: matching,
                 startMatching: isStartMatching,
                 buttonPositionTop: buttonPositionTop,
                 buttonPositionLeft: buttonPositionLeft,
                 tagSelected: _tagSelected,
                 currentActivityTags: _currentActivityTags,
-                enableMatch: _enableMatch && !args.isPreview,
                 changeTagAndName: changeTagAndName,
                 currentUserName: _currentUser.displayName,
               ),

@@ -198,8 +198,9 @@ class _NewTagFieldState extends State<NewTagField> {
                       _controller.text = widget.tagName;
                     });
                   }
-                : () {
+                : () async {
                     widget.onDelete!();
+                    await context.read<ActivityProvider>().deleteTag(widget.activityId,widget.userId,widget.id);
                   },
           ),
         ],

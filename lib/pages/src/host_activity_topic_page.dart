@@ -242,6 +242,7 @@ class _NewTopicFieldState extends State<NewTopicField> {
                   }
                 : () {
                     widget.onDelete!();
+                    activityProvider.deleteTopicAndQuestion(widget.activityId, widget.id);
                   },
           ),
         ],

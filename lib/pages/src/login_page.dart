@@ -38,168 +38,166 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     return Scaffold(
-      body: Container(
-        color: Theme.of(context).colorScheme.background,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              margin: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).size.height * 0.08),
-              child: Text(
-                '請先登入',
-                style: TextStyle(
-                  fontSize: MediaQuery.of(context).size.width * 0.08,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+      backgroundColor: Theme.of(context).colorScheme.background,
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            margin: EdgeInsets.only(
+                bottom: MediaQuery.of(context).size.height * 0.08),
+            child: Text(
+              '請先登入',
+              style: TextStyle(
+                fontSize: MediaQuery.of(context).size.width * 0.08,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.primary,
               ),
             ),
-            SizedBox(
-              width: MediaQuery.of(context).size.width * 0.7,
-              height: MediaQuery.of(context).size.height * 0.08,
-              child: FloatingActionButton.extended(
-                heroTag: 'googleFAB',
-                onPressed: () {
-                  context.read<AuthProvider>().signInWithGoogle().then((_) {
-                    pref.then((instance) {
-                      Navigator.of(context).pushNamed(
-                        MainPage.routeName,
-                        arguments: MainPageArguments(
-                          isHost: instance.getBool('isHost')!,
-                        ),
-                      );
-                    });
-                  });
-                },
-                label: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Image.asset(
-                      'lib/assets/google.png',
-                      width: MediaQuery.of(context).size.width * 0.08,
-                      height: MediaQuery.of(context).size.height * 0.08,
-                    ),
-                    const SizedBox(width: 10),
-                    Text(
-                      '使用 Google 登入',
-                      style: TextStyle(
-                        fontSize: MediaQuery.of(context).size.width * 0.05,
-                        color: Theme.of(context).colorScheme.tertiary,
+          ),
+          SizedBox(
+            width: MediaQuery.of(context).size.width * 0.7,
+            height: MediaQuery.of(context).size.height * 0.08,
+            child: FloatingActionButton.extended(
+              heroTag: 'googleFAB',
+              onPressed: () {
+                context.read<AuthProvider>().signInWithGoogle().then((_) {
+                  pref.then((instance) {
+                    Navigator.of(context).pushNamed(
+                      MainPage.routeName,
+                      arguments: MainPageArguments(
+                        isHost: instance.getBool('isHost')!,
                       ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(height: MediaQuery.of(context).size.height * 0.03),
-            SizedBox(
-              width: MediaQuery.of(context).size.width * 0.7,
-              height: MediaQuery.of(context).size.height * 0.08,
-              child: FloatingActionButton.extended(
-                heroTag: 'facebookFAB',
-                onPressed: () {
-                  context.read<AuthProvider>().signInWithFacebook().then((_) {
-                    pref.then((instance) {
-                      Navigator.of(context).pushNamed(
-                        MainPage.routeName,
-                        arguments: MainPageArguments(
-                          isHost: instance.getBool('isHost')!,
-                        ),
-                      );
-                    });
+                    );
                   });
-                },
-                label: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Image.asset(
-                      'lib/assets/facebook.png',
-                      width: MediaQuery.of(context).size.width * 0.08,
-                      height: MediaQuery.of(context).size.height * 0.08,
+                });
+              },
+              label: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    'lib/assets/google.png',
+                    width: MediaQuery.of(context).size.width * 0.08,
+                    height: MediaQuery.of(context).size.height * 0.08,
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    '使用 Google 登入',
+                    style: TextStyle(
+                      fontSize: MediaQuery.of(context).size.width * 0.05,
+                      color: Theme.of(context).colorScheme.tertiary,
                     ),
-                    const SizedBox(width: 10),
-                    Text(
-                      '使用 Facebook 登入',
-                      style: TextStyle(
-                        fontSize: MediaQuery.of(context).size.width * 0.05,
-                        color: Theme.of(context).colorScheme.tertiary,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-            Container(
-              margin: EdgeInsets.symmetric(
-                  vertical: MediaQuery.of(context).size.height * 0.04),
-              child: Text(
-                'OR',
+          ),
+          SizedBox(height: MediaQuery.of(context).size.height * 0.03),
+          SizedBox(
+            width: MediaQuery.of(context).size.width * 0.7,
+            height: MediaQuery.of(context).size.height * 0.08,
+            child: FloatingActionButton.extended(
+              heroTag: 'facebookFAB',
+              onPressed: () {
+                context.read<AuthProvider>().signInWithFacebook().then((_) {
+                  pref.then((instance) {
+                    Navigator.of(context).pushNamed(
+                      MainPage.routeName,
+                      arguments: MainPageArguments(
+                        isHost: instance.getBool('isHost')!,
+                      ),
+                    );
+                  });
+                });
+              },
+              label: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    'lib/assets/facebook.png',
+                    width: MediaQuery.of(context).size.width * 0.08,
+                    height: MediaQuery.of(context).size.height * 0.08,
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    '使用 Facebook 登入',
+                    style: TextStyle(
+                      fontSize: MediaQuery.of(context).size.width * 0.05,
+                      color: Theme.of(context).colorScheme.tertiary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Container(
+            margin: EdgeInsets.symmetric(
+                vertical: MediaQuery.of(context).size.height * 0.04),
+            child: Text(
+              'OR',
+              style: TextStyle(
+                fontSize: MediaQuery.of(context).size.width * 0.05,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 2,
+                color: Theme.of(context).colorScheme.secondary,
+              ),
+            ),
+          ),
+          SizedBox(
+            width: MediaQuery.of(context).size.width * 0.7,
+            height: MediaQuery.of(context).size.height * 0.08,
+            child: FloatingActionButton.extended(
+              heroTag: 'anonymousFAB',
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                    title: const Text('注意'),
+                    content:
+                        const Text('匿名使用無法使用部分功能\n且無法轉移帳號資料\n也無法串辦活動\n確定要繼續嗎？'),
+                    actions: confirmButtons(context, () {
+                      context
+                          .read<AuthProvider>()
+                          .signInWithAnonymous()
+                          .then((_) {
+                        pref.then((instance) {
+                          Navigator.of(context).pushNamed(
+                            MainPage.routeName,
+                            arguments: const MainPageArguments(
+                              isHost: false,
+                            ),
+                          );
+                        });
+                      });
+                      Navigator.of(context).pop();
+                    }),
+                  ),
+                );
+              },
+              label: Text(
+                '以匿名身份繼續',
                 style: TextStyle(
                   fontSize: MediaQuery.of(context).size.width * 0.05,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 2,
                   color: Theme.of(context).colorScheme.secondary,
                 ),
               ),
             ),
-            SizedBox(
-              width: MediaQuery.of(context).size.width * 0.7,
-              height: MediaQuery.of(context).size.height * 0.08,
-              child: FloatingActionButton.extended(
-                heroTag: 'anonymousFAB',
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (_) => AlertDialog(
-                      title: const Text('注意'),
-                      content: const Text(
-                          '匿名使用無法使用部分功能\n且無法轉移帳號資料\n也無法串辦活動\n確定要繼續嗎？'),
-                      actions: confirmButtons(context, () {
-                        context
-                            .read<AuthProvider>()
-                            .signInWithAnonymous()
-                            .then((_) {
-                          pref.then((instance) {
-                            Navigator.of(context).pushNamed(
-                              MainPage.routeName,
-                              arguments: const MainPageArguments(
-                                isHost: false,
-                              ),
-                            );
-                          });
-                        });
-                        Navigator.of(context).pop();
-                      }),
-                    ),
-                  );
-                },
-                label: Text(
-                  '以匿名身份繼續',
-                  style: TextStyle(
-                    fontSize: MediaQuery.of(context).size.width * 0.05,
-                    color: Theme.of(context).colorScheme.secondary,
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(height: MediaQuery.of(context).size.height * 0.05),
-            FutureBuilder(
-              future: pref,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.1,
-                    child: const Center(child: CircularProgressIndicator()),
-                  );
-                }
+          ),
+          SizedBox(height: MediaQuery.of(context).size.height * 0.05),
+          FutureBuilder(
+            future: pref,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.1,
+                  child: const Center(child: CircularProgressIndicator()),
+                );
+              }
 
-                final instance = snapshot.data!;
-                return _SetIsHostWidget(pref: instance);
-              },
-            ),
-          ],
-        ),
+              final instance = snapshot.data!;
+              return _SetIsHostWidget(pref: instance);
+            },
+          ),
+        ],
       ),
     );
   }

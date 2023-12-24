@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import '../../models/models.dart';
 import '../../providers/providers.dart';
 import '../../utils/utils.dart';
-import '../../widgets/src/confirm_buttons.dart';
+import '../../widgets/widgets.dart';
 import '../routes.dart';
 
 class MainPageArguments {
@@ -40,106 +40,29 @@ class _MainPageState extends State<MainPage> {
         }
         final user = snapshot.data!;
         return Scaffold(
-          appBar: AppBar(
-              toolbarHeight: MediaQuery.of(context).size.height * 0.1,
-              title: Text(
-                args.isHost ? '舉辦的活動' : '參加的活動',
-                style: TextStyle(
-                  fontSize: 28.0,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 5,
-                  color: Theme.of(context).colorScheme.primary,
+          backgroundColor: Theme.of(context).colorScheme.background,
+          appBar: myAppBar(
+            context,
+            title: Text(args.isHost ? '舉辦的活動' : '參加的活動'),
+            leading: Container(
+              padding: const EdgeInsets.only(top: 5.0, bottom: 5.0, left: 10.0),
+              child: InkWell(
+                onTap: () {
+                  Navigator.of(context).pushNamed(PersonalSettingPage.routeName,
+                      arguments:
+                          PersonalSettingPageArguments(isHost: args.isHost));
+                },
+                child: CircleAvatar(
+                  foregroundImage: user.photoUrl != null
+                      ? NetworkImage(user.photoUrl!)
+                      : null,
+                  backgroundImage: const AssetImage('lib/assets/user.png'),
                 ),
               ),
-              centerTitle: true,
-              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-              leadingWidth: MediaQuery.of(context).size.width * 0.15,
-              leading: Container(
-                margin: const EdgeInsets.all(0),
-                padding:
-                    const EdgeInsets.only(top: 5.0, bottom: 5.0, left: 10.0),
-                child: InkWell(
-                  onTap: () {
-                    Navigator.of(context).pushNamed(
-                        PersonalSettingPage.routeName,
-                        arguments:
-                            PersonalSettingPageArguments(isHost: args.isHost));
-                  },
-                  child: CircleAvatar(
-                    foregroundImage: user.photoUrl != null
-                        ? NetworkImage(user.photoUrl!)
-                        : null,
-                    backgroundImage: const AssetImage('lib/assets/user.png'),
-                    radius: MediaQuery.of(context).size.width * 0.15,
-                  ),
-                ),
-              )),
-          body: Container(
-            color: Theme.of(context).colorScheme.background,
-            child: FutureBuilder<List<UserActivity>>(
-              future: context
-                  .read<UserProvider>()
-                  .getUserActivities(isManager: args.isHost),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (snapshot.hasError) {
-                  return Text('Error: ${snapshot.error}');
-                }
-                final userActivities = snapshot.requireData;
-                return userActivities.isNotEmpty
-                    ? CarouselSlider.builder(
-                        itemCount: userActivities.length,
-                        options: CarouselOptions(
-                          height: MediaQuery.of(context).size.height,
-                          enlargeCenterPage: true,
-                          initialPage: 0,
-                          viewportFraction: 0.8,
-                        ),
-                        itemBuilder: (context, index, realIndex) {
-                          final activityId = userActivities[index].uid;
-                          return InkWell(
-                            onLongPress: () => args.isHost
-                                ? ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('主辦方無法刪除活動')))
-                                : showDialog(
-                                    context: context,
-                                    builder: (context) => AlertDialog(
-                                      title: const Text('刪除活動'),
-                                      content: const Text('是否要刪除該活動？'),
-                                      actions: confirmButtons(context, () {
-                                        context
-                                            .read<UserProvider>()
-                                            .removeUserActivity(activityId,
-                                                isManager: false)
-                                            .then((value) => setState(() {}));
-                                        Navigator.of(context).pop();
-                                      }),
-                                    ),
-                                  ),
-                            child: RoomCard(
-                              isHost: args.isHost,
-                              activityId: activityId,
-                            ),
-                          );
-                        },
-                      )
-                    : Center(
-                        child: Text(
-                          '目前沒有${args.isHost ? '舉辦' : '參加'}活動',
-                          style: TextStyle(
-                            fontSize: 24.0,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1.2,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                        ),
-                      );
-              },
             ),
           ),
-          floatingActionButton: FloatingActionButton(
+          body: ActivityCarouselWidget(isHost: args.isHost),
+          floatingActionButton: FloatingActionButton.extended(
             onPressed: () {
               // Navigator.of(context).pushNamed(
               //             HostActivitySetPage.routeName,
@@ -147,7 +70,7 @@ class _MainPageState extends State<MainPage> {
               _joinActivity(context, user);
             },
             tooltip: 'Add Activity',
-            child: const Icon(Icons.add_circle_outline),
+            label: const Icon(Icons.event),
           ),
         );
       },
@@ -235,11 +158,89 @@ class _MainPageState extends State<MainPage> {
   }
 }
 
-class RoomCard extends StatelessWidget {
+class ActivityCarouselWidget extends StatefulWidget {
+  final bool isHost;
+
+  const ActivityCarouselWidget({
+    super.key,
+    required this.isHost,
+  });
+
+  @override
+  State<ActivityCarouselWidget> createState() => _ActivityCarouselWidgetState();
+}
+
+class _ActivityCarouselWidgetState extends State<ActivityCarouselWidget> {
+  @override
+  Widget build(BuildContext context) => FutureBuilder<List<UserActivity>>(
+        future: context
+            .read<UserProvider>()
+            .getUserActivities(isManager: widget.isHost),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Text('Error: ${snapshot.error}');
+          }
+          final userActivities = snapshot.requireData;
+          return userActivities.isNotEmpty
+              ? CarouselSlider.builder(
+                  itemCount: userActivities.length,
+                  options: CarouselOptions(
+                    height: MediaQuery.of(context).size.height,
+                    enlargeCenterPage: true,
+                    initialPage: 0,
+                    viewportFraction: 0.8,
+                  ),
+                  itemBuilder: (context, index, realIndex) {
+                    final activityId = userActivities[index].uid;
+                    return InkWell(
+                      onLongPress: () => widget.isHost
+                          ? ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('主辦方無法刪除活動')))
+                          : showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: const Text('刪除活動'),
+                                content: const Text('是否要刪除該活動？'),
+                                actions: confirmButtons(context, () {
+                                  context
+                                      .read<UserProvider>()
+                                      .removeUserActivity(activityId,
+                                          isManager: false)
+                                      .then((value) => setState(() {}));
+                                  Navigator.of(context).pop();
+                                }),
+                              ),
+                            ),
+                      child: RoomCardWidget(
+                        isHost: widget.isHost,
+                        activityId: activityId,
+                      ),
+                    );
+                  },
+                )
+              : Center(
+                  child: Text(
+                    '目前沒有${widget.isHost ? '舉辦' : '參加'}活動',
+                    style: TextStyle(
+                      fontSize: 24.0,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.2,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                );
+        },
+      );
+}
+
+class RoomCardWidget extends StatelessWidget {
   final bool isHost;
   final String activityId;
 
-  const RoomCard({
+  const RoomCardWidget({
     super.key,
     required this.isHost,
     required this.activityId,
@@ -248,57 +249,47 @@ class RoomCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Card(
         elevation: 4.0,
-        child: SizedBox(
-          height: 100.0,
-          child: FutureBuilder<Activity>(
-            future: context.read<ActivityProvider>().getActivity(activityId),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              }
+        child: FutureBuilder<Activity>(
+          future: context.read<ActivityProvider>().getActivity(activityId),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-              final activity = snapshot.data!;
-              return InkWell(
-                onTap: () {
-                  if (activity.isEnabled) {
-                    Navigator.of(context).pushNamed(
-                      UserActivityMainPage.routeName,
-                      arguments: UserActivityMainPageArguments(
-                        activityId: activityId,
-                      ),
-                    );
-                    Navigator.of(context).pushNamed(
-                      UserActivityMainPage.routeName,
-                      arguments: UserActivityMainPageArguments(
-                        activityId: activityId, 
-                        isPreview: false,
-                      ),
-                    );
-                  } else {
-                    showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: const Text('發生錯誤'),
-                        content: const Text(
-                            '活動可能已經取消或發生錯誤\n長按活動可以刪除該活動\n若有疑問請聯繫主辦方'),
-                        actions: [
-                          TextButton(
-                            child: const Text('了解'),
-                            onPressed: () => Navigator.of(context).pop(),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-                },
-                child: Image.memory(
-                  base64ToImage(activity.activityPhoto),
-                  fit: BoxFit.contain,
-                  opacity: AlwaysStoppedAnimation(activity.isEnabled ? 1 : 0.5),
-                ),
-              );
-            },
-          ),
+            final activity = snapshot.data!;
+            return InkWell(
+              onTap: () {
+                if (activity.isEnabled) {
+                  Navigator.of(context).pushNamed(
+                    UserActivityMainPage.routeName,
+                    arguments: UserActivityMainPageArguments(
+                      activityId: activityId,
+                    ),
+                  );
+                } else {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('發生錯誤'),
+                      content:
+                          const Text('活動可能已經取消或發生錯誤\n長按活動可以刪除該活動\n若有疑問請聯繫主辦方'),
+                      actions: [
+                        TextButton(
+                          child: const Text('了解'),
+                          onPressed: () => Navigator.of(context).pop(),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+              },
+              child: Image.memory(
+                base64ToImage(activity.activityPhoto),
+                fit: BoxFit.contain,
+                opacity: AlwaysStoppedAnimation(activity.isEnabled ? 1 : 0.5),
+              ),
+            );
+          },
         ),
       );
 }

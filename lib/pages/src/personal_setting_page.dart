@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import '../../models/models.dart';
 import '../../pages/routes.dart';
 import '../../providers/providers.dart';
-import '../../widgets/src/confirm_buttons.dart';
+import '../../widgets/widgets.dart';
 
 class PersonalSettingPageArguments {
   final bool isHost;
@@ -27,239 +27,231 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
     final args = ModalRoute.of(context)!.settings.arguments
         as PersonalSettingPageArguments;
 
-    return Container(
-      color: Theme.of(context).colorScheme.background,
-      child: FutureBuilder<User>(
+    return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.background,
+      appBar: myAppBar(
+        context,
+        title: const Text('使用者頁面'),
+        leading: const BackButton(),
+      ),
+      body: FutureBuilder<User>(
         future: context.read<AuthProvider>().currentUser,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
           final user = snapshot.data!;
-          return Scaffold(
-            appBar: AppBar(
-              title: Text(
-                '使用者資訊',
-                style: TextStyle(color: Theme.of(context).colorScheme.primary),
+          return Column(
+            children: [
+              SizedBox(height: MediaQuery.of(context).size.height * 0.01),
+              CircleAvatar(
+                foregroundImage:
+                    user.photoUrl != null ? NetworkImage(user.photoUrl!) : null,
+                backgroundImage: const AssetImage('lib/assets/user.png'),
+                radius: MediaQuery.of(context).size.height * 0.07,
               ),
-            ),
-            body: Column(
-              children: [
-                SizedBox(height: MediaQuery.of(context).size.height * 0.01),
-                CircleAvatar(
-                  foregroundImage: user.photoUrl != null
-                      ? NetworkImage(user.photoUrl!)
-                      : null,
-                  backgroundImage: const AssetImage('lib/assets/user.png'),
-                  radius: MediaQuery.of(context).size.height * 0.07,
+              SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.03,
+                child: _NickNameWidget(user: user),
+              ),
+              SizedBox(height: MediaQuery.of(context).size.height * 0.01),
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.03,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.2,
+                      child: const Text(
+                        'Email : ',
+                        textAlign: TextAlign.right,
+                      ),
+                    ),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.55,
+                      child: Text(
+                        user.email ?? '匿名使用',
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    SizedBox(width: MediaQuery.of(context).size.width * 0.2)
+                  ],
                 ),
-                SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.03,
-                  child: _NickNameWidget(user: user),
+              ),
+              SizedBox(height: MediaQuery.of(context).size.height * 0.01),
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.03,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.2,
+                      child: const Text(
+                        '目前身份 : ',
+                        textAlign: TextAlign.right,
+                      ),
+                    ),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.55,
+                      child: Text(
+                        args.isHost ? '主辦方' : '參加者',
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    SizedBox(width: MediaQuery.of(context).size.width * 0.2)
+                  ],
                 ),
-                SizedBox(height: MediaQuery.of(context).size.height * 0.01),
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.03,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+              ),
+              Divider(height: MediaQuery.of(context).size.height * 0.03),
+              Expanded(
+                child: Scrollbar(
+                  child: Column(
                     children: [
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.2,
-                        child: const Text(
-                          'Email : ',
-                          textAlign: TextAlign.right,
+                      Text(
+                        args.isHost ? '我舉辦過的活動' : '我參加過的活動',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
                         ),
+                        textAlign: TextAlign.center,
                       ),
                       SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.55,
-                        child: Text(
-                          user.email ?? '匿名使用',
-                          textAlign: TextAlign.center,
+                          height: MediaQuery.of(context).size.height * 0.01),
+                      Expanded(
+                        child: FutureBuilder<List<Activity>>(
+                          future: _getRelateActivities(
+                            args.isHost,
+                            context.read<ActivityProvider>(),
+                            context.read<UserProvider>(),
+                          ),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const Center(
+                                  child: CircularProgressIndicator());
+                            }
+                            final activities = snapshot.data!;
+                            return ListView.builder(
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: activities.length,
+                              itemBuilder: (context, index) {
+                                final activity = activities[index];
+                                return ListTile(
+                                  leading: Icon(
+                                    Icons.event,
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                  ),
+                                  title: Text(activity.activityName),
+                                  subtitle: FutureBuilder<List<Tag>>(
+                                    future: context
+                                        .read<ActivityProvider>()
+                                        .getAllTags(activity.uid),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.connectionState ==
+                                          ConnectionState.waiting) {
+                                        return const Center(
+                                            child: CircularProgressIndicator());
+                                      }
+                                      final tags = snapshot.data!;
+                                      return Text(
+                                        '標籤: ${tags.map((e) => e.tagName).join(', ')}',
+                                        overflow: TextOverflow.ellipsis,
+                                      );
+                                    },
+                                  ),
+                                );
+                              },
+                            );
+                          },
                         ),
                       ),
-                      SizedBox(width: MediaQuery.of(context).size.width * 0.2)
                     ],
                   ),
                 ),
-                SizedBox(height: MediaQuery.of(context).size.height * 0.01),
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.03,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.2,
-                        child: const Text(
-                          '目前身份 : ',
-                          textAlign: TextAlign.right,
-                        ),
-                      ),
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.55,
-                        child: Text(
-                          args.isHost ? '主辦方' : '參加者',
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                      SizedBox(width: MediaQuery.of(context).size.width * 0.2)
-                    ],
-                  ),
-                ),
-                Divider(height: MediaQuery.of(context).size.height * 0.03),
-                Expanded(
-                  child: Scrollbar(
-                    child: Column(
-                      children: [
-                        Text(
-                          args.isHost ? '我舉辦過的活動' : '我參加過的活動',
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.01),
-                        Expanded(
-                          child: FutureBuilder<List<Activity>>(
-                            future: _getRelateActivities(
-                              args.isHost,
-                              context.read<ActivityProvider>(),
-                              context.read<UserProvider>(),
-                            ),
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return const Center(
-                                    child: CircularProgressIndicator());
-                              }
-                              final activities = snapshot.data!;
-                              return ListView.builder(
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemCount: activities.length,
-                                itemBuilder: (context, index) {
-                                  final activity = activities[index];
-                                  return ListTile(
-                                    leading: Icon(
-                                      Icons.event,
-                                      color:
-                                          Theme.of(context).colorScheme.primary,
-                                    ),
-                                    title: Text(activity.activityName),
-                                    subtitle: FutureBuilder<List<Tag>>(
-                                      future: context
-                                          .read<ActivityProvider>()
-                                          .getAllTags(activity.uid),
-                                      builder: (context, snapshot) {
-                                        if (snapshot.connectionState ==
-                                            ConnectionState.waiting) {
-                                          return const Center(
-                                              child:
-                                                  CircularProgressIndicator());
-                                        }
-                                        final tags = snapshot.data!;
-                                        return Text(
-                                          '標籤: ${tags.map((e) => e.tagName).join(', ')}',
-                                          overflow: TextOverflow.ellipsis,
-                                        );
-                                      },
-                                    ),
-                                  );
-                                },
-                              );
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            bottomNavigationBar: BottomAppBar(
-              child: Row(
-                children: [
-                  SizedBox(width: MediaQuery.of(context).size.width * 0.02),
-                  Expanded(
-                    child: FloatingActionButton.extended(
-                      heroTag: 'changeRoleFAB',
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (_) => AlertDialog(
-                            title: const Text('確認身份切換'),
-                            content: Text(
-                                '確定要切換成${args.isHost ? '參加者' : '主辦方'}角色嗎？'),
-                            actions: confirmButtons(
-                              context,
-                              () {
-                                context
-                                    .read<SharedPreferenceProvider>()
-                                    .setIsHost(!args.isHost)
-                                    .then((_) => Navigator.of(context)
-                                            .pushNamedAndRemoveUntil(
-                                          MainPage.routeName,
-                                          ModalRoute.withName(
-                                              LoginPage.routeName),
-                                          arguments: MainPageArguments(
-                                            isHost: !args.isHost,
-                                          ),
-                                        ));
-                              },
-                            ),
-                          ),
-                        );
-                      },
-                      label: Text(
-                        '切換身份',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: MediaQuery.of(context).size.width * 0.05),
-                  Expanded(
-                    child: FloatingActionButton.extended(
-                      heroTag: 'logoutFAB',
-                      backgroundColor:
-                          Theme.of(context).colorScheme.errorContainer,
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (_) => AlertDialog(
-                            title: const Text('確認登出'),
-                            content: const Text('確定要登出嗎？'),
-                            actions: confirmButtons(
-                              context,
-                              () {
-                                Navigator.of(context).popUntil(
-                                    ModalRoute.withName(LoginPage.routeName));
-                                context.read<AuthProvider>().logout();
-                              },
-                            ),
-                          ),
-                        );
-                      },
-                      label: Text(
-                        '登出',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.error,
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: MediaQuery.of(context).size.width * 0.02),
-                ],
               ),
-            ),
+            ],
           );
         },
+      ),
+      bottomNavigationBar: BottomAppBar(
+        child: Row(
+          children: [
+            SizedBox(width: MediaQuery.of(context).size.width * 0.02),
+            Expanded(
+              child: FloatingActionButton.extended(
+                heroTag: 'changeRoleFAB',
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (_) => AlertDialog(
+                      title: const Text('確認身份切換'),
+                      content: Text('確定要切換成${args.isHost ? '參加者' : '主辦方'}角色嗎？'),
+                      actions: confirmButtons(
+                        context,
+                        () {
+                          context
+                              .read<SharedPreferenceProvider>()
+                              .setIsHost(!args.isHost)
+                              .then((_) =>
+                                  Navigator.of(context).pushNamedAndRemoveUntil(
+                                    MainPage.routeName,
+                                    ModalRoute.withName(LoginPage.routeName),
+                                    arguments: MainPageArguments(
+                                      isHost: !args.isHost,
+                                    ),
+                                  ));
+                        },
+                      ),
+                    ),
+                  );
+                },
+                label: Text(
+                  '切換身份',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(width: MediaQuery.of(context).size.width * 0.05),
+            Expanded(
+              child: FloatingActionButton.extended(
+                heroTag: 'logoutFAB',
+                backgroundColor: Theme.of(context).colorScheme.errorContainer,
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (_) => AlertDialog(
+                      title: const Text('確認登出'),
+                      content: const Text('確定要登出嗎？'),
+                      actions: confirmButtons(
+                        context,
+                        () {
+                          Navigator.of(context).popUntil(
+                              ModalRoute.withName(LoginPage.routeName));
+                          context.read<AuthProvider>().logout();
+                        },
+                      ),
+                    ),
+                  );
+                },
+                label: Text(
+                  '登出',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(width: MediaQuery.of(context).size.width * 0.02),
+          ],
+        ),
       ),
     );
   }

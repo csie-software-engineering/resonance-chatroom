@@ -312,10 +312,10 @@ class ActivityProvider {
   /// 刪除標籤
   ///
   /// 需合併DeleteTopic和DeleteQuestion
-  Future<void> deleteTag(String activityId, String userId, String tagId) async {
+  Future<void> deleteTag(String activityId, String tagId) async {
     assert(await _checkActivityAlive(activityId), "活動不存在");
     assert(await _checkTagAlive(activityId, tagId), "標籤不存在");
-    assert(await _isManager(activityId, userId: userId), '你不是管理者');
+    assert(await _isManager(activityId), '你不是管理者');
 
     final documentReference = db
         .collection(FirestoreConstants.activityCollectionPath.value)

@@ -40,11 +40,17 @@ class _HostActivityTopicPageState extends State<HostActivityTopicPage> {
             .getQuestionByTopic(args.activityId, _originTopic[i].uid)
             .then((questionTmp) {
           fields.add(NewTopicField(
-            onDelete: () {
+            onDelete: (i) {
               setState(() {
-                fields.removeAt(fields.length - 1);
+                fields.removeAt(i);
+                for (int i = 0; i < fields.length; i++) {
+                  NewTopicField topicField = fields[i] as NewTopicField;
+                  topicField.index = i;
+                  fields[i] = topicField;
+                }
               });
             },
+            index: i,
             id: _originTopic[i].uid,
             questionId: questionTmp.uid,
             tagId: args.tagId,
@@ -113,13 +119,20 @@ class _HostActivityTopicPageState extends State<HostActivityTopicPage> {
                         Question question = await activityProvider
                             .addNewQuestion(args.activityId, questionTmp);
                         debugPrint("question測試");
+                        int i = fields.length;
                         setState(() {
                           fields.add(NewTopicField(
-                            onDelete: () {
+                            onDelete: (i) {
                               setState(() {
-                                fields.removeAt(fields.length - 1);
+                                fields.removeAt(i);
+                                for (int i = 0; i < fields.length; i++) {
+                                  NewTopicField topicField = fields[i] as NewTopicField;
+                                  topicField.index = i;
+                                  fields[i] = topicField;
+                                }
                               });
                             },
+                            index: i,
                             id: tmp.uid,
                             questionId: question.uid,
                             activityId: args.activityId,
@@ -159,7 +172,8 @@ class _HostActivityTopicPageState extends State<HostActivityTopicPage> {
 }
 
 class NewTopicField extends StatefulWidget {
-  final VoidCallback? onDelete;
+  final Function(int) onDelete;
+  int index;
   String questionId;
   String id;
   String activityId;
@@ -169,6 +183,7 @@ class NewTopicField extends StatefulWidget {
   NewTopicField({
     super.key,
     required this.onDelete,
+    required this.index,
     required this.id,
     required this.questionId,
     required this.activityId,
@@ -241,7 +256,7 @@ class _NewTopicFieldState extends State<NewTopicField> {
                     });
                   }
                 : () {
-                    widget.onDelete!();
+                    widget.onDelete!(widget.index);
                     activityProvider.deleteTopicAndQuestion(widget.activityId, widget.id);
                   },
           ),

@@ -30,11 +30,17 @@ class _HostActivityTagPageState extends State<HostActivityTagPage> {
     _originTag = getTags;
     for (int i = 0; i < _originTag.length; i++) {
       fields.add(NewTagField(
-        onDelete: () {
+        onDelete: (i) {
           setState(() {
-            fields.removeAt(fields.length - 1);
+            fields.removeAt(i);
+            for (int i = 0; i < fields.length; i++) {
+              NewTagField tagField = fields[i] as NewTagField;
+              tagField.index = i;
+              fields[i] = tagField;
+            }
           });
         },
+        index: i,
         id: _originTag[i].uid,
         activityId: args.activityId,
         tagName: _originTag[i].tagName,
@@ -81,15 +87,22 @@ class _HostActivityTagPageState extends State<HostActivityTagPage> {
                         );
                         debugPrint('活動id${args.activityId}');
                         setState(() {
+                          int ind = fields.length;
                           fields.add(NewTagField(
-                            onDelete: () {
+                            onDelete: (ind) {
                               setState(() {
-                                fields.removeAt(fields.length - 1);
+                                fields.removeAt(ind);
+                                for (int i = 0; i < fields.length; i++) {
+                                  NewTagField tagField = fields[i] as NewTagField;
+                                  tagField.index = i;
+                                  fields[i] = tagField;
+                                }
                               });
                             },
                             id: tag.uid,
                             activityId: args.activityId,
                             tagName: '',
+                            index: ind,
                           ));
                         });
                       },
@@ -120,7 +133,8 @@ class _HostActivityTagPageState extends State<HostActivityTagPage> {
 }
 
 class NewTagField extends StatefulWidget {
-  final VoidCallback? onDelete;
+  final Function(int) onDelete;
+  int index;
   final String id;
   final String activityId;
   String tagName;
@@ -131,6 +145,7 @@ class NewTagField extends StatefulWidget {
     required this.id,
     required this.activityId,
     required this.tagName,
+    required this.index,
   });
 
   @override
@@ -197,8 +212,10 @@ class _NewTagFieldState extends State<NewTagField> {
                     });
                   }
                 : () async {
-                    widget.onDelete!();
-                    await context.read<ActivityProvider>().deleteTag(widget.activityId,widget.id);
+                    widget.onDelete!(widget.index);
+                    await context
+                        .read<ActivityProvider>()
+                        .deleteTag(widget.activityId, widget.id);
                   },
           ),
         ],

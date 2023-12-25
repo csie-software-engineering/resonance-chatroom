@@ -569,8 +569,8 @@ class ActivityProvider {
     assert(await _isManager(activityId), '你不是管理者');
 
     final activityData = await getActivity(activityId);
-    assert(
-        activityData.startDate.toEpochTime().isAfter(DateTime.now()), '活動已經開始');
+    // assert(
+    //     activityData.startDate.toEpochTime().isAfter(DateTime.now()), '活動已經開始');
 
     final topicDoc = db
         .collection(FirestoreConstants.activityCollectionPath.value)

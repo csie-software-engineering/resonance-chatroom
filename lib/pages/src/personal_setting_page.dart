@@ -1,3 +1,4 @@
+import 'package:async/async.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -22,11 +23,33 @@ class PersonalSettingPage extends StatefulWidget {
 }
 
 class _PersonalSettingPageState extends State<PersonalSettingPage> {
+  late final args = ModalRoute.of(context)!.settings.arguments
+      as PersonalSettingPageArguments;
+
+  final _userProfileMemoizer = AsyncMemoizer<void>();
+  final _userHoldActivityMemoizer = AsyncMemoizer<void>();
+  late final List<AsyncMemoizer> _activityNameMemoizerList;
+  late final User user;
+  late final List<Activity?> activityList;
+  late final List<UserActivity> userActivities;
+
+  Future<void> _initProfile() async {
+    user = await context.read<AuthProvider>().currentUser;
+  }
+
+  Future<void> _initHoldActivity() async {
+    userActivities = await _getRelateActivities(
+      args.isHost,
+      context.read<ActivityProvider>(),
+      context.read<UserProvider>(),
+    );
+    _activityNameMemoizerList =
+        List.generate(userActivities.length, (index) => AsyncMemoizer());
+    activityList = List.generate(userActivities.length, (index) => null);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final args = ModalRoute.of(context)!.settings.arguments
-        as PersonalSettingPageArguments;
-
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
       appBar: myAppBar(
@@ -34,14 +57,12 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
         title: const Text('使用者頁面'),
         leading: const BackButton(),
       ),
-      body: FutureBuilder<User>(
-        future: context.read<AuthProvider>().currentUser,
+      body: FutureBuilder(
+        future: _userProfileMemoizer.runOnce(_initProfile),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-
-          final user = snapshot.requireData;
           return Column(
             children: [
               SizedBox(height: MediaQuery.of(context).size.height * 0.01),
@@ -120,27 +141,26 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
                       SizedBox(
                           height: MediaQuery.of(context).size.height * 0.01),
                       Expanded(
-                        child: FutureBuilder<List<UserActivity>>(
-                          future: _getRelateActivities(
-                            args.isHost,
-                            context.read<ActivityProvider>(),
-                            context.read<UserProvider>(),
-                          ),
+                        child: FutureBuilder(
+                          future: _userHoldActivityMemoizer
+                              .runOnce(_initHoldActivity),
                           builder: (context, snapshot) {
                             if (snapshot.connectionState ==
                                 ConnectionState.waiting) {
                               return const Center(
                                   child: CircularProgressIndicator());
                             }
-                            final userActivities = snapshot.requireData;
                             return ListView.separated(
                               itemCount: userActivities.length,
                               itemBuilder: (context, index) {
                                 final userActivity = userActivities[index];
-                                return FutureBuilder<Activity>(
-                                  future: context
-                                      .read<ActivityProvider>()
-                                      .getActivity(userActivity.uid),
+                                return FutureBuilder(
+                                  future: _activityNameMemoizerList[index]
+                                      .runOnce(() async {
+                                    activityList[index] = await context
+                                        .read<ActivityProvider>()
+                                        .getActivity(userActivity.uid);
+                                  }),
                                   builder: (context, snapshot) {
                                     if (snapshot.connectionState ==
                                         ConnectionState.waiting) {
@@ -148,7 +168,7 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
                                           child: CircularProgressIndicator());
                                     }
 
-                                    final activity = snapshot.requireData;
+                                    final activity = activityList[index];
                                     return ListTile(
                                       leading: Icon(
                                         Icons.event,
@@ -156,7 +176,7 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
                                             .colorScheme
                                             .primary,
                                       ),
-                                      title: Text(activity.activityName),
+                                      title: Text(activity!.activityName),
                                       subtitle: args.isHost
                                           ? FutureBuilder<User>(
                                               future: context
@@ -227,22 +247,6 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
         child: Row(
           children: [
             SizedBox(width: MediaQuery.of(context).size.width * 0.02),
-            FloatingActionButton.extended(
-              heroTag: 'editSocialMediaFAB',
-              backgroundColor: Theme.of(context).colorScheme.tertiaryContainer,
-              onPressed: () {
-                Navigator.of(context).pushNamed(SocialMediaPage.routeName);
-              },
-              label: Text(
-                '社群媒體',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-            ),
-            SizedBox(width: MediaQuery.of(context).size.width * 0.05),
             Expanded(
               child: FloatingActionButton.extended(
                 heroTag: 'changeRoleFAB',
@@ -359,7 +363,6 @@ class _NickNameWidgetState extends State<_NickNameWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final nameController = TextEditingController(text: widget.user.displayName);
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -374,7 +377,8 @@ class _NickNameWidgetState extends State<_NickNameWidget> {
           width: MediaQuery.of(context).size.width * 0.55,
           child: _setNickname
               ? TextField(
-                  controller: nameController,
+                  controller:
+                      TextEditingController(text: widget.user.displayName),
                   onChanged: (value) {
                     widget.user.displayName = value;
                   },
@@ -398,9 +402,7 @@ class _NickNameWidgetState extends State<_NickNameWidget> {
             tooltip: '修改暱稱',
             icon:
                 _setNickname ? const Icon(Icons.check) : const Icon(Icons.edit),
-            onPressed: () {
-              _rename(context);
-            },
+            onPressed: () => _rename(context),
           ),
         ),
       ],
@@ -419,9 +421,7 @@ class _NickNameWidgetState extends State<_NickNameWidget> {
             ),
           );
     } else {
-      setState(() {
-        _setNickname = true;
-      });
+      setState(() => _setNickname = true);
     }
   }
 }

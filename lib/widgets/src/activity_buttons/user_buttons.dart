@@ -329,10 +329,16 @@ class UserButtonsState extends State<UserButtons>
                             ),
                             actions: confirmButtons(
                               context,
-                              action: () => widget.changeTagAndName(
-                                  _textEditingController, _tagTmp),
-                              cancel: () => _textEditingController.text =
-                                  widget.currentUserName,
+                              action: () {
+                                widget.changeTagAndName(
+                                    _textEditingController, _tagTmp);
+                                Navigator.of(context).pop();
+                              },
+                              cancel: () {
+                                _textEditingController.text =
+                                    widget.currentUserName;
+                                Navigator.of(context).pop();
+                              },
                             ),
                           );
                         });

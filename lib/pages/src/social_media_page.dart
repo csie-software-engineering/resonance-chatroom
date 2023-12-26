@@ -117,11 +117,16 @@ class _SocialMediaPageState extends State<SocialMediaPage> {
                                       .removeUserSocialMedia(
                                           socialMedium[index].displayName)
                                       .then(
-                                        (_) => setState(() =>
+                                        (_) => setState(
+                                          () {
                                             _futureGetUserSocialMedium = context
                                                 .read<UserProvider>()
-                                                .getUserSocialMedium(),),
+                                                .getUserSocialMedium();
+                                            Navigator.of(context).pop();
+                                          },
+                                        ),
                                       ),
+                                  cancel: () => Navigator.of(context).pop(),
                                 ),
                               ),
                             );

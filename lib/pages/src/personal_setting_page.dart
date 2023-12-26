@@ -86,8 +86,8 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
                     SizedBox(
                       width: MediaQuery.of(context).size.width * 0.2,
                       child: const Text(
-                        'Email : ',
-                        textAlign: TextAlign.right,
+                        '電子郵件 : ',
+                        textAlign: TextAlign.center,
                       ),
                     ),
                     SizedBox(
@@ -111,7 +111,7 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
                       width: MediaQuery.of(context).size.width * 0.2,
                       child: const Text(
                         '目前身份 : ',
-                        textAlign: TextAlign.right,
+                        textAlign: TextAlign.center,
                       ),
                     ),
                     SizedBox(
@@ -262,15 +262,17 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
                           context
                               .read<SharedPreferenceProvider>()
                               .setIsHost(!args.isHost)
-                              .then((_) =>
-                                  Navigator.of(context).pushNamedAndRemoveUntil(
-                                    MainPage.routeName,
-                                    ModalRoute.withName(LoginPage.routeName),
-                                    arguments: MainPageArguments(
-                                      isHost: !args.isHost,
-                                    ),
-                                  ));
+                              .then((_) {
+                            Navigator.of(context).pushNamedAndRemoveUntil(
+                              MainPage.routeName,
+                              (_) => false,
+                              arguments: MainPageArguments(
+                                isHost: !args.isHost,
+                              ),
+                            );
+                          });
                         },
+                        cancel: () => Navigator.of(context).pop(),
                       ),
                     ),
                   );
@@ -299,10 +301,15 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
                       actions: confirmButtons(
                         context,
                         action: () {
-                          Navigator.of(context).popUntil(
-                              ModalRoute.withName(LoginPage.routeName));
-                          context.read<AuthProvider>().logout();
+                          Navigator.of(context)
+                              .pushNamedAndRemoveUntil(
+                                LoginPage.routeName,
+                                (Route<dynamic> route) => false,
+                              )
+                              .then(
+                                  (_) => context.read<AuthProvider>().logout());
                         },
+                        cancel: () => Navigator.of(context).pop(),
                       ),
                     ),
                   );
@@ -369,8 +376,11 @@ class _NickNameWidgetState extends State<_NickNameWidget> {
         SizedBox(
           width: MediaQuery.of(context).size.width * 0.2,
           child: const Text(
-            '暱稱 : ',
-            textAlign: TextAlign.right,
+            '暱稱:',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              letterSpacing: 8,
+            ),
           ),
         ),
         SizedBox(
@@ -387,7 +397,6 @@ class _NickNameWidgetState extends State<_NickNameWidget> {
                   decoration: InputDecoration(
                     contentPadding: EdgeInsets.all(
                         3 + MediaQuery.of(context).size.height * 0.01),
-                    border: InputBorder.none,
                     hintText: '輸入新的暱稱',
                   ),
                 )

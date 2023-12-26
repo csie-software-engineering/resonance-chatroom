@@ -16,7 +16,14 @@ class _QuitWarningDialogState extends State<QuitWarningDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: const Text("確定要退出？"),
-      actions: confirmButtons(context, action: widget.action),
+      actions: confirmButtons(
+        context,
+        action: () {
+          widget.action();
+          Navigator.of(context).pop();
+        },
+        cancel: () => Navigator.of(context).pop(),
+      ),
     );
   }
 }

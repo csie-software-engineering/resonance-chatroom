@@ -13,7 +13,6 @@ List<Widget> confirmButtons(
           ),
         ),
         onPressed: () {
-          Navigator.of(context).pop();
           if(cancel != null) cancel();
         },
         child: Text(
@@ -30,7 +29,6 @@ List<Widget> confirmButtons(
           ),
         ),
         onPressed: () {
-          Navigator.of(context).pop();
           if(action != null) action();
         },
         child: Text(

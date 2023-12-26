@@ -567,8 +567,7 @@ class ActivityProvider {
   ) async {
     assert(await _checkActivityAlive(activityId), "活動不存在");
     assert(await _isManager(activityId), '你不是管理者');
-
-    final activityData = await getActivity(activityId);
+    // final activityData = await getActivity(activityId);
     // assert(
     //     activityData.startDate.toEpochTime().isAfter(DateTime.now()), '活動已經開始');
 

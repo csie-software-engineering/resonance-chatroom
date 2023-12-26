@@ -6,27 +6,23 @@ import '../../widgets/src/confirm_buttons.dart';
 import '../routes.dart';
 import '../../providers/providers.dart';
 
-class LoginPage extends StatefulWidget {
+class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
 
   static const routeName = '/login';
 
-  @override
-  State<LoginPage> createState() => _LoginPageState();
-}
-
-class _LoginPageState extends State<LoginPage> {
-  bool first = true;
+  static bool first = true;
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = context.read<AuthProvider>();
     final pref = context.read<SharedPreferenceProvider>().pref;
 
     pref.then((instance) {
       bool? isHost = instance.getBool('isHost');
       if (isHost != null) {
         if (first && context.read<AuthProvider>().getFBAUser != null) {
-          Navigator.of(context).pushNamed(
+          Navigator.of(context).pushReplacementNamed(
             MainPage.routeName,
             arguments: MainPageArguments(isHost: isHost),
           );
@@ -62,7 +58,7 @@ class _LoginPageState extends State<LoginPage> {
               onPressed: () {
                 context.read<AuthProvider>().signInWithGoogle().then((_) {
                   pref.then((instance) {
-                    Navigator.of(context).pushNamed(
+                    Navigator.of(context).pushReplacementNamed(
                       MainPage.routeName,
                       arguments: MainPageArguments(
                         isHost: instance.getBool('isHost')!,
@@ -100,7 +96,7 @@ class _LoginPageState extends State<LoginPage> {
               onPressed: () {
                 context.read<AuthProvider>().signInWithFacebook().then((_) {
                   pref.then((instance) {
-                    Navigator.of(context).pushNamed(
+                    Navigator.of(context).pushReplacementNamed(
                       MainPage.routeName,
                       arguments: MainPageArguments(
                         isHost: instance.getBool('isHost')!,
@@ -157,21 +153,17 @@ class _LoginPageState extends State<LoginPage> {
                     actions: confirmButtons(
                       context,
                       action: () {
-                        context
-                            .read<AuthProvider>()
-                            .signInWithAnonymous()
-                            .then((_) {
-                          pref.then((instance) {
-                            Navigator.of(context).pushNamed(
-                              MainPage.routeName,
-                              arguments: const MainPageArguments(
-                                isHost: false,
-                              ),
-                            );
-                          });
+                        authProvider.signInWithAnonymous().then((_) {
+                          Navigator.of(context).pushNamedAndRemoveUntil(
+                            MainPage.routeName,
+                            (_) => false,
+                            arguments: const MainPageArguments(
+                              isHost: false,
+                            ),
+                          );
                         });
-                        Navigator.of(context).pop();
                       },
+                      cancel: () => Navigator.of(context).pop(),
                     ),
                   ),
                 );

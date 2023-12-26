@@ -130,9 +130,12 @@ class _MainPageState extends State<MainPage> {
                                             uid: activity.uid,
                                             isManager: false,
                                           ))
-                                          .then((_) => setState(() {}));
-                                      Navigator.of(context).pop();
+                                          .then((_) => setState(() {
+                                                Navigator.of(context).pop();
+                                                Navigator.of(context).pop();
+                                              }));
                                     },
+                                    cancel: () => Navigator.of(context).pop(),
                                   ),
                                 ),
                               );
@@ -211,8 +214,11 @@ class _ActivityCarouselWidgetState extends State<ActivityCarouselWidget> {
                                         .read<UserProvider>()
                                         .removeUserActivity(activityId,
                                             isManager: false)
-                                        .then((value) => setState(() {}));
+                                        .then((value) => setState(() {
+                                              Navigator.of(context).pop();
+                                            }));
                                   },
+                                  cancel: () => Navigator.of(context).pop(),
                                 ),
                               ),
                             ),

@@ -45,7 +45,7 @@ class WelcomePage extends StatelessWidget {
                     Navigator.of(context).pushNamed(LoginPage.routeName),
                 icon: const Icon(Icons.arrow_forward),
                 label: const Text(
-                  '繼續',
+                  ' 繼續',
                   style: TextStyle(
                     fontSize: 24,
                   ),

@@ -27,16 +27,11 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
   late final args = ModalRoute.of(context)!.settings.arguments
       as PersonalSettingPageArguments;
 
-  final _userProfileMemoizer = AsyncMemoizer<void>();
   final _userHoldActivityMemoizer = AsyncMemoizer<void>();
   late final List<AsyncMemoizer> _activityNameMemoizerList;
-  late final User user;
+  late final Future<User> _futureUser;
   late final List<Activity?> activityList;
   late final List<UserActivity> userActivities;
-
-  Future<void> _initProfile() async {
-    user = await context.read<AuthProvider>().currentUser;
-  }
 
   Future<void> _initHoldActivity() async {
     userActivities = await _getRelateActivities(
@@ -50,21 +45,29 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _futureUser = context.read<AuthProvider>().currentUser;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
-      appBar: myAppBar(
-        context,
-        title: const Text('使用者頁面'),
-        leading: const BackButton(),
-      ),
-      body: FutureBuilder(
-        future: _userProfileMemoizer.runOnce(_initProfile),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          return Column(
+    return FutureBuilder(
+      future: _futureUser,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final user = snapshot.requireData;
+        return Scaffold(
+          backgroundColor: Theme.of(context).colorScheme.background,
+          appBar: myAppBar(
+            context,
+            title: const Text('使用者頁面'),
+            leading: const BackButton(),
+          ),
+          body: Column(
             children: [
               SizedBox(height: MediaQuery.of(context).size.height * 0.01),
               CircleAvatar(
@@ -279,113 +282,121 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
                 ),
               ),
             ],
-          );
-        },
-      ),
-      bottomNavigationBar: BottomAppBar(
-        child: Row(
-          children: [
-            SizedBox(width: MediaQuery.of(context).size.width * 0.02),
-            Expanded(
-              child: FloatingActionButton.extended(
-                heroTag: 'editSocialMediaFAB',
-                backgroundColor:
-                    Theme.of(context).colorScheme.tertiaryContainer,
-                onPressed: () {
-                  Navigator.of(context).pushNamed(SocialMediaPage.routeName);
-                },
-                label: Text(
-                  '社群媒體',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.primary,
+          ),
+          bottomNavigationBar: BottomAppBar(
+            child: Row(
+              children: [
+                SizedBox(width: MediaQuery.of(context).size.width * 0.02),
+                Expanded(
+                  child: FloatingActionButton.extended(
+                    heroTag: 'editSocialMediaFAB',
+                    backgroundColor:
+                        Theme.of(context).colorScheme.tertiaryContainer,
+                    onPressed: () {
+                      Navigator.of(context)
+                          .pushNamed(SocialMediaPage.routeName);
+                    },
+                    label: Text(
+                      '社群媒體',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
-            SizedBox(width: MediaQuery.of(context).size.width * 0.05),
-            Expanded(
-              child: FloatingActionButton.extended(
-                heroTag: 'changeRoleFAB',
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (_) => AlertDialog(
-                      title: const Text('確認身份切換'),
-                      content: Text('確定要切換成${args.isHost ? '參加者' : '主辦方'}角色嗎？'),
-                      actions: confirmButtons(
-                        context,
-                        action: () {
-                          context
-                              .read<SharedPreferenceProvider>()
-                              .setIsHost(!args.isHost)
-                              .then((_) {
-                            Navigator.of(context).pushNamedAndRemoveUntil(
-                              MainPage.routeName,
-                              (_) => false,
-                              arguments: MainPageArguments(
-                                isHost: !args.isHost,
+                SizedBox(width: MediaQuery.of(context).size.width * 0.05),
+                ...user.email != null
+                    ? [
+                        Expanded(
+                          child: FloatingActionButton.extended(
+                            heroTag: 'changeRoleFAB',
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (_) => AlertDialog(
+                                  title: const Text('確認身份切換'),
+                                  content: Text(
+                                      '確定要切換成${args.isHost ? '參加者' : '主辦方'}角色嗎？'),
+                                  actions: confirmButtons(
+                                    context,
+                                    action: () {
+                                      context
+                                          .read<SharedPreferenceProvider>()
+                                          .setIsHost(!args.isHost)
+                                          .then((_) {
+                                        Navigator.of(context)
+                                            .pushNamedAndRemoveUntil(
+                                          MainPage.routeName,
+                                          (_) => false,
+                                          arguments: MainPageArguments(
+                                            isHost: !args.isHost,
+                                          ),
+                                        );
+                                      });
+                                    },
+                                    cancel: () => Navigator.of(context).pop(),
+                                  ),
+                                ),
+                              );
+                            },
+                            label: Text(
+                              '切換身份',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.primary,
                               ),
-                            );
-                          });
-                        },
-                        cancel: () => Navigator.of(context).pop(),
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.05),
+                      ]
+                    : [],
+                Expanded(
+                  child: FloatingActionButton.extended(
+                    heroTag: 'logoutFAB',
+                    backgroundColor:
+                        Theme.of(context).colorScheme.errorContainer,
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (_) => AlertDialog(
+                          title: const Text('確認登出'),
+                          content: const Text('確定要登出嗎？'),
+                          actions: confirmButtons(
+                            context,
+                            action: () {
+                              context.read<AuthProvider>().logout().then(
+                                  (value) => Navigator.of(context)
+                                          .pushNamedAndRemoveUntil(
+                                        LoginPage.routeName,
+                                        (Route<dynamic> route) => false,
+                                      ));
+                            },
+                            cancel: () => Navigator.of(context).pop(),
+                          ),
+                        ),
+                      );
+                    },
+                    label: Text(
+                      '登出',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.error,
                       ),
                     ),
-                  );
-                },
-                label: Text(
-                  '切換身份',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
-              ),
+                SizedBox(width: MediaQuery.of(context).size.width * 0.02),
+              ],
             ),
-            SizedBox(width: MediaQuery.of(context).size.width * 0.05),
-            Expanded(
-              child: FloatingActionButton.extended(
-                heroTag: 'logoutFAB',
-                backgroundColor: Theme.of(context).colorScheme.errorContainer,
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (_) => AlertDialog(
-                      title: const Text('確認登出'),
-                      content: const Text('確定要登出嗎？'),
-                      actions: confirmButtons(
-                        context,
-                        action: () {
-                          Navigator.of(context)
-                              .pushNamedAndRemoveUntil(
-                                LoginPage.routeName,
-                                (Route<dynamic> route) => false,
-                              )
-                              .then(
-                                  (_) => context.read<AuthProvider>().logout());
-                        },
-                        cancel: () => Navigator.of(context).pop(),
-                      ),
-                    ),
-                  );
-                },
-                label: Text(
-                  '登出',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.error,
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(width: MediaQuery.of(context).size.width * 0.02),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 

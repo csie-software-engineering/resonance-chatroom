@@ -15,7 +15,6 @@ class LoginPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = context.read<AuthProvider>();
     final pref = context.read<SharedPreferenceProvider>().pref;
 
     pref.then((instance) {
@@ -149,19 +148,22 @@ class LoginPage extends StatelessWidget {
                   builder: (_) => AlertDialog(
                     title: const Text('注意'),
                     content:
-                        const Text('匿名使用無法使用部分功能\n且無法轉移帳號資料\n也無法串辦活動\n確定要繼續嗎？'),
+                        const Text('匿名使用無法使用部分功能\n且無法轉移帳號資料\n也無法創辦活動\n確定要繼續嗎？'),
                     actions: confirmButtons(
                       context,
                       action: () {
-                        authProvider.signInWithAnonymous().then((_) {
-                          Navigator.of(context).pushNamedAndRemoveUntil(
-                            MainPage.routeName,
-                            (_) => false,
-                            arguments: const MainPageArguments(
-                              isHost: false,
-                            ),
-                          );
-                        });
+                        context.read<AuthProvider>().signInWithAnonymous().then((value) =>
+                            context
+                                .read<SharedPreferenceProvider>()
+                                .setIsHost(false)
+                                .then((_) => Navigator.of(context)
+                                        .pushNamedAndRemoveUntil(
+                                      MainPage.routeName,
+                                      (_) => false,
+                                      arguments: const MainPageArguments(
+                                        isHost: false,
+                                      ),
+                                    )));
                       },
                       cancel: () => Navigator.of(context).pop(),
                     ),

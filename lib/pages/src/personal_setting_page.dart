@@ -1,5 +1,6 @@
 import 'package:async/async.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/models.dart';
@@ -75,6 +76,44 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
               SizedBox(height: MediaQuery.of(context).size.height * 0.02),
               SizedBox(
                 height: MediaQuery.of(context).size.height * 0.05,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.2,
+                      child: const Text(
+                        '使用者ID : ',
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.6,
+                      child: Text(
+                        user.uid,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.1,
+                      child: IconButton(
+                        tooltip: '複製',
+                        icon: Icon(
+                          Icons.copy,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        onPressed: () {
+                          Clipboard.setData(ClipboardData(text: user.uid)).then(
+                              (_) => ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('已複製使用者ID'))));
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: MediaQuery.of(context).size.height * 0.01),
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.05,
                 child: _NickNameWidget(user: user),
               ),
               SizedBox(height: MediaQuery.of(context).size.height * 0.01),
@@ -91,13 +130,13 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
                       ),
                     ),
                     SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.55,
+                      width: MediaQuery.of(context).size.width * 0.6,
                       child: Text(
                         user.email ?? '匿名使用',
                         textAlign: TextAlign.center,
                       ),
                     ),
-                    SizedBox(width: MediaQuery.of(context).size.width * 0.2)
+                    SizedBox(width: MediaQuery.of(context).size.width * 0.1),
                   ],
                 ),
               ),
@@ -115,13 +154,13 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
                       ),
                     ),
                     SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.55,
+                      width: MediaQuery.of(context).size.width * 0.6,
                       child: Text(
                         args.isHost ? '主辦方' : '參加者',
                         textAlign: TextAlign.center,
                       ),
                     ),
-                    SizedBox(width: MediaQuery.of(context).size.width * 0.2)
+                    SizedBox(width: MediaQuery.of(context).size.width * 0.1),
                   ],
                 ),
               ),
@@ -247,6 +286,25 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
         child: Row(
           children: [
             SizedBox(width: MediaQuery.of(context).size.width * 0.02),
+            Expanded(
+              child: FloatingActionButton.extended(
+                heroTag: 'editSocialMediaFAB',
+                backgroundColor:
+                    Theme.of(context).colorScheme.tertiaryContainer,
+                onPressed: () {
+                  Navigator.of(context).pushNamed(SocialMediaPage.routeName);
+                },
+                label: Text(
+                  '社群媒體',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(width: MediaQuery.of(context).size.width * 0.05),
             Expanded(
               child: FloatingActionButton.extended(
                 heroTag: 'changeRoleFAB',
@@ -384,7 +442,7 @@ class _NickNameWidgetState extends State<_NickNameWidget> {
           ),
         ),
         SizedBox(
-          width: MediaQuery.of(context).size.width * 0.55,
+          width: MediaQuery.of(context).size.width * 0.6,
           child: _setNickname
               ? TextField(
                   controller:
@@ -394,10 +452,15 @@ class _NickNameWidgetState extends State<_NickNameWidget> {
                   },
                   onSubmitted: (_) => _rename(context),
                   textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 14,
+                  ),
                   decoration: InputDecoration(
-                    contentPadding: EdgeInsets.all(
-                        3 + MediaQuery.of(context).size.height * 0.01),
+                    contentPadding: const EdgeInsets.all(0),
                     hintText: '輸入新的暱稱',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
                 )
               : Text(
@@ -406,7 +469,7 @@ class _NickNameWidgetState extends State<_NickNameWidget> {
                 ),
         ),
         SizedBox(
-          width: MediaQuery.of(context).size.width * 0.2,
+          width: MediaQuery.of(context).size.width * 0.1,
           child: IconButton(
             tooltip: '修改暱稱',
             icon:

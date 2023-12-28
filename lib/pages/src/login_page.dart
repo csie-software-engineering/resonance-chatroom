@@ -20,7 +20,7 @@ class LoginPage extends StatelessWidget {
     pref.then((instance) {
       bool? isHost = instance.getBool('isHost');
       if (isHost != null) {
-        if (first && context.read<AuthProvider>().getFBAUser != null) {
+        if (first && context.read<AuthProvider>().fbaUser != null) {
           Navigator.of(context).pushReplacementNamed(
             MainPage.routeName,
             arguments: MainPageArguments(isHost: isHost),

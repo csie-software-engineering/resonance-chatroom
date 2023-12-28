@@ -12,6 +12,7 @@ import 'package:resonance_chatroom/pages/src/activity_main_page.dart';
 import 'package:resonance_chatroom/widgets/src/public/quit_warning_dialog.dart';
 import 'package:resonance_chatroom/widgets/widgets.dart';
 import 'package:resonance_chatroom/providers/providers.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../widgets/src/chat_components/questionDialog.dart';
 import '../../constants/src/firestore_constants.dart';
@@ -78,6 +79,7 @@ class _ChatPageState extends State<ChatPage> {
   bool initial = false;
   bool _isAlreadyReport = false;
   bool _enableShowTopic = true;
+  List<bool>? isTryLaunchUrl;
 
   List<QueryDocumentSnapshot> _chatMessages = [];
 
@@ -505,6 +507,9 @@ class _ChatPageState extends State<ChatPage> {
                                             return Text(
                                                 'Error: ${snapshot.error}');
                                           } else {
+                                            if(snapshot.data != null){
+                                              isTryLaunchUrl = List.generate(snapshot.data!.length, (index) => false);
+                                            }
                                             return snapshot.data != null
                                                 ? Row(
                                                     children: [
@@ -572,8 +577,22 @@ class _ChatPageState extends State<ChatPage> {
                                                                               .withOpacity(
                                                                                   0.3),
                                                                           onPressed:
-                                                                              () {
+                                                                              () async {
                                                                             // todo launch;
+                                                                                if(!isTryLaunchUrl![index]) {
+                                                                                  isTryLaunchUrl![index] = true;
+                                                                                    try {
+                                                                                      snapshot.data![index].linkUrl;
+                                                                                      Uri url = Uri.parse(snapshot.data![index].linkUrl);
+                                                                                      if (!await launchUrl(url)) {
+                                                                                        throw Exception('Could not launch $url');
+                                                                                        }
+                                                                                    } catch (e) {
+                                                                                      debugPrint("_launchSocialMedialError: $e");
+                                                                                      Fluttertoast.showToast(msg: "連結有誤無法點開");
+                                                                                    }
+                                                                                    isTryLaunchUrl![index] = false;
+                                                                                }
                                                                           }),
                                                                       Container(
                                                                         padding: const EdgeInsets
@@ -936,7 +955,7 @@ class _ChatPageState extends State<ChatPage> {
                               AsyncSnapshot<DocumentSnapshot> snapshot) {
                             Map<String, dynamic>? room =
                                 snapshot.data?.data() as Map<String, dynamic>?;
-                            debugPrint("topic: ${_allTopics[room!["topicId"]]}");
+                            // debugPrint("topic: ${_allTopics[room!["topicId"]]}");
                             if (room != null &&
                                 room.isNotEmpty &&
                                 room["topicId"] != _currentTopicId) {

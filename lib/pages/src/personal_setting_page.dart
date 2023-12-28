@@ -308,7 +308,8 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
                 ),
                 SizedBox(width: MediaQuery.of(context).size.width * 0.05),
                 ...context.read<AuthProvider>().fbaUser!.isAnonymous
-                    ? [
+                    ? []
+                    : [
                         Expanded(
                           child: FloatingActionButton.extended(
                             heroTag: 'changeRoleFAB',
@@ -353,8 +354,7 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
                         ),
                         SizedBox(
                             width: MediaQuery.of(context).size.width * 0.05),
-                      ]
-                    : [],
+                      ],
                 Expanded(
                   child: FloatingActionButton.extended(
                     heroTag: 'logoutFAB',

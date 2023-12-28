@@ -809,8 +809,7 @@ class _ChatPageState extends State<ChatPage> {
                                           Navigator.popUntil(
                                               context,
                                               ModalRoute.withName(
-                                                  ActivityMainPage
-                                                      .routeName));
+                                                  ActivityMainPage.routeName));
                                         });
                                       }
                                     });
@@ -820,32 +819,32 @@ class _ChatPageState extends State<ChatPage> {
                         ),
                         args.isHistorical
                             ? const SizedBox()
-                        : Align(
-                          alignment: Alignment.centerRight,
-                          child: Padding(
-                            padding: const EdgeInsets.only(right: 20),
-                            child: Container(
-                              height: 40,
-                              width: 40,
-                              decoration: BoxDecoration(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .primary
-                                    .withOpacity(0.7),
-                                borderRadius: BorderRadius.circular(15),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurface
-                                        .withOpacity(0.2),
-                                    offset: const Offset(2, 2),
-                                    blurRadius: 2,
-                                    spreadRadius: 1,
-                                  )
-                                ],
-                              ),
-                              child: IconButton(
+                            : Align(
+                                alignment: Alignment.centerRight,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(right: 20),
+                                  child: Container(
+                                    height: 40,
+                                    width: 40,
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .primary
+                                          .withOpacity(0.7),
+                                      borderRadius: BorderRadius.circular(15),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurface
+                                              .withOpacity(0.2),
+                                          offset: const Offset(2, 2),
+                                          blurRadius: 2,
+                                          spreadRadius: 1,
+                                        )
+                                      ],
+                                    ),
+                                    child: IconButton(
                                       iconSize: 25,
                                       icon: Icon(isOn
                                           ? Icons.lightbulb
@@ -868,72 +867,62 @@ class _ChatPageState extends State<ChatPage> {
                                                       .choices.length,
                                                   (index) => false);
                                               return AlertDialog(
-                                                title: Text(_currentQuestion!
-                                                    .questionName),
-                                                content: Container(
-                                                  width: 230,
-                                                  height: 200,
-                                                  child: QuestionDialog(
-                                                    questionAnswers:
-                                                        _questionAnswers!,
-                                                    currentQuestion:
-                                                        _currentQuestion!,
+                                                  title: Text(_currentQuestion!
+                                                      .questionName),
+                                                  content: Container(
+                                                    width: 230,
+                                                    height: 200,
+                                                    child: QuestionDialog(
+                                                      questionAnswers:
+                                                          _questionAnswers!,
+                                                      currentQuestion:
+                                                          _currentQuestion!,
+                                                    ),
                                                   ),
-                                                ),
-                                                actions: [
-                                                  TextButton(
-                                                    onPressed: () async {
-                                                      Navigator.of(context)
-                                                          .pop();
-                                                      // todo 不知道 choice 要傳什麼
-                                                      String? choice = "";
+                                                  actions:
+                                                      confirmButtons(context,
+                                                          action: () async {
+                                                    Navigator.of(context).pop();
+                                                    // todo 不知道 choice 要傳什麼
+                                                    String? choice = "";
 
-                                                      for (int i = 0;
-                                                          i <
-                                                              _questionAnswers!
-                                                                  .length;
-                                                          i++) {
-                                                        if (_questionAnswers![
-                                                            i])
-                                                          choice =
+                                                    for (int i = 0;
+                                                        i <
+                                                            _questionAnswers!
+                                                                .length;
+                                                        i++) {
+                                                      if (_questionAnswers![i])
+                                                        choice =
+                                                            _currentQuestion!
+                                                                .choices[i];
+                                                    }
+
+                                                    // todo 抓錯誤
+                                                    try {
+                                                      debugPrint(
+                                                          "choice: ${choice}");
+                                                      await questionProvider
+                                                          .userAnswer(
+                                                              args.activityId,
                                                               _currentQuestion!
-                                                                  .choices[i];
-                                                      }
-
-                                                      // todo 抓錯誤
-                                                      try {
-                                                        debugPrint(
-                                                            "choice: ${choice}");
-                                                        await questionProvider
-                                                            .userAnswer(
-                                                                args.activityId,
-                                                                _currentQuestion!
-                                                                    .uid,
-                                                                choice!);
-                                                      } catch (e) {
-                                                        debugPrint(
-                                                            "answerQuesitonError:$e");
-                                                      }
-                                                    },
-                                                    child: Text('確定'),
-                                                  ),
-                                                  TextButton(
-                                                    onPressed: () {
-                                                      Navigator.of(context)
-                                                          .pop();
-                                                    },
-                                                    child: Text('算了'),
-                                                  ),
-                                                ],
-                                              );
+                                                                  .uid,
+                                                              choice!);
+                                                    } catch (e) {
+                                                      debugPrint(
+                                                          "answerQuesitonError:$e");
+                                                    }
+                                                  }, cancel: () {
+                                                    Navigator.of(context).pop();
+                                                  })
+                                                  );
                                             },
                                           );
                                         }
                                       },
                                     ),
-                            ),
-                          ),
-                        )
+                                  ),
+                                ),
+                              )
                       ],
                     ),
                   ),

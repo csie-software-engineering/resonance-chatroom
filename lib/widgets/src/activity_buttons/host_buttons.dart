@@ -228,8 +228,8 @@ class HostButtonsState extends State<HostButtons>
                         )),
                     onPressed: () {
                       Navigator.of(context).pushNamed(
-                          HostActivityTagPage.routeName,
-                          arguments: HostActivityTagPageArguments(
+                          HostActivityEditPage.routeName,
+                          arguments: HostActivityEditPageArguments(
                               activityId: widget.activityId));
                     })
                 : IconButton(onPressed: () {}, icon: const Text("無效")),

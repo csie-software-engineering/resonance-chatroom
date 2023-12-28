@@ -27,7 +27,8 @@ class _HostActivityEditPageState extends State<HostActivityEditPage> {
   final TextEditingController _infoController = TextEditingController();
   final List<DateTime?> _selectedDates = [null, null];
   String? _selectedImage;
-  final DateFormat formatter = DateFormat('yyyy-MM-dd');
+// 建立一個日期格式化物件，參數改成'yyyy-MM-dd-hh-mm'
+final DateFormat formatter = DateFormat('yyyy-MM-dd-hh-mm');
   late final ActivityProvider activityProvider =
       context.read<ActivityProvider>();
   late final args = ModalRoute.of(context)!.settings.arguments
@@ -37,15 +38,25 @@ class _HostActivityEditPageState extends State<HostActivityEditPage> {
     debugPrint("初始活動編輯頁面");
     activityProvider.getActivity(args.activityId).then((value) {
       _originActivity = value;
+      // 將_originActivity.startDate和_originActivity.endDate轉換成int
+      int startTimestamp = int.parse(_originActivity.startDate);
+      int endTimestamp = int.parse(_originActivity.endDate);
+// 將int轉換成DateTime
+      DateTime startDate = DateTime.fromMillisecondsSinceEpoch(startTimestamp);
+      DateTime endDate = DateTime.fromMillisecondsSinceEpoch(endTimestamp);
+// 將DateTime轉換成String
+      String startString = formatter.format(startDate);
+      String endString = formatter.format(endDate);
       _nameController.text = _originActivity.activityName;
       _infoController.text = _originActivity.activityInfo;
-      _selectedDates[0] = formatter.parse(_originActivity.startDate);
-      _selectedDates[1] = formatter.parse(_originActivity.endDate);
-      _selectedImage = _originActivity.activityPhoto;
+      print(_nameController.text);
+      print(_infoController.text);
+         _selectedImage = _originActivity.activityPhoto;
+// 將String轉換成DateTime
+      _selectedDates[0] = formatter.parse(startString);
+      _selectedDates[1] = formatter.parse(endString);
       setState(() {});
     });
-    debugPrint(_nameController.text);
-    debugPrint(_infoController.text);
   }
 
   @override
@@ -294,7 +305,8 @@ class _HostActivityEditPageState extends State<HostActivityEditPage> {
             endDate: _selectedDates[1]!.toEpochString(),
             activityPhoto: _selectedImage!,
           );
-          context.read<ActivityProvider>().setNewActivity(activityData).then(
+          activityData.uid = args.activityId;
+          context.read<ActivityProvider>().editActivity(activityData).then(
                 (activity) => Navigator.of(context).pushNamed(
                   HostActivityTagPage.routeName,
                   arguments: HostActivityTagPageArguments(
@@ -303,7 +315,7 @@ class _HostActivityEditPageState extends State<HostActivityEditPage> {
                 ),
               );
         },
-        label: const Row(children: [Icon(Icons.send), Text("新增活動")]),
+        label: const Row(children: [Icon(Icons.send), Text("編輯活動")]),
       ),
       floatingActionButtonAnimator: FloatingActionButtonAnimator.scaling,
     );

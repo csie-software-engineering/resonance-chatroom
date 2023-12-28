@@ -14,6 +14,7 @@ import 'src/social_media_page.dart';
 import 'src/activity_main_page.dart';
 import 'src/welcome_page.dart';
 import 'src/manager_page.dart';
+import 'src/host_activity_edit_page.dart';
 
 export 'src/chat.dart';
 export 'src/historical_chat_room_page.dart';
@@ -29,6 +30,7 @@ export 'src/social_media_page.dart';
 export 'src/activity_main_page.dart';
 export 'src/welcome_page.dart';
 export 'src/manager_page.dart';
+export 'src/host_activity_edit_page.dart';
 
 Map<String, Widget Function(BuildContext)> routes = {
   ChatPage.routeName: (_) => const ChatPage(),
@@ -45,4 +47,5 @@ Map<String, Widget Function(BuildContext)> routes = {
   ActivityMainPage.routeName: (_) => const ActivityMainPage(),
   WelcomePage.routeName: (_) => const WelcomePage(),
   ManagerPage.routeName: (_) => const ManagerPage(),
+  HostActivityEditPage.routeName: (_) => const HostActivityEditPage(),
 };

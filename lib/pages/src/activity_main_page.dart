@@ -313,7 +313,7 @@ class _ActivityMainPageState extends State<ActivityMainPage>
       await _initActivityContent();
       _initSetTag();
       _initImage();
-      await _initPoints();
+      if(!args.isHost) await _initPoints();
       initial = true;
     }
   }

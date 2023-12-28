@@ -225,6 +225,7 @@ class _ActivityCarouselWidgetState extends State<ActivityCarouselWidget> {
                       child: RoomCardWidget(
                         isHost: widget.isHost,
                         activityId: activityId,
+                        refresh: () => setState(() {}),
                       ),
                     );
                   },
@@ -247,11 +248,13 @@ class _ActivityCarouselWidgetState extends State<ActivityCarouselWidget> {
 class RoomCardWidget extends StatelessWidget {
   final bool isHost;
   final String activityId;
+  final Function refresh;
 
   const RoomCardWidget({
     super.key,
     required this.isHost,
     required this.activityId,
+    required this.refresh,
   });
 
   @override
@@ -262,45 +265,44 @@ class RoomCardWidget extends StatelessWidget {
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
-              } else if (snapshot.hasError) {
-                return const SizedBox();
-              } else {
-                final activity = snapshot.requireData;
-                return InkWell(
-                  onTap: () {
-                    if (isHost || activity.isEnabled) {
-                      Navigator.of(context).pushNamed(
-                        ActivityMainPage.routeName,
-                        arguments: ActivityMainPageArguments(
-                          activityId: activityId,
-                          isHost: isHost, //todo
-                        ),
-                      );
-                    } else {
-                      showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: const Text('發生錯誤'),
-                          content: const Text(
-                              '活動可能已經取消或發生錯誤\n長按活動可以刪除該活動\n若有疑問請聯繫主辦方'),
-                          actions: [
-                            TextButton(
-                              child: const Text('了解'),
-                              onPressed: () => Navigator.of(context).pop(),
-                            ),
-                          ],
-                        ),
-                      );
-                    }
-                  },
-                  child: Image.memory(
-                    base64ToImage(activity.activityPhoto),
-                    fit: BoxFit.contain,
-                    opacity:
-                        AlwaysStoppedAnimation(activity.isEnabled ? 1 : 0.5),
-                  ),
-                );
               }
+
+              final activity = snapshot.requireData;
+              return InkWell(
+                onTap: () {
+                  if (isHost || activity.isEnabled) {
+                    Navigator.of(context)
+                        .pushNamed(
+                          ActivityMainPage.routeName,
+                          arguments: ActivityMainPageArguments(
+                            activityId: activityId,
+                            isHost: isHost,
+                          ),
+                        )
+                        .then((_) => refresh());
+                  } else {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('發生錯誤'),
+                        content: const Text(
+                            '活動可能已經取消或發生錯誤\n長按活動可以刪除該活動\n若有疑問請聯繫主辦方'),
+                        actions: [
+                          TextButton(
+                            child: const Text('了解'),
+                            onPressed: () => Navigator.of(context).pop(),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                },
+                child: Image.memory(
+                  base64ToImage(activity.activityPhoto),
+                  fit: BoxFit.contain,
+                  opacity: AlwaysStoppedAnimation(activity.isEnabled ? 1 : 0.5),
+                ),
+              );
             }),
       );
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
+import 'package:intl/intl.dart';
 import '../../models/models.dart';
 import '../../providers/providers.dart';
 import '../../utils/utils.dart';
@@ -27,6 +27,7 @@ class _HostActivityEditPageState extends State<HostActivityEditPage> {
   final TextEditingController _infoController = TextEditingController();
   final List<DateTime?> _selectedDates = [null, null];
   String? _selectedImage;
+  final DateFormat formatter = DateFormat('yyyy-MM-dd');
   late final ActivityProvider activityProvider =
       context.read<ActivityProvider>();
   late final args = ModalRoute.of(context)!.settings.arguments
@@ -38,11 +39,13 @@ class _HostActivityEditPageState extends State<HostActivityEditPage> {
       _originActivity = value;
       _nameController.text = _originActivity.activityName;
       _infoController.text = _originActivity.activityInfo;
-      //_selectedDates[0] = _originActivity.startDate;
-      //_selectedDates[1] = _originActivity.endDate;
+      _selectedDates[0] = formatter.parse(_originActivity.startDate);
+      _selectedDates[1] = formatter.parse(_originActivity.endDate);
       _selectedImage = _originActivity.activityPhoto;
       setState(() {});
     });
+    debugPrint(_nameController.text);
+    debugPrint(_infoController.text);
   }
 
   @override

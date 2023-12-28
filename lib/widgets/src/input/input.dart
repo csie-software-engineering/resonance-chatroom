@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:provider/provider.dart';
+import 'package:resonance_chatroom/providers/providers.dart';
 
 import '../../../models/models.dart';
 import 'widgets.dart';
@@ -11,7 +14,7 @@ class Input extends StatefulWidget {
   const Input({
     super.key,
     this.onAttachmentPressed,
-    required this.onSendPressed, required this.nextTopic, required this.enableSocialMedia,
+    required this.onSendPressed, required this.enableSocialMedia, required this.activityId, required this.peerId,
   });
 
   final void Function(String, MessageType) onSendPressed; // 暫時先用 string 塞著
@@ -22,8 +25,9 @@ class Input extends StatefulWidget {
   /// something is uploading so you need to set this manually.
 
   // final bool? isAttachmentUploading;
+  final String activityId;
+  final String peerId;
 
-  final Function() nextTopic;
   final Function() enableSocialMedia;
 
   /// See [AttachmentButton.onPressed].
@@ -42,6 +46,8 @@ class Input extends StatefulWidget {
 
 /// [Input] widget state.
 class _InputState extends State<Input> {
+  late final ChatProvider chatProvider = context.read<ChatProvider>();
+
   late final _inputFocusNode = FocusNode(
     onKeyEvent: (node, event) {
       if (event.physicalKey == PhysicalKeyboardKey.enter &&
@@ -63,6 +69,7 @@ class _InputState extends State<Input> {
 
   bool _sendButtonVisible = false;
   bool _isFocus = false;
+  bool isTryChangeTopic = false;
   late TextEditingController _textController;
 
   @override
@@ -143,11 +150,28 @@ class _InputState extends State<Input> {
                   padding: const EdgeInsets.only(left: 15),
                   child: IconButton(
                     // Next
-                    color: Theme.of(context).colorScheme.primary.withOpacity(0.8),
+                    color: isTryChangeTopic ? Theme.of(context).colorScheme.primary.withOpacity(0.1) : Theme.of(context).colorScheme.primary.withOpacity(0.8),
                     icon: const Icon(Icons.next_plan),
                     tooltip: "換話題",
                     onPressed: () {
-                      widget.nextTopic();
+                       //todo
+                      if(!isTryChangeTopic) {
+                        isTryChangeTopic = true;
+                          try{
+                            chatProvider.updateRandomTopic(widget.activityId, widget.peerId);
+                            setState(() {});
+                            Fluttertoast.showToast(msg: "30秒內無法再更換話題");
+                            Future.delayed(Duration(seconds: 30), (){
+                              setState((){
+                                isTryChangeTopic = false;
+                              });
+                            });
+                          } catch (e) {
+                              debugPrint("changeTopicError: $e");
+                              isTryChangeTopic = false;
+                          }
+                      }
+
                     },
                     iconSize: 30,
                     splashRadius: 1,

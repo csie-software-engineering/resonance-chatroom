@@ -860,6 +860,7 @@ class _ChatPageState extends State<ChatPage> {
                                             isOn = false;
                                           });
                                           showDialog(
+                                            barrierDismissible: false,
                                             context: context,
                                             builder: (BuildContext context) {
                                               _questionAnswers = List.generate(
@@ -935,6 +936,7 @@ class _ChatPageState extends State<ChatPage> {
                               AsyncSnapshot<DocumentSnapshot> snapshot) {
                             Map<String, dynamic>? room =
                                 snapshot.data?.data() as Map<String, dynamic>?;
+                            debugPrint("topic: ${_allTopics[room!["topicId"]]}");
                             if (room != null &&
                                 room.isNotEmpty &&
                                 room["topicId"] != _currentTopicId) {
@@ -1115,8 +1117,9 @@ class _ChatPageState extends State<ChatPage> {
                               ),
                               !args.isHistorical
                                   ? Input(
+                                      activityId: args.activityId,
+                                      peerId: args.peerId,
                                       onSendPressed: onSendMessage,
-                                      nextTopic: nextTopic,
                                       enableSocialMedia: enableSocialMedia,
                                     )
                                   : const SizedBox(),

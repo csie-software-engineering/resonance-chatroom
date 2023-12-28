@@ -3,9 +3,11 @@ import 'dart:isolate';
 
 // import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 import 'package:async/async.dart';
 import 'package:resonance_chatroom/widgets/src/activity_buttons/host_buttons.dart';
+import 'package:resonance_chatroom/widgets/src/confirm_buttons.dart';
 
 import '../../widgets/src/public/quit_warning_dialog.dart';
 import '../routes.dart';
@@ -50,13 +52,17 @@ class _ActivityMainPageState extends State<ActivityMainPage>
   late final _currentUser;
   late final _currentUserActivity;
   late final _image;
+  late int _currentActivityPoints;
 
   FloatingActionButtonLocation buttonPosition =
       FloatingActionButtonLocation.centerFloat;
 
+  String? _deletePointsString;
+
   double _height = 0;
   Timer? _timer;
   int timeShowUp = 0;
+
 
   // 到時候會從 activity_provider 那邊抓資料
   late final Activity _currentActivity;
@@ -68,6 +74,7 @@ class _ActivityMainPageState extends State<ActivityMainPage>
   bool _enableMatch = false;
   bool isStartMatching = false;
   bool initial = false;
+  bool isTryChangingPoints = false;
 
   void _onTimerTick(Timer timer) {
     setState(() {
@@ -292,11 +299,21 @@ class _ActivityMainPageState extends State<ActivityMainPage>
     }
   }
 
+  Future<void> _initPoints() async {
+    try{
+      _currentActivityPoints = await userProvider.getUserActivityPoint(args.activityId);
+    } catch (e) {
+      debugPrint("_initPointsError: $e");
+      _currentActivityPoints = 0;
+    }
+  }
+
   Future<void> _init() async {
     if (!initial) {
       await _initActivityContent();
       _initSetTag();
       _initImage();
+      await _initPoints();
       initial = true;
     }
   }
@@ -447,24 +464,105 @@ class _ActivityMainPageState extends State<ActivityMainPage>
                                 ),
                               ),
                               // const SizedBox(width: 50),
-                              args.isHost ? Align(
-                                alignment: Alignment.centerRight,
-                                child: Padding(
-                                  padding: const EdgeInsets.only(right: 10.0),
-                                  child: IconButton(
-                                    color: Theme.of(context).colorScheme.primary,
-                                      iconSize: 30,
-                                      icon: const Icon(
-                                          Icons.person,
+                              args.isHost
+                                  ? Align(
+                                      alignment: Alignment.centerRight,
+                                      child: Padding(
+                                        padding:
+                                            const EdgeInsets.only(right: 10.0),
+                                        child: IconButton(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .primary,
+                                            iconSize: 30,
+                                            icon: const Icon(
+                                              Icons.person,
+                                            ),
+                                            onPressed: () {
+                                              Navigator.of(context).pushNamed(
+                                                  ManagerPage.routeName,
+                                                  arguments: ManagerArguments(
+                                                      activityId:
+                                                          args.activityId));
+                                            }),
                                       ),
-                                      onPressed: () {
-                                        Navigator.of(context).pushNamed(
-                                            ManagerPage.routeName,
-                                            arguments: ManagerArguments(
-                                                activityId: args.activityId));
-                                      }),
-                                ),
-                              ) : const SizedBox(),
+                                    )
+                                  : Align(
+                                      alignment: Alignment.centerRight,
+                                      child: GestureDetector(
+                                        child: Padding(
+                                          padding:
+                                              const EdgeInsets.only(right: 20.0),
+                                          child: Container(
+                                            padding: EdgeInsets.only(left: 8, top: 2, bottom: 2, right: 12),
+                                            decoration: BoxDecoration(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .primary
+                                                  .withOpacity(0.8),
+                                              borderRadius: BorderRadius.circular(16),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .onSurface
+                                                      .withOpacity(0.2),
+                                                  offset: const Offset(2, 2),
+                                                  blurRadius: 2,
+                                                  spreadRadius: 1,
+                                                ),
+                                              ],
+                                            ),
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.end,
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Icon(Icons.currency_bitcoin,
+                                                color: Color(0xffffb300),),
+                                                Text(_currentActivityPoints.toString(), style: TextStyle(
+                                                  color: Colors.yellow,
+                                                )),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                        onTap: (){
+                                          showDialog(context: context, builder: (BuildContext context){
+                                            return AlertDialog(
+                                              title: Text("要扣多少點數？"),
+                                              content: TextField(
+                                                controller: TextEditingController(),
+                                                onChanged: (value){
+                                                  _deletePointsString = value;
+                                                },
+                                              ),
+                                              actions: confirmButtons(context,
+                                                  action:() async {
+                                                    if(!isTryChangingPoints) {
+                                                      isTryChangingPoints = true;
+                                                      int deletePoints = 0;
+                                                      try {
+                                                        deletePoints = int.parse(_deletePointsString!);
+                                                        await userProvider.minusUserActivityPoint(args.activityId, deletePoints);
+                                                        _currentActivityPoints -= deletePoints;
+                                                        setState(() {
+                                                          Navigator.of(context).pop();
+                                                        });
+                                                      } catch (e) {
+                                                        debugPrint("_changePointsError $e");
+                                                        Fluttertoast.showToast(msg: "無效輸入");
+                                                      }
+                                                      isTryChangingPoints = false;
+                                                    }
+                                                },
+                                                  cancel: (){
+                                                Navigator.of(context).pop();
+                                              })
+                                            );
+                                          });
+                                        },
+                                      ),
+                                    ),
                             ],
                           ),
                         ),

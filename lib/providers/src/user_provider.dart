@@ -419,8 +419,9 @@ class UserProvider {
 
     final userData = await userRef.get();
     if (!userData.exists) throw Exception("使用者不存在");
-    if (!userData.get(FSUserConstants.isEnabled.value))
+    if (!userData.get(FSUserConstants.isEnabled.value)) {
       throw Exception("使用者已被停用");
+    }
 
     final collection = isManager
         ? FireStoreUserConstants.userHostedActivityCollectionPath.value

@@ -95,10 +95,10 @@ class UserProvider {
         .doc(userId);
 
     final userData = await userRef.get();
-    assert(userData.exists, "使用者不存在");
-    final fsUser = FSUser.fromDocument(userData);
-    final user = fsUser.toUser();
-    assert(user.email != null || activity.isManager != true, "匿名使用者不能管理活動");
+    if (!userData.exists) throw Exception("使用者不存在");
+
+    assert(activity.isManager != true || !AuthProvider().fbaUser!.isAnonymous,
+        "匿名使用者不能管理活動");
 
     final collection = activity.isManager
         ? FireStoreUserConstants.userHostedActivityCollectionPath.value
@@ -136,8 +136,9 @@ class UserProvider {
         .doc(userId);
 
     final userData = await userRef.get();
-    assert(userData.exists, "使用者不存在");
-    assert(userData.get(FSUserConstants.isEnabled.value), "使用者已被停用");
+    if (!userData.exists) throw Exception("使用者不存在");
+    if (!userData.get(FSUserConstants.isEnabled.value))
+      throw Exception("使用者已被停用");
 
     final socialMediaRef = userRef
         .collection(FireStoreUserConstants.userSocialMediaCollectionPath.value)
@@ -159,8 +160,9 @@ class UserProvider {
         .doc(userId);
 
     final userData = await userRef.get();
-    assert(userData.exists, "使用者不存在");
-    assert(userData.get(FSUserConstants.isEnabled.value), "使用者已被停用");
+    if (!userData.exists) throw Exception("使用者不存在");
+    if (!userData.get(FSUserConstants.isEnabled.value))
+      throw Exception("使用者已被停用");
 
     final collection = isManager
         ? FireStoreUserConstants.userHostedActivityCollectionPath.value
@@ -189,7 +191,7 @@ class UserProvider {
         .doc(user.uid);
 
     final userData = await userRef.get();
-    assert(userData.exists, "使用者不存在");
+    if (!userData.exists) throw Exception("使用者不存在");
 
     user.isEnabled = true;
     final fsUser = user.toFSUser();
@@ -233,8 +235,9 @@ class UserProvider {
         .doc(userId);
 
     final userData = await userRef.get();
-    assert(userData.exists, "使用者不存在");
-    assert(userData.get(FSUserConstants.isEnabled.value), "使用者已被停用");
+    if (!userData.exists) throw Exception("使用者不存在");
+    if (!userData.get(FSUserConstants.isEnabled.value))
+      throw Exception("使用者已被停用");
 
     final socialMediaRef = userRef
         .collection(FireStoreUserConstants.userSocialMediaCollectionPath.value)
@@ -262,8 +265,9 @@ class UserProvider {
         .doc(userId);
 
     final userData = await userRef.get();
-    assert(userData.exists, "使用者不存在");
-    assert(userData.get(FSUserConstants.isEnabled.value), "使用者已被停用");
+    if (!userData.exists) throw Exception("使用者不存在");
+    if (!userData.get(FSUserConstants.isEnabled.value))
+      throw Exception("使用者已被停用");
 
     final collection = activity.isManager
         ? FireStoreUserConstants.userHostedActivityCollectionPath.value
@@ -291,8 +295,9 @@ class UserProvider {
         .doc(userId);
 
     final userData = await userRef.get();
-    assert(userData.exists, "使用者不存在");
-    assert(userData.get(FSUserConstants.isEnabled.value), "使用者已被停用");
+    if (!userData.exists) throw Exception("使用者不存在");
+    if (!userData.get(FSUserConstants.isEnabled.value))
+      throw Exception("使用者已被停用");
 
     final activityRef = userRef
         .collection(
@@ -326,7 +331,7 @@ class UserProvider {
         .doc(userId);
 
     final userData = await userRef.get();
-    assert(userData.exists, "使用者不存在");
+    if (!userData.exists) throw Exception("使用者不存在");
 
     final fsUser = FSUser.fromDocument(userData);
     final user = fsUser.toUser();
@@ -358,8 +363,9 @@ class UserProvider {
         .doc(userId);
 
     final userData = await userRef.get();
-    assert(userData.exists, "使用者不存在");
-    assert(userData.get(FSUserConstants.isEnabled.value), "使用者已被停用");
+    if (!userData.exists) throw Exception("使用者不存在");
+    if (!userData.get(FSUserConstants.isEnabled.value))
+      throw Exception("使用者已被停用");
 
     final userSocialMediaData = await userRef
         .collection(FireStoreUserConstants.userSocialMediaCollectionPath.value)
@@ -385,8 +391,9 @@ class UserProvider {
         .doc(userId);
 
     final userData = await userRef.get();
-    assert(userData.exists, "使用者不存在");
-    assert(userData.get(FSUserConstants.isEnabled.value), "使用者已被停用");
+    if (!userData.exists) throw Exception("使用者不存在");
+    if (!userData.get(FSUserConstants.isEnabled.value))
+      throw Exception("使用者已被停用");
     final userSocialMediaData = await userRef
         .collection(FireStoreUserConstants.userSocialMediaCollectionPath.value)
         .get();
@@ -411,8 +418,9 @@ class UserProvider {
         .doc(userId);
 
     final userData = await userRef.get();
-    assert(userData.exists, "使用者不存在");
-    assert(userData.get(FSUserConstants.isEnabled.value), "使用者已被停用");
+    if (!userData.exists) throw Exception("使用者不存在");
+    if (!userData.get(FSUserConstants.isEnabled.value))
+      throw Exception("使用者已被停用");
 
     final collection = isManager
         ? FireStoreUserConstants.userHostedActivityCollectionPath.value
@@ -438,8 +446,9 @@ class UserProvider {
         .doc(userId);
 
     final userData = await userRef.get();
-    assert(userData.exists, "使用者不存在");
-    assert(userData.get(FSUserConstants.isEnabled.value), "使用者已被停用");
+    if (!userData.exists) throw Exception("使用者不存在");
+    if (!userData.get(FSUserConstants.isEnabled.value))
+      throw Exception("使用者已被停用");
 
     final collection = isManager
         ? FireStoreUserConstants.userHostedActivityCollectionPath.value
@@ -520,8 +529,9 @@ class UserProvider {
         .doc(userId);
 
     final userData = await userRef.get();
-    assert(userData.exists, "使用者不存在");
-    assert(userData.get(FSUserConstants.isEnabled.value), "使用者已被停用");
+    if (!userData.exists) throw Exception("使用者不存在");
+    if (!userData.get(FSUserConstants.isEnabled.value))
+      throw Exception("使用者已被停用");
 
     final userActivityRef = userRef
         .collection(
@@ -544,8 +554,9 @@ class UserProvider {
         .doc(userId);
 
     final userData = await userRef.get();
-    assert(userData.exists, "使用者不存在");
-    assert(userData.get(FSUserConstants.isEnabled.value), "使用者已被停用");
+    if (!userData.exists) throw Exception("使用者不存在");
+    if (!userData.get(FSUserConstants.isEnabled.value))
+      throw Exception("使用者已被停用");
 
     final userActivityRef = userRef
         .collection(

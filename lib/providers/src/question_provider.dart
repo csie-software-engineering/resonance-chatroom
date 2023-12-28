@@ -22,7 +22,7 @@ class QuestionProvider {
     String questionId,
     String choice,
   ) async {
-    assert(AuthProvider().getFBAUser!.isAnonymous == false, '匿名無法回答問題');
+    assert(AuthProvider().fbaUser!.isAnonymous == false, '匿名無法回答問題');
 
     final email = (await AuthProvider().currentUser).email;
     assert(email != null, 'email 不可為空');

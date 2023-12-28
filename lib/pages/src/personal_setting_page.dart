@@ -307,7 +307,7 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
                   ),
                 ),
                 SizedBox(width: MediaQuery.of(context).size.width * 0.05),
-                ...user.email != null
+                ...context.read<AuthProvider>().fbaUser!.isAnonymous
                     ? [
                         Expanded(
                           child: FloatingActionButton.extended(

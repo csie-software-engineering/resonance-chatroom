@@ -1008,8 +1008,8 @@ class _ChatPageState extends State<ChatPage> {
                                           child: Text(
                                             key: UniqueKey(),
                                             _enableShowTopic
-                                                ? _allTopics[_currentTopicId]!
-                                                : "",
+                                                ? _allTopics[_currentTopicId] ?? "自由聊天吧!"
+                                                : "自由聊天吧!",
                                             style: TextStyle(
                                               fontSize: 20,
                                               color: Theme.of(context)

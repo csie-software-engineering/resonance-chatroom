@@ -95,11 +95,17 @@ class _ChatPageState extends State<ChatPage> {
               curve: Curves.easeOut);
         }
       } catch (e) {
-        // todo 因為沒有辦法分辨錯誤，所以只能抓所有看看
-        Fluttertoast.showToast(
-            msg: '對方已離開，無法傳送訊息',
-            backgroundColor: Theme.of(context).colorScheme.onSurface,
-            textColor: Theme.of(context).colorScheme.onInverseSurface);
+
+        if(e is FormatException){
+          debugPrint("_onSendMessageFormatException: $e");
+          Fluttertoast.showToast(
+              msg: '對方已離開，無法傳送訊息',
+              backgroundColor: Theme.of(context).colorScheme.onSurface,
+              textColor: Theme.of(context).colorScheme.onInverseSurface);
+        } else {
+          debugPrint("_onSendMessageError: $e");
+        }
+
       }
     } else {
       // 當沒有文字的時候

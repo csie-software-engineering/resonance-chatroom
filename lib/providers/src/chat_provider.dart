@@ -310,7 +310,10 @@ class ChatProvider {
   ) async {
     final fromId = AuthProvider().currentUserId;
     final room = await getRoom(activityId, peerId);
-    assert(room.isEnable, '房間已關閉');
+    // assert(room.isEnable, '房間已關閉'); //todo
+    if(!room.isEnable){
+      throw const FormatException("房間已關閉");
+    }
 
     final curTime = DateTime.now().millisecondsSinceEpoch.toString();
     final roomId = _getRoomId([fromId, peerId]);

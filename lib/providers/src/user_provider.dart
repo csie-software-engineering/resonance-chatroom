@@ -331,7 +331,7 @@ class UserProvider {
         .doc(userId);
 
     final userData = await userRef.get();
-    if (!userData.exists) throw Exception("使用者不存在");
+    if (!userData.exists) throw Exception("使用者不存在"); // 這應該是 assertion ?
 
     final fsUser = FSUser.fromDocument(userData);
     final user = fsUser.toUser();

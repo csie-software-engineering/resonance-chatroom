@@ -247,7 +247,10 @@ class ChatProvider {
 
     final roomData = await roomQuery.get();
     assert(roomData.exists, '房間不存在');
-    assert(roomData.get(RoomConstants.isEnable.value), '房間已停用');
+
+    if(!roomData.get(RoomConstants.isEnable.value)) {
+        throw const FormatException('房間已提用');
+    }
 
     await roomQuery.update({
       RoomConstants.isEnable.value: false,
@@ -438,13 +441,19 @@ class ChatProvider {
     String peerId,
   ) async {
     final room = await getRoom(activityId, peerId);
-    assert(room.isEnable, '房間已關閉');
+
+    if(!room.isEnable){
+      throw const FormatException('房間已關閉');
+    }
 
     final roomUserIndex = room.users.indexWhere((e) => e.id == peerId);
     assert(roomUserIndex != -1, '對方不在房間中');
 
     final roomUser = room.users[roomUserIndex];
-    assert(roomUser.shareSocialMedia, '對方未同意分享社群媒體');
+
+    if(!roomUser.shareSocialMedia){
+      throw const FormatException('對方未同意分享社群媒體');
+    }
 
     return await UserProvider().getUserSocialMedium(userId: peerId);
   }

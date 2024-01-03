@@ -39,11 +39,30 @@ class _MainPageState extends State<MainPage> {
         final user = snapshot.requireData;
         return Scaffold(
           backgroundColor: Theme.of(context).colorScheme.background,
-          appBar: myAppBar(
-            context,
-            title: Text(args.isHost ? '舉辦的活動' : '參加的活動'),
-            leading: Container(
-              padding: const EdgeInsets.only(top: 5.0, bottom: 5.0, left: 10.0),
+          // appBar: myAppBar(
+          //   context,
+          //   title: Text(args.isHost ? '舉辦的活動' : '參加的活動'),
+          //   leading: Container(
+          //     padding: const EdgeInsets.only(top: 5.0, bottom: 5.0, left: 10.0),
+          //     child: InkWell(
+          //       onTap: () {
+          //         Navigator.of(context).pushNamed(PersonalSettingPage.routeName,
+          //             arguments:
+          //                 PersonalSettingPageArguments(isHost: args.isHost));
+          //       },
+          //       child: CircleAvatar(
+          //         foregroundImage: user.photoUrl != null
+          //             ? NetworkImage(user.photoUrl!)
+          //             : null,
+          //         backgroundImage: const AssetImage('lib/assets/user.png'),
+          //       ),
+          //     ),
+          //   ),
+          // ),
+          appBar: CustomAppBar(
+            title: args.isHost ? '舉辦的活動' : '參加的活動',
+            leading: Padding(
+              padding: const EdgeInsets.only(left: 15.0),
               child: InkWell(
                 onTap: () {
                   Navigator.of(context).pushNamed(PersonalSettingPage.routeName,
@@ -51,13 +70,13 @@ class _MainPageState extends State<MainPage> {
                           PersonalSettingPageArguments(isHost: args.isHost));
                 },
                 child: CircleAvatar(
-                  foregroundImage: user.photoUrl != null
-                      ? NetworkImage(user.photoUrl!)
-                      : null,
+                  foregroundImage:
+                      user.photoUrl != null ? NetworkImage(user.photoUrl!) : null,
                   backgroundImage: const AssetImage('lib/assets/user.png'),
                 ),
               ),
             ),
+            tail: null,
           ),
           body: ActivityCarouselWidget(isHost: args.isHost),
           floatingActionButton: FloatingActionButton.extended(

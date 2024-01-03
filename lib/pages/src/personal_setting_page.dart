@@ -62,10 +62,10 @@ class _PersonalSettingPageState extends State<PersonalSettingPage> {
         final user = snapshot.requireData;
         return Scaffold(
           backgroundColor: Theme.of(context).colorScheme.background,
-          appBar: myAppBar(
-            context,
-            title: const Text('使用者頁面'),
+          appBar: CustomAppBar(
             leading: const BackButton(),
+            title: "個人檔案",
+            tail: null,
           ),
           body: Column(
             children: [

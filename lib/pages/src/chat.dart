@@ -66,7 +66,7 @@ class _ChatPageState extends State<ChatPage> {
   final FocusNode focusNode = FocusNode();
 
   int _limit = 20;
-  int _limitIncrement = 20;
+  final int _limitIncrement = 20;
   double _height = 0;
   String _currentTopicId = "";
   String _previousTopicId = "";
@@ -473,7 +473,7 @@ class _ChatPageState extends State<ChatPage> {
                                       padding:
                                           EdgeInsets.only(top: 20, bottom: 10),
                                       child: Container(
-                                          padding: EdgeInsets.symmetric(
+                                          padding: const EdgeInsets.symmetric(
                                               horizontal: 6, vertical: 6),
                                           decoration: BoxDecoration(
                                             color: Theme.of(context)
@@ -483,7 +483,7 @@ class _ChatPageState extends State<ChatPage> {
                                             borderRadius:
                                                 BorderRadius.circular(10),
                                           ),
-                                          child: Text("社群媒體連結",
+                                          child: const Text("社群媒體連結",
                                               style: TextStyle(
                                                 fontWeight: FontWeight.w700,
                                               ))),
@@ -749,7 +749,7 @@ class _ChatPageState extends State<ChatPage> {
             // 如果 Future 發生錯誤，返回錯誤 UI
             return Text('Error: ${snapshot.error}');
           } else {
-            debugPrint("alltopics:${_allTopics.length}");
+            debugPrint("all topics:${_allTopics.length}");
             return Scaffold(
               body: Column(
                 children: [
@@ -766,7 +766,7 @@ class _ChatPageState extends State<ChatPage> {
                           color: Colors.black.withOpacity(0.2),
                           spreadRadius: 2,
                           blurRadius: 4,
-                          offset: Offset(0, 2), // 阴影位置，可以调整阴影的方向
+                          offset: const Offset(0, 2), // 阴影位置，可以调整阴影的方向
                         ),
                       ],
                     ),
@@ -917,10 +917,11 @@ class _ChatPageState extends State<ChatPage> {
                                                             _questionAnswers!
                                                                 .length;
                                                         i++) {
-                                                      if (_questionAnswers![i])
+                                                      if (_questionAnswers![i]) {
                                                         choice =
                                                             _currentQuestion!
                                                                 .choices[i];
+                                                      }
                                                     }
 
                                                     // todo 抓錯誤

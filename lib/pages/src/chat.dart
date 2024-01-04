@@ -191,7 +191,7 @@ class _ChatPageState extends State<ChatPage> {
       }
 
       peerUser = await userProvider.getUser(
-          userId: args.peerId); // todo 我可以直接載入對方的 social media?
+          userId: args.peerId);
 
       room = await chatProvider.getRoom(args.activityId, args.peerId);
       currentUser = await authProvider.currentUser;

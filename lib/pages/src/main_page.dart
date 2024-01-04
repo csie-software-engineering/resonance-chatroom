@@ -63,7 +63,12 @@ class _MainPageState extends State<MainPage> {
             ),
             tail: null,
           ),
-          body: ActivityCarouselWidget(isHost: args.isHost),
+          body: ActivityCarouselWidget(
+              isHost: args.isHost,
+              refreshMainPage: (){
+                setState(() {});
+        },
+          ),
           floatingActionButton: FloatingActionButton.extended(
             onPressed: () {
               if (args.isHost) {
@@ -169,10 +174,12 @@ class _MainPageState extends State<MainPage> {
 
 class ActivityCarouselWidget extends StatefulWidget {
   final bool isHost;
+  final Function() refreshMainPage;
 
   const ActivityCarouselWidget({
     super.key,
     required this.isHost,
+    required this.refreshMainPage,
   });
 
   @override
@@ -265,10 +272,11 @@ class _ActivityCarouselWidgetState extends State<ActivityCarouselWidget> {
                                                   .read<UserProvider>()
                                                   .removeUserActivity(activityId,
                                                       isManager: false)
-                                                  .then((value) => setState(() {
-                                                        Navigator.of(context)
-                                                            .pop();
-                                                      }));
+                                                  .then((value) {
+                                                  Navigator.of(context)
+                                                      .pop();
+                                                  widget.refreshMainPage();
+                                              });
                                             },
                                             cancel: () =>
                                                 Navigator.of(context).pop(),

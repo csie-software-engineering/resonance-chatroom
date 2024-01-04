@@ -72,6 +72,7 @@ class _ActivityMainPageState extends State<ActivityMainPage>
 
   bool _enableTagWidget = false;
   bool _enableMatch = false;
+  bool _enableHistoricalChatRoom = false;
   bool isStartMatching = false;
   bool initial = false;
   bool isTryChangingPoints = false;
@@ -294,11 +295,12 @@ class _ActivityMainPageState extends State<ActivityMainPage>
       Navigator.of(context).pop();
     }
 
-    var getTags = await activityProvider.getAllTags(args.activityId);
+    _currentActivityTags = await activityProvider.getAllTags(args.activityId);
 
-    if (getTags != null) {
+    if (_currentActivityTags.isNotEmpty) {
       _enableTagWidget = true;
-      _currentActivityTags = getTags;
+      _enableHistoricalChatRoom = true;
+      _enableTagWidget = true;
     }
   }
 
@@ -610,7 +612,7 @@ class _ActivityMainPageState extends State<ActivityMainPage>
                     )
                   : UserButtons(
                       enableTagWidget: _enableTagWidget,
-                      enableHistoricalChatRoom: true,
+                      enableHistoricalChatRoom: _enableHistoricalChatRoom,
                       enableMatch: _enableMatch,
                       matching: matching,
                       goToHistoricalChatRoomPage: _goToHistoricalChatRoomPage,

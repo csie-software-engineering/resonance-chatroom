@@ -14,7 +14,10 @@ class Input extends StatefulWidget {
   const Input({
     super.key,
     this.onAttachmentPressed,
-    required this.onSendPressed, required this.enableSocialMedia, required this.activityId, required this.peerId,
+    required this.onSendPressed,
+    required this.enableSocialMedia,
+    required this.activityId,
+    required this.peerId,
   });
 
   final void Function(String, MessageType) onSendPressed; // 暫時先用 string 塞著
@@ -126,7 +129,7 @@ class _InputState extends State<Input> {
     const textPadding = EdgeInsets.fromLTRB(20, 20, 0, 20);
 
     return Focus(
-      onFocusChange: (hasFocus){
+      onFocusChange: (hasFocus) {
         setState(() {
           _isFocus = hasFocus;
         });
@@ -146,49 +149,70 @@ class _InputState extends State<Input> {
             child: Row(
               textDirection: TextDirection.ltr,
               children: [
-                !_isFocus ? Padding(
-                  padding: const EdgeInsets.only(left: 15),
-                  child: IconButton(
-                    // Next
-                    color: isTryChangeTopic ? Theme.of(context).colorScheme.primary.withOpacity(0.1) : Theme.of(context).colorScheme.primary.withOpacity(0.8),
-                    icon: const Icon(Icons.next_plan),
-                    tooltip: "換話題",
-                    onPressed: () {
-                       //todo
-                      if(!isTryChangeTopic) {
-                        isTryChangeTopic = true;
-                          try{
-                            chatProvider.updateRandomTopic(widget.activityId, widget.peerId);
-                            setState(() {});
-                            Fluttertoast.showToast(msg: "30秒內無法再更換話題");
-                            Future.delayed(Duration(seconds: 30), (){
-                              setState((){
+                !_isFocus
+                    ? Padding(
+                        padding: const EdgeInsets.only(left: 15),
+                        child: IconButton(
+                          // Next
+                          color: isTryChangeTopic
+                              ? Theme.of(context)
+                                  .colorScheme
+                                  .primary
+                                  .withOpacity(0.1)
+                              : Theme.of(context)
+                                  .colorScheme
+                                  .primary
+                                  .withOpacity(0.8),
+                          icon: const Icon(Icons.next_plan),
+                          tooltip: "換話題",
+                          onPressed: () async {
+                            //todo
+                            if (!isTryChangeTopic) {
+                              isTryChangeTopic = true;
+                              try {
+                                await chatProvider.updateRandomTopic(
+                                    widget.activityId, widget.peerId);
+                                setState(() {});
+                                Fluttertoast.showToast(msg: "30秒內無法再更換話題");
+                                Future.delayed(Duration(seconds: 30), () {
+                                  setState(() {
+                                    isTryChangeTopic = false;
+                                  });
+                                });
+                              } catch (e) {
+                                if (e is FormatException) {
+                                  debugPrint("nextTopicError: $e");
+                                  Fluttertoast.showToast(
+                                      msg: "對方已離開聊天室，無法更換標題");
+                                } else {
+                                  debugPrint("nextTopicBadError: $e");
+                                }
                                 isTryChangeTopic = false;
-                              });
-                            });
-                          } catch (e) {
-                              debugPrint("changeTopicError: $e");
-                              isTryChangeTopic = false;
-                          }
-                      }
-
-                    },
-                    iconSize: 30,
-                    splashRadius: 1,
-                  ),
-                ) : const SizedBox(),
-                !_isFocus ? IconButton(
-                  // Next
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
-                  icon: const Icon(Icons.add_circle_rounded),
-                  tooltip: "同意分享社群媒體",
-                  onPressed: () {
-                    widget.enableSocialMedia();
-                  },
-                  iconSize: 30,
-                  splashRadius: 1,
-                  padding: const EdgeInsets.only(left: 10, right: 0),
-                ) : const SizedBox(),
+                              }
+                            }
+                          },
+                          iconSize: 30,
+                          splashRadius: 1,
+                        ),
+                      )
+                    : const SizedBox(),
+                !_isFocus
+                    ? IconButton(
+                        // Next
+                        color: Theme.of(context)
+                            .colorScheme
+                            .primary
+                            .withOpacity(0.7),
+                        icon: const Icon(Icons.add_circle_rounded),
+                        tooltip: "同意分享社群媒體",
+                        onPressed: () {
+                          widget.enableSocialMedia();
+                        },
+                        iconSize: 30,
+                        splashRadius: 1,
+                        padding: const EdgeInsets.only(left: 10, right: 0),
+                      )
+                    : const SizedBox(),
                 Expanded(
                   child: Padding(
                     padding: textPadding,
@@ -200,10 +224,16 @@ class _InputState extends State<Input> {
                         autofocus: widget.options.autofocus,
                         enableSuggestions: widget.options.enableSuggestions,
                         controller: _textController,
-                        cursorColor: Theme.of(context).colorScheme.primary.withOpacity(0.9),
+                        cursorColor: Theme.of(context)
+                            .colorScheme
+                            .primary
+                            .withOpacity(0.9),
                         decoration: InputDecoration(
                           filled: true,
-                          fillColor: Theme.of(context).colorScheme.secondary.withOpacity(0.1),
+                          fillColor: Theme.of(context)
+                              .colorScheme
+                              .secondary
+                              .withOpacity(0.1),
                           border: InputBorder.none,
                           hintStyle: TextStyle(
                             fontSize: 16,

@@ -95,8 +95,7 @@ class _ChatPageState extends State<ChatPage> {
               curve: Curves.easeOut);
         }
       } catch (e) {
-
-        if(e is FormatException){
+        if (e is FormatException) {
           debugPrint("_onSendMessageFormatException: $e");
           Fluttertoast.showToast(
               msg: '對方已離開，無法傳送訊息',
@@ -105,7 +104,6 @@ class _ChatPageState extends State<ChatPage> {
         } else {
           debugPrint("_onSendMessageError: $e");
         }
-
       }
     } else {
       // 當沒有文字的時候
@@ -114,14 +112,6 @@ class _ChatPageState extends State<ChatPage> {
           backgroundColor: Theme.of(context).colorScheme.onSurface,
           textColor: Theme.of(context).colorScheme.onInverseSurface);
     }
-  }
-
-  // Widget? _subTitle() {
-  //
-  // }
-
-  Future<void> nextTopic() async {
-    await chatProvider.updateRandomTopic(args.activityId, args.peerId);
   }
 
   Future<void> enableSocialMedia() async {
@@ -133,8 +123,12 @@ class _ChatPageState extends State<ChatPage> {
       try {
         await chatProvider.agreeShareSocialMedia(args.activityId, args.peerId);
       } catch (e) {
-        // todo 應該要抓對應錯誤
-        debugPrint("$e");
+        if(e is FormatException){
+          debugPrint("agreeShareSocialMediaError: $e");
+          Fluttertoast.showToast(msg: "對方已離開聊天室，無法分享");
+        } else {
+          debugPrint("agreeShareSocialMediaBadError: $e");
+        }
       }
     }
   }
@@ -160,9 +154,8 @@ class _ChatPageState extends State<ChatPage> {
     } catch (e) {
       // todo 應該要抓對應錯誤，如果是這樣代表對方沒有同意
       peerSocialMedia = null;
-    } finally {
-      return peerSocialMedia;
     }
+    return peerSocialMedia;
   }
 
   // void _launchURL(String url) async {
@@ -182,16 +175,18 @@ class _ChatPageState extends State<ChatPage> {
 
   Future<void> _init() async {
     if (!initial) {
-      // await chatProvider.disagreeShareSocialMedia(args.activityId, args.peerId);
       try {
         _isEnableSocialMedial = await chatProvider.getIsAgreeShareSocialMedia(
             args.activityId, args.peerId);
       } catch (e) {
-        debugPrint("_initgetIsAgreeShareSocialMediaError: $e");
+        if(e is FormatException){
+          debugPrint("_initGetIsAgreeShareSocialMediaError: $e");
+        } else {
+          debugPrint("_initGetIsAgreeShareSocialMediaBadError: $e");
+        }
       }
 
-      peerUser = await userProvider.getUser(
-          userId: args.peerId);
+      peerUser = await userProvider.getUser(userId: args.peerId);
 
       room = await chatProvider.getRoom(args.activityId, args.peerId);
       currentUser = await authProvider.currentUser;
@@ -514,8 +509,10 @@ class _ChatPageState extends State<ChatPage> {
                                             return Text(
                                                 'Error: ${snapshot.error}');
                                           } else {
-                                            if(snapshot.data != null){
-                                              isTryLaunchUrl = List.generate(snapshot.data!.length, (index) => false);
+                                            if (snapshot.data != null) {
+                                              isTryLaunchUrl = List.generate(
+                                                  snapshot.data!.length,
+                                                  (index) => false);
                                             }
                                             return snapshot.data != null
                                                 ? Row(
@@ -586,20 +583,20 @@ class _ChatPageState extends State<ChatPage> {
                                                                           onPressed:
                                                                               () async {
                                                                             // todo launch;
-                                                                                if(!isTryLaunchUrl![index]) {
-                                                                                  isTryLaunchUrl![index] = true;
-                                                                                    try {
-                                                                                      snapshot.data![index].linkUrl;
-                                                                                      Uri url = Uri.parse(snapshot.data![index].linkUrl);
-                                                                                      if (!await launchUrl(url)) {
-                                                                                        throw Exception('Could not launch $url');
-                                                                                        }
-                                                                                    } catch (e) {
-                                                                                      debugPrint("_launchSocialMedialError: $e");
-                                                                                      Fluttertoast.showToast(msg: "連結有誤無法點開");
-                                                                                    }
-                                                                                    isTryLaunchUrl![index] = false;
+                                                                            if (!isTryLaunchUrl![index]) {
+                                                                              isTryLaunchUrl![index] = true;
+                                                                              try {
+                                                                                snapshot.data![index].linkUrl;
+                                                                                Uri url = Uri.parse(snapshot.data![index].linkUrl);
+                                                                                if (!await launchUrl(url)) {
+                                                                                  throw Exception('Could not launch $url');
                                                                                 }
+                                                                              } catch (e) {
+                                                                                debugPrint("_launchSocialMedialError: $e");
+                                                                                Fluttertoast.showToast(msg: "連結有誤無法點開");
+                                                                              }
+                                                                              isTryLaunchUrl![index] = false;
+                                                                            }
                                                                           }),
                                                                       Container(
                                                                         padding: const EdgeInsets
@@ -829,7 +826,7 @@ class _ChatPageState extends State<ChatPage> {
                                         await chatProvider.leaveRoom(
                                             args.activityId, args.peerId);
                                       } catch (e) {
-                                        if(e is! FormatException) {
+                                        if (e is! FormatException) {
                                           debugPrint("leaveRoomError:$e");
                                         }
                                       } finally {
@@ -920,7 +917,8 @@ class _ChatPageState extends State<ChatPage> {
                                                             _questionAnswers!
                                                                 .length;
                                                         i++) {
-                                                      if (_questionAnswers![i]) {
+                                                      if (_questionAnswers![
+                                                          i]) {
                                                         choice =
                                                             _currentQuestion!
                                                                 .choices[i];
@@ -943,8 +941,7 @@ class _ChatPageState extends State<ChatPage> {
                                                     }
                                                   }, cancel: () {
                                                     Navigator.of(context).pop();
-                                                  })
-                                                  );
+                                                  }));
                                             },
                                           );
                                         }
@@ -1018,7 +1015,8 @@ class _ChatPageState extends State<ChatPage> {
                                           child: Text(
                                             key: UniqueKey(),
                                             _enableShowTopic
-                                                ? _allTopics[_currentTopicId] ?? "自由聊天吧!"
+                                                ? _allTopics[_currentTopicId] ??
+                                                    "自由聊天吧!"
                                                 : "自由聊天吧!",
                                             style: TextStyle(
                                               fontSize: 20,

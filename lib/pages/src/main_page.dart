@@ -224,153 +224,156 @@ class _ActivityCarouselWidgetState extends State<ActivityCarouselWidget> {
             return const Center(child: CircularProgressIndicator());
           }
           _acivityCount = _userActivities.length;
-          return _userActivities.isNotEmpty
-              ? Center(
-                  child: Stack(
-                    children: [
-                      Align(
-                        alignment: Alignment.center,
-                        child: CarouselSlider.builder(
-                          itemCount: _userActivities.length,
-                          options: CarouselOptions(
-                              aspectRatio: 1,
-                              // height: MediaQuery.of(context).size.height,
-                              enlargeCenterPage: true,
-                              initialPage: 0,
-                              viewportFraction: 0.7,
-                              enableInfiniteScroll: false,
-                              onPageChanged: (index, reason) {
-                                setState(() {
-                                  _activeIndex = index;
-                                });
-                              }),
-                          itemBuilder: (context, index, realIndex) {
-                            final activityId = _userActivities[index].uid;
-                            return InkWell(
-                              onLongPress: () => widget.isHost
-                                  ? ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                          content: Text('主辦方無法刪除活動')))
-                                  : showDialog(
-                                      context: context,
-                                      builder: (context) => AlertDialog(
-                                        title: const Text('刪除活動'),
-                                        content: const Text('是否要刪除該活動？'),
-                                        actions: confirmButtons(
-                                          context,
-                                          action: () {
-                                            context
-                                                .read<UserProvider>()
-                                                .removeUserActivity(activityId,
-                                                    isManager: false)
-                                                .then((value) => setState(() {
-                                                      Navigator.of(context)
-                                                          .pop();
-                                                    }));
-                                          },
-                                          cancel: () =>
-                                              Navigator.of(context).pop(),
+          return Container(
+            color: Theme.of(context).colorScheme.inversePrimary.withOpacity(0.1),
+            child: _userActivities.isNotEmpty
+                ? Center(
+                    child: Stack(
+                      children: [
+                        Align(
+                          alignment: Alignment.center,
+                          child: CarouselSlider.builder(
+                            itemCount: _userActivities.length,
+                            options: CarouselOptions(
+                                aspectRatio: 1,
+                                // height: MediaQuery.of(context).size.height,
+                                enlargeCenterPage: true,
+                                initialPage: 0,
+                                viewportFraction: 0.7,
+                                enableInfiniteScroll: false,
+                                onPageChanged: (index, reason) {
+                                  setState(() {
+                                    _activeIndex = index;
+                                  });
+                                }),
+                            itemBuilder: (context, index, realIndex) {
+                              final activityId = _userActivities[index].uid;
+                              return InkWell(
+                                onLongPress: () => widget.isHost
+                                    ? ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                            content: Text('主辦方無法刪除活動')))
+                                    : showDialog(
+                                        context: context,
+                                        builder: (context) => AlertDialog(
+                                          title: const Text('刪除活動'),
+                                          content: const Text('是否要刪除該活動？'),
+                                          actions: confirmButtons(
+                                            context,
+                                            action: () {
+                                              context
+                                                  .read<UserProvider>()
+                                                  .removeUserActivity(activityId,
+                                                      isManager: false)
+                                                  .then((value) => setState(() {
+                                                        Navigator.of(context)
+                                                            .pop();
+                                                      }));
+                                            },
+                                            cancel: () =>
+                                                Navigator.of(context).pop(),
+                                          ),
+                                        ),
+                                      ),
+                                child: Stack(
+                                  children: [
+                                    Align(
+                                      alignment: Alignment.center,
+                                      child: Padding(
+                                        padding:
+                                            const EdgeInsets.only(bottom: 0.0),
+                                        child: RoomCardWidget(
+                                          isHost: widget.isHost,
+                                          activity: _activities[index],
+                                          refresh: () => setState(() {}),
+                                          image: _images[index],
                                         ),
                                       ),
                                     ),
-                              child: Stack(
-                                children: [
-                                  Align(
-                                    alignment: Alignment.center,
-                                    child: Padding(
-                                      padding:
-                                          const EdgeInsets.only(bottom: 0.0),
-                                      child: RoomCardWidget(
-                                        isHost: widget.isHost,
-                                        activity: _activities[index],
-                                        refresh: () => setState(() {}),
-                                        image: _images[index],
-                                      ),
-                                    ),
-                                  ),
-                                  Align(
-                                    alignment: Alignment.bottomCenter,
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        Container(
-                                          height: 80,
-                                          width: 200,
-                                          decoration: BoxDecoration(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .background,
-                                              borderRadius:
-                                                  BorderRadius.circular(30),
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .onSurface
-                                                      .withOpacity(0.1),
-                                                  offset: const Offset(0, 4),
-                                                  spreadRadius: 1,
-                                                  blurRadius: 2,
-                                                )
-                                              ]),
-                                          child: Center(
-                                              child: Padding(
-                                            padding: const EdgeInsets.all(12.0),
-                                            child: Text(
-                                              _activities[index].activityName,
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(
+                                    Align(
+                                      alignment: Alignment.bottomCenter,
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.end,
+                                        children: [
+                                          Container(
+                                            height: 80,
+                                            width: 200,
+                                            decoration: BoxDecoration(
                                                 color: Theme.of(context)
                                                     .colorScheme
-                                                    .primary,
-                                                fontSize: 16,
+                                                    .background,
+                                                borderRadius:
+                                                    BorderRadius.circular(30),
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .onSurface
+                                                        .withOpacity(0.1),
+                                                    offset: const Offset(0, 4),
+                                                    spreadRadius: 1,
+                                                    blurRadius: 2,
+                                                  )
+                                                ]),
+                                            child: Center(
+                                                child: Padding(
+                                              padding: const EdgeInsets.all(12.0),
+                                              child: Text(
+                                                _activities[index].activityName,
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .primary,
+                                                  fontSize: 16,
+                                                ),
                                               ),
-                                            ),
-                                          )),
-                                        ),
-                                        const SizedBox(height: 30),
-                                      ],
-                                    ),
-                                  )
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 80),
-                        child: Align(
-                          alignment: Alignment.bottomCenter,
-                          child: AnimatedSmoothIndicator(
-                            activeIndex: _activeIndex,
-                            count: _acivityCount,
-                            effect: ScrollingDotsEffect(
-                              fixedCenter: true,
-                              activeDotColor:
-                                  Theme.of(context).colorScheme.primary,
-                              dotColor: Theme.of(context)
-                                  .colorScheme
-                                  .primary
-                                  .withOpacity(0.2),
-                            ),
+                                            )),
+                                          ),
+                                          const SizedBox(height: 30),
+                                        ],
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              );
+                            },
                           ),
                         ),
-                      )
-                    ],
-                  ),
-                )
-              : Center(
-                  child: Text(
-                    '目前沒有${widget.isHost ? '舉辦' : '參加'}活動',
-                    style: TextStyle(
-                      fontSize: 24.0,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.2,
-                      color: Theme.of(context).colorScheme.primary,
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 80),
+                          child: Align(
+                            alignment: Alignment.bottomCenter,
+                            child: AnimatedSmoothIndicator(
+                              activeIndex: _activeIndex,
+                              count: _acivityCount,
+                              effect: ScrollingDotsEffect(
+                                fixedCenter: true,
+                                activeDotColor:
+                                    Theme.of(context).colorScheme.primary,
+                                dotColor: Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withOpacity(0.2),
+                              ),
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                  )
+                : Center(
+                    child: Text(
+                      '目前沒有${widget.isHost ? '舉辦' : '參加'}活動',
+                      style: TextStyle(
+                        fontSize: 24.0,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.2,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                     ),
                   ),
-                );
+          );
         },
       );
 }

@@ -434,13 +434,6 @@ class _ActivityMainPageState extends State<ActivityMainPage>
                                     child: Container(
                                       padding: const EdgeInsets.symmetric(
                                           vertical: 2, horizontal: 20.0),
-                                      child: Text(_currentActivity.activityName,
-                                          style: TextStyle(
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.w700,
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .onInverseSurface)),
                                       decoration: BoxDecoration(
                                         color: Theme.of(context)
                                             .colorScheme
@@ -459,6 +452,14 @@ class _ActivityMainPageState extends State<ActivityMainPage>
                                           ),
                                         ],
                                       ),
+                                      child: Text(_currentActivity.activityName.length > 10 ?
+                                      _currentActivity.activityName.substring(0, 8) + "..." : _currentActivity.activityName,
+                                          style: TextStyle(
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.w700,
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onInverseSurface)),
                                     ),
                                   ),
                                 ),

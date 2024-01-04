@@ -24,10 +24,15 @@ class HistoricalChatRoomPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
-      appBar: myAppBar(
-        context,
-        title: const Text('過去的聊天室'),
+      // appBar: myAppBar(
+      //   context,
+      //   title: const Text('過去的聊天室'),
+      //   leading: const BackButton(),
+      // ),
+      appBar: CustomAppBar(
         leading: const BackButton(),
+        title: '過去的聊天室',
+        tail: null,
       ),
       body: FutureBuilder<List<Room>>(
         future: context.read<ChatProvider>().getUserRooms(args.activityId),

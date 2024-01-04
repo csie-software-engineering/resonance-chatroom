@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../models/models.dart';
 import '../../providers/providers.dart';
+import '../../widgets/src/my_app_bar.dart';
 
 class HostQuestionStatisticPageArguments {
   final String activityId;
@@ -21,16 +22,10 @@ class HostQuestionStatisticPage extends StatelessWidget {
     final args = ModalRoute.of(context)!.settings.arguments
         as HostQuestionStatisticPageArguments;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          '問卷統計',
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.primary,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: true,
-        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+      appBar: CustomAppBar(
+        leading: const BackButton(),
+        title: '問卷統計',
+        tail: null,
       ),
       body: Container(
         color: Theme.of(context).colorScheme.background,

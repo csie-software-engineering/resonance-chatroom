@@ -37,11 +37,16 @@ class _ManagerPageState extends State<ManagerPage> {
         managers = snapshot.data!;
 
         return Scaffold(
-          appBar: myAppBar(
-            context,
-            title: const Text('管理者名單'),
+          appBar: CustomAppBar(
             leading: const BackButton(),
+            title: '管理者名單',
+            tail: null,
           ),
+          // appBar: myAppBar(
+          //   context,
+          //   title: const Text('管理者名單'),
+          //   leading: const BackButton(),
+          // ),
           body: Column(
             children: [
               Padding(

@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 
-AppBar myAppBar(BuildContext context, {Widget? title, Widget? leading}) =>
-    AppBar(
-      toolbarHeight: 50 + MediaQuery.of(context).size.height * 0.03,
-      title: title,
-      centerTitle: true,
-      titleSpacing: 5,
-      titleTextStyle: TextStyle(
-        color: Theme.of(context).colorScheme.primary,
-        fontWeight: FontWeight.bold,
-        fontSize: 28,
-      ),
-      leading: leading,
-      leadingWidth: 80,
-      backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-    );
+// AppBar myAppBar(BuildContext context, {Widget? title, Widget? leading}) =>
+//     AppBar(
+//       toolbarHeight: 50 + MediaQuery.of(context).size.height * 0.03,
+//       title: title,
+//       centerTitle: true,
+//       titleSpacing: 5,
+//       titleTextStyle: TextStyle(
+//         color: Theme.of(context).colorScheme.primary,
+//         fontWeight: FontWeight.bold,
+//         fontSize: 28,
+//       ),
+//       leading: leading,
+//       leadingWidth: 80,
+//       backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+//     );
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -33,7 +33,9 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         SizedBox(height: MediaQuery
             .of(context)
             .padding
-            .top),
+            .top, child: Container(
+          color: Theme.of(context).colorScheme.inversePrimary.withOpacity(0.2),
+        )),
         Container(
           height: kToolbarHeight,
           decoration: BoxDecoration(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:resonance_chatroom/providers/providers.dart';
 import '../../models/models.dart';
+import '../../widgets/src/my_app_bar.dart';
 import '../routes.dart';
 
 class HostActivityTopicPageArguments {
@@ -78,8 +79,10 @@ class _HostActivityTopicPageState extends State<HostActivityTopicPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('話題頁面'),
+      appBar: CustomAppBar(
+        leading: const BackButton(),
+        title: '設定活動話題',
+        tail: null,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

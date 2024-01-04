@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../models/models.dart';
 import '../../providers/providers.dart';
+import '../../widgets/src/my_app_bar.dart';
 import '../routes.dart';
 
 class HostActivityQuestionPageArguments {
@@ -87,8 +88,10 @@ class _HostActivityQuestionPageState extends State<HostActivityQuestionPage> {
   Widget build(BuildContext context) {
     final double height = MediaQuery.of(context).size.height;
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('問卷頁面'),
+      appBar: CustomAppBar(
+        leading: const BackButton(),
+        title: '設定活動問卷',
+        tail: null,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

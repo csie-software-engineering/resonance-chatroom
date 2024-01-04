@@ -430,7 +430,6 @@ class ActivityProvider {
         .doc(topicId);
 
     final topicData = await documentReference.get();
-
     return Topic.fromDocument(topicData);
   }
 

@@ -15,7 +15,6 @@ import 'package:resonance_chatroom/providers/providers.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../widgets/src/chat_components/questionDialog.dart';
-import '../../constants/src/firestore_constants.dart';
 import '../../widgets/src/input/widgets.dart';
 
 class ChatPageArguments {
@@ -42,6 +41,7 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   late final ChatPageArguments args =
       ModalRoute.of(context)!.settings.arguments as ChatPageArguments;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   late final User currentUser;
   late final User peerUser;
   late final Room room;
@@ -749,6 +749,7 @@ class _ChatPageState extends State<ChatPage> {
           } else {
             debugPrint("all topics:${_allTopics.length}");
             return Scaffold(
+              key: _scaffoldKey,
               body: Column(
                 children: [
                   SizedBox(height: MediaQuery.of(context).padding.top),
@@ -832,7 +833,7 @@ class _ChatPageState extends State<ChatPage> {
                                       } finally {
                                         setState(() {
                                           Navigator.popUntil(
-                                              context,
+                                              _scaffoldKey.currentContext!,
                                               ModalRoute.withName(
                                                   ActivityMainPage.routeName));
                                         });

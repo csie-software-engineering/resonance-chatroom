@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -74,6 +76,7 @@ class _InputState extends State<Input> {
   bool _isFocus = false;
   bool isTryChangeTopic = false;
   late TextEditingController _textController;
+  Timer? _nextTopicTimer;
 
   @override
   void initState() {
@@ -166,7 +169,6 @@ class _InputState extends State<Input> {
                           icon: const Icon(Icons.next_plan),
                           tooltip: "換話題",
                           onPressed: () async {
-                            //todo
                             if (!isTryChangeTopic) {
                               isTryChangeTopic = true;
                               try {
@@ -174,7 +176,7 @@ class _InputState extends State<Input> {
                                     widget.activityId, widget.peerId);
                                 setState(() {});
                                 Fluttertoast.showToast(msg: "30秒內無法再更換話題");
-                                Future.delayed(Duration(seconds: 30), () {
+                                _nextTopicTimer = Timer(const Duration(seconds: 30), (){
                                   setState(() {
                                     isTryChangeTopic = false;
                                   });
@@ -296,6 +298,7 @@ class _InputState extends State<Input> {
   void dispose() {
     _inputFocusNode.dispose();
     _textController.dispose();
+    _nextTopicTimer?.cancel();
     super.dispose();
   }
 

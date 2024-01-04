@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 import 'package:async/async.dart';
 
@@ -72,6 +73,9 @@ class _ChatPageState extends State<ChatPage> {
   String _previousTopicId = "";
   Question? _currentQuestion;
   List<bool>? _questionAnswers;
+  late Color _color = Theme.of(context).colorScheme.onInverseSurface;
+  late Color _colorText = Theme.of(context).colorScheme.primary;
+  Timer? _topicColorChangeTimer;
 
   bool isOn = false;
   bool isLoading = false;
@@ -171,6 +175,12 @@ class _ChatPageState extends State<ChatPage> {
     super.initState();
     focusNode.addListener(onFocusChange);
     listScrollController.addListener(_scrollListener);
+  }
+
+  @override
+  void dispose() {
+    _topicColorChangeTimer?.cancel();
+    super.dispose();
   }
 
   Future<void> _init() async {
@@ -537,7 +547,7 @@ class _ChatPageState extends State<ChatPage> {
                                                                     .circular(
                                                                         10)),
                                                           ),
-                                                          child: Center(
+                                                          child: const Center(
                                                               child: Text(
                                                                   "對方已公開")),
                                                         ),
@@ -727,7 +737,7 @@ class _ChatPageState extends State<ChatPage> {
         );
       }
     } else {
-      return SizedBox.shrink();
+      return const SizedBox.shrink();
     }
   }
 
@@ -970,11 +980,19 @@ class _ChatPageState extends State<ChatPage> {
                               _enableShowTopic = true;
                               _previousTopicId = _currentTopicId;
                               _currentTopicId = room["topicId"];
-                              _height = 50;
+                              _height = 10 + 40 * _allTopics[_currentTopicId]!.length / 16;
+                              _color = Theme.of(context).colorScheme.primary.withOpacity(0.6);
+                              _colorText = Theme.of(context).colorScheme.background;
+                              _topicColorChangeTimer = Timer(const Duration(seconds: 5), (){
+                                setState(() {
+                                  _color = Theme.of(context).colorScheme.onInverseSurface;
+                                  _colorText = Theme.of(context).colorScheme.primary;
+                                });
+                              });
                               _newQuestion();
                             } else {
                               if (_enableShowTopic) {
-                                _height = 50;
+                                _height = 10 + 40 * _allTopics[_currentTopicId]!.length / 16;
                               } else {
                                 _height = 20;
                               }
@@ -988,13 +1006,11 @@ class _ChatPageState extends State<ChatPage> {
                                 }
                               },
                               child: AnimatedContainer(
-                                curve: Curves.easeIn,
+                                curve: Curves.easeOutExpo,
                                 height: _height,
-                                duration: const Duration(milliseconds: 500),
+                                duration: const Duration(milliseconds: 1000),
                                 decoration: BoxDecoration(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onInverseSurface,
+                                  color: _color,
                                   boxShadow: [
                                     BoxShadow(
                                       color: Colors.black.withOpacity(0.1),
@@ -1013,18 +1029,19 @@ class _ChatPageState extends State<ChatPage> {
                                       Center(
                                         child: AnimatedSwitcher(
                                           duration: Duration(milliseconds: 500),
-                                          child: Text(
-                                            key: UniqueKey(),
-                                            _enableShowTopic
-                                                ? _allTopics[_currentTopicId] ??
-                                                    "自由聊天吧!"
-                                                : "自由聊天吧!",
-                                            style: TextStyle(
-                                              fontSize: 20,
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .secondary,
-                                              fontWeight: FontWeight.w300,
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(left: 20, right: 40.0),
+                                            child: Text(
+                                              key: UniqueKey(),
+                                              _enableShowTopic
+                                                  ? _allTopics[_currentTopicId] ??
+                                                      "自由聊天吧!"
+                                                  : "",
+                                              style: TextStyle(
+                                                fontSize: 20,
+                                                color: _colorText,
+                                                fontWeight: FontWeight.w300,
+                                              ),
                                             ),
                                           ),
                                         ),

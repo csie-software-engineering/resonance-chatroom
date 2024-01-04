@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 import 'package:resonance_chatroom/providers/providers.dart';
 import 'package:resonance_chatroom/widgets/src/my_app_bar.dart';
@@ -42,11 +43,6 @@ class _ManagerPageState extends State<ManagerPage> {
             title: '管理者名單',
             tail: null,
           ),
-          // appBar: myAppBar(
-          //   context,
-          //   title: const Text('管理者名單'),
-          //   leading: const BackButton(),
-          // ),
           body: Column(
             children: [
               Padding(
@@ -92,15 +88,23 @@ class _ManagerPageState extends State<ManagerPage> {
   }
 
   Future<void> _deleteItem(String activityId, String deleteUserId) async {
-    await ActivityProvider().deleteManagers(activityId, deleteUserId);
-    managers = await ActivityProvider().getAllManagers(activityId);
-    setState(() {});
+    try {
+      await ActivityProvider().deleteManagers(activityId, deleteUserId);
+      managers = await ActivityProvider().getAllManagers(activityId);
+      setState(() {});
+    }catch(e){
+      Fluttertoast.showToast(msg: e.toString());
+    }
   }
 
   Future<void> _addNewManager(String activityId, String newManagerId) async {
     _textEditingController.clear();
-    await ActivityProvider().addManagers(activityId, newManagerId);
-    managers = await ActivityProvider().getAllManagers(activityId);
-    setState(() {});
+    try {
+      await ActivityProvider().addManagers(activityId, newManagerId);
+      managers = await ActivityProvider().getAllManagers(activityId);
+      setState(() {});
+    }catch(e){
+      Fluttertoast.showToast(msg: e.toString());
+    }
   }
 }

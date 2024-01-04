@@ -189,6 +189,7 @@ class _ChatPageState extends State<ChatPage> {
       } catch (e) {
         debugPrint("_initgetIsAgreeShareSocialMediaError: $e");
       }
+
       peerUser = await userProvider.getUser(
           userId: args.peerId); // todo 我可以直接載入對方的 social media?
 
@@ -828,7 +829,9 @@ class _ChatPageState extends State<ChatPage> {
                                         await chatProvider.leaveRoom(
                                             args.activityId, args.peerId);
                                       } catch (e) {
-                                        debugPrint("leaveRoomError:$e");
+                                        if(e is! FormatException) {
+                                          debugPrint("leaveRoomError:$e");
+                                        }
                                       } finally {
                                         setState(() {
                                           Navigator.popUntil(

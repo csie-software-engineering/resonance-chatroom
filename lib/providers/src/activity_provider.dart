@@ -17,14 +17,11 @@ class ActivityProvider {
 
   /// 設置新活動
   Future<Activity> setNewActivity(Activity activityData) async {
-    // assert(activityData.startDate.toEpochTime().isAfter(DateTime.now()),
-    //     '活動開始時間需要在現在之後');
-    // assert(
-    //   activityData.endDate
-    //       .toEpochTime()
-    //       .isAfter(activityData.startDate.toEpochTime()),
-    //   '活動結束時間需要在開始之間之後',
-    // );
+    if (activityData.endDate
+        .toEpochTime()
+        .isBefore(activityData.startDate.toEpochTime())) {
+      throw const FormatException('活動結束時間需要在開始之間之後');
+    }
 
     activityData.uid = generateUuid();
     final documentReference = db
@@ -45,7 +42,9 @@ class ActivityProvider {
 
   /// 取得活動
   Future<Activity> getActivity(String activityId) async {
-    assert(await _checkActivityAlive(activityId), "活動不存在");
+    if (!await _checkActivityAlive(activityId)) {
+      throw const FormatException("活動不存在");
+    }
 
     final documentReference = db
         .collection(FirestoreConstants.activityCollectionPath.value)
@@ -74,24 +73,22 @@ class ActivityProvider {
 
   /// 編輯活動
   Future<Activity> editActivity(Activity activityData) async {
-    assert(await _checkActivityAlive(activityData.uid), "活動不存在");
-    assert(await _isManager(activityData.uid), '你不是管理者');
+    if (!await _checkActivityAlive(activityData.uid)) {
+      throw const FormatException("活動不存在");
+    }
+    if (!await _isManager(activityData.uid)) {
+      throw const FormatException("你不是管理者");
+    }
 
     final documentReference = db
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityData.uid);
 
-    // final pastActivityData = await getActivity(activityData.uid);
-    // assert(pastActivityData.startDate.toEpochTime().isAfter(DateTime.now()),
-    //     '活動開始時間需要在現在之後');
-
-    // assert(activityData.startDate.toEpochTime().isAfter(DateTime.now()),
-    //     '活動開始時間需要在現在之後');
-    // assert(
-    //     activityData.endDate
-    //         .toEpochTime()
-    //         .isAfter(activityData.startDate.toEpochTime()),
-    //     '活動結束時間需要在開始之間之後');
+    if (activityData.endDate
+        .toEpochTime()
+        .isBefore(activityData.startDate.toEpochTime())) {
+      throw const FormatException("活動結束時間需要在開始時間之後");
+    }
 
     await documentReference.update({
       ActivityConstants.activityName.value: activityData.activityName,
@@ -106,8 +103,12 @@ class ActivityProvider {
 
   /// 刪除活動
   Future<void> deleteActivity(String activityId) async {
-    assert(await _checkActivityAlive(activityId), "活動不存在");
-    assert(await _isHost(activityId), '你不是主辦方');
+    if (!await _checkActivityAlive(activityId)) {
+      throw const FormatException("活動不存在");
+    }
+    if (!await _isHost(activityId)) {
+      throw const FormatException("你不是主辦方");
+    }
 
     final documentReference = db
         .collection(FirestoreConstants.activityCollectionPath.value)
@@ -118,8 +119,12 @@ class ActivityProvider {
 
   /// 啟用活動
   Future<void> enableActivity(String activityId) async {
-    assert(await _checkActivityAlive(activityId), "活動不存在");
-    assert(await _isHost(activityId), '你不是主辦方');
+    if (!await _checkActivityAlive(activityId)) {
+      throw const FormatException("活動不存在");
+    }
+    if (!await _isHost(activityId)) {
+      throw const FormatException("你不是主辦方");
+    }
 
     final documentReference = db
         .collection(FirestoreConstants.activityCollectionPath.value)
@@ -195,8 +200,12 @@ class ActivityProvider {
   }
 
   Future<List<String>> getAllManagers(String activityId) async {
-    assert(await _checkActivityAlive(activityId), "活動不存在");
-    assert(await _isManager(activityId), "你不是管理者");
+    if (!await _checkActivityAlive(activityId)) {
+      throw const FormatException("活動不存在");
+    }
+    if (!await _isManager(activityId)) {
+      throw const FormatException("你不是管理者");
+    }
 
     final documentReference = db
         .collection(FirestoreConstants.activityCollectionPath.value)
@@ -209,9 +218,15 @@ class ActivityProvider {
 
   /// 增加管理者
   Future<void> addManagers(String activityId, String addUserId) async {
-    assert(await _checkActivityAlive(activityId), "活動不存在");
-    assert(await _isHost(activityId), '你不是主辦者');
-    assert(!await _isManager(activityId, userId: addUserId), '該用戶已經是管理者');
+    if (!await _checkActivityAlive(activityId)) {
+      throw const FormatException("活動不存在");
+    }
+    if (!await _isHost(activityId)) {
+      throw const FormatException("你不是主辦方");
+    }
+    if (await _isManager(activityId, userId: addUserId)) {
+      throw const FormatException("該用戶已經是管理者");
+    }
 
     final documentReference = db
         .collection(FirestoreConstants.activityCollectionPath.value)
@@ -228,8 +243,12 @@ class ActivityProvider {
 
   /// 刪除管理者
   Future<void> deleteManagers(String activityId, String deleteUserId) async {
-    assert(await _checkActivityAlive(activityId), "活動不存在");
-    assert(await _isHost(activityId), '你不是主辦者');
+    if (!await _checkActivityAlive(activityId)) {
+      throw const FormatException("活動不存在");
+    }
+    if (!await _isHost(activityId)) {
+      throw const FormatException("你不是主辦方");
+    }
 
     final documentReference = db
         .collection(FirestoreConstants.activityCollectionPath.value)
@@ -237,8 +256,12 @@ class ActivityProvider {
 
     final activityData = Activity.fromDocument(await documentReference.get());
 
-    assert(activityData.ownerId != deleteUserId, "不能刪除主辦者");
-    assert(activityData.managers.remove(deleteUserId), '該用戶不是管理者');
+    if (activityData.ownerId == deleteUserId) {
+      throw const FormatException("不能刪除主辦者");
+    }
+    if (!activityData.managers.remove(deleteUserId)) {
+      throw const FormatException("該用戶不是管理者");
+    }
     await UserProvider()
         .removeUserActivity(activityId, userId: deleteUserId, isManager: true);
     await documentReference.set(activityData.toJson());
@@ -249,8 +272,12 @@ class ActivityProvider {
     String activityId,
     String tagName,
   ) async {
-    assert(await _checkActivityAlive(activityId), "活動不存在");
-    assert(await _isManager(activityId), '你不是管理者');
+    if (!await _checkActivityAlive(activityId)) {
+      throw const FormatException("活動不存在");
+    }
+    if (!await _isManager(activityId)) {
+      throw const FormatException("你不是管理者");
+    }
 
     final tagData = Tag(activityId: activityId, tagName: tagName);
     tagData.uid = generateUuid();
@@ -267,8 +294,12 @@ class ActivityProvider {
 
   /// 取得標籤
   Future<Tag> getTag(String activityId, String tagId) async {
-    assert(await _checkActivityAlive(activityId), "活動不存在");
-    assert(await _checkTagAlive(activityId, tagId), "標籤不存在");
+    if (!await _checkActivityAlive(activityId)) {
+      throw const FormatException("活動不存在");
+    }
+    if (!await _checkTagAlive(activityId, tagId)) {
+      throw const FormatException("標籤不存在");
+    }
     final documentReference = db
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityId)
@@ -276,14 +307,15 @@ class ActivityProvider {
         .doc(tagId);
 
     final tagData = await documentReference.get();
-    assert(tagData.exists, '標籤不存在');
 
     return Tag.fromDocument(tagData);
   }
 
   /// 取得所有標籤資訊
   Future<List<Tag>> getAllTags(String activityId) async {
-    assert(await _checkActivityAlive(activityId), "活動不存在");
+    if (!await _checkActivityAlive(activityId)) {
+      throw const FormatException("活動不存在");
+    }
     final tagQuery = db
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityId)
@@ -296,9 +328,15 @@ class ActivityProvider {
 
   /// 編輯標籤
   Future<void> editTag(String activityId, String tagId, String tagName) async {
-    assert(await _checkActivityAlive(activityId), "活動不存在");
-    assert(await _checkTagAlive(activityId, tagId), "標籤不存在");
-    assert(await _isManager(activityId), '你不是管理者');
+    if (!await _checkActivityAlive(activityId)) {
+      throw const FormatException("活動不存在");
+    }
+    if (!await _checkTagAlive(activityId, tagId)) {
+      throw const FormatException("標籤不存在");
+    }
+    if (!await _isManager(activityId)) {
+      throw const FormatException("你不是管理者");
+    }
 
     final documentReference = db
         .collection(FirestoreConstants.activityCollectionPath.value)
@@ -313,9 +351,15 @@ class ActivityProvider {
   ///
   /// 需合併DeleteTopic和DeleteQuestion
   Future<void> deleteTag(String activityId, String tagId) async {
-    assert(await _checkActivityAlive(activityId), "活動不存在");
-    assert(await _checkTagAlive(activityId, tagId), "標籤不存在");
-    assert(await _isManager(activityId), '你不是管理者');
+    if (!await _checkActivityAlive(activityId)) {
+      throw const FormatException("活動不存在");
+    }
+    if (!await _checkTagAlive(activityId, tagId)) {
+      throw const FormatException("標籤不存在");
+    }
+    if (!await _isManager(activityId)) {
+      throw const FormatException("你不是管理者");
+    }
 
     final documentReference = db
         .collection(FirestoreConstants.activityCollectionPath.value)
@@ -350,9 +394,15 @@ class ActivityProvider {
 
   /// 新增話題
   Future<Topic> addNewTopic(String activityId, Topic topicData) async {
-    assert(await _checkActivityAlive(activityId), "活動不存在");
-    assert(await _checkTagAlive(activityId, topicData.tagId), "標籤不存在");
-    assert(await _isManager(activityId), '你不是管理者');
+    if (!await _checkActivityAlive(activityId)) {
+      throw const FormatException("活動不存在");
+    }
+    if (!await _checkTagAlive(activityId, topicData.tagId)) {
+      throw const FormatException("標籤不存在");
+    }
+    if (!await _isManager(activityId)) {
+      throw const FormatException("你不是管理者");
+    }
 
     topicData.uid = generateUuid();
     DocumentReference topicDoc = db
@@ -367,8 +417,12 @@ class ActivityProvider {
 
   /// 取得話題
   Future<Topic> getTopic(String activityId, String topicId) async {
-    assert(await _checkActivityAlive(activityId), "活動不存在");
-    assert(await _checkTopicAlive(activityId, topicId), "話題不存在");
+    if (!await _checkActivityAlive(activityId)) {
+      throw const FormatException("活動不存在");
+    }
+    if (!await _checkTopicAlive(activityId, topicId)) {
+      throw const FormatException("話題不存在");
+    }
     final documentReference = db
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityId)
@@ -382,8 +436,12 @@ class ActivityProvider {
 
   /// 用標籤取得話題
   Future<List<Topic>> getTopicsByTag(String activityId, String tagId) async {
-    assert(await _checkActivityAlive(activityId), "活動不存在");
-    assert(await _checkTagAlive(activityId, tagId), "標籤不存在");
+    if (!await _checkActivityAlive(activityId)) {
+      throw const FormatException("活動不存在");
+    }
+    if (!await _checkTagAlive(activityId, tagId)) {
+      throw const FormatException("標籤不存在");
+    }
     final topicQuery = db
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityId)
@@ -400,9 +458,15 @@ class ActivityProvider {
     String topicId,
     String topicName,
   ) async {
-    assert(await _checkActivityAlive(activityId), "活動不存在");
-    assert(await _checkTopicAlive(activityId, topicId), "話題不存在");
-    assert(await _isManager(activityId), '你不是管理者');
+    if (!await _checkActivityAlive(activityId)) {
+      throw const FormatException("活動不存在");
+    }
+    if (!await _checkTopicAlive(activityId, topicId)) {
+      throw const FormatException("話題不存在");
+    }
+    if (!await _isManager(activityId)) {
+      throw const FormatException("你不是管理者");
+    }
 
     final topicDoc = db
         .collection(FirestoreConstants.activityCollectionPath.value)
@@ -418,25 +482,19 @@ class ActivityProvider {
     String activityId,
     Question questionData,
   ) async {
-    assert(await _checkActivityAlive(activityId), "活動不存在");
-    assert(await _checkTagAlive(activityId, questionData.tagId), "標籤不存在");
-    assert(await _checkTopicAlive(activityId, questionData.topicId), "話題不存在");
-    assert(await _isManager(activityId), '你不是管理者');
-    // while (questionData.choices.remove("")) {}
-    // assert(
-    //   questionData.choices.toSet().length == questionData.choices.length,
-    //   '選項重複',
-    // );
-
+    if (!await _checkActivityAlive(activityId)) {
+      throw const FormatException("活動不存在");
+    }
+    if (!await _checkTagAlive(activityId, questionData.tagId)) {
+      throw const FormatException("標籤不存在");
+    }
+    if (!await _checkTopicAlive(activityId, questionData.topicId)) {
+      throw const FormatException("話題不存在");
+    }
+    if (!await _isManager(activityId)) {
+      throw const FormatException("你不是管理者");
+    }
     questionData.choices = List.filled(5, '');
-    final existQuestion = db
-        .collection(FirestoreConstants.activityCollectionPath.value)
-        .doc(activityId)
-        .collection(FirestoreConstants.questionCollectionPath.value)
-        .where(QuestionConstants.topicId.value,
-            isEqualTo: questionData.topicId);
-
-    assert((await existQuestion.count().get()).count == 0, '該話題已經有問卷');
 
     questionData.uid = generateUuid();
     final questionDoc = db
@@ -450,52 +508,28 @@ class ActivityProvider {
     return await getQuestion(activityId, questionData.uid);
   }
 
-  /// 新增/修改問卷選項(若活動已經開始，則不可修改)
-  Future<void> editQuestionChoices(
-    String activityId,
-    String questionId,
-    List<String> choices,
-  ) async {
-    assert(await _isManager(activityId), '你不是管理者');
-
-    final questionDoc = db
-        .collection(FirestoreConstants.activityCollectionPath.value)
-        .doc(activityId)
-        .collection(FirestoreConstants.questionCollectionPath.value)
-        .doc(questionId);
-
-    final questionData = await questionDoc.get();
-    assert(questionData.exists, '問卷不存在');
-
-    final activityData = await getActivity(activityId);
-    assert(
-        activityData.startDate.toEpochTime().isAfter(DateTime.now()), '活動已經開始');
-
-    await db.runTransaction((transaction) async {
-      transaction
-          .update(questionDoc, {QuestionConstants.choices.value: choices});
-
-      final reviewQuery = questionDoc
-          .collection(FirestoreConstants.replyCollectionPath.value)
-          .where(QuestionConstants.choices.value, whereIn: choices);
-
-      final reviewDocs = (await reviewQuery.get()).docs;
-      for (final reviewDoc in reviewDocs) {
-        transaction.delete(reviewDoc.reference);
-      }
-    });
-  }
-
   /// 修改問卷題目(若活動已經開始，則不可修改)
   Future<Question> editQuestion(
     String activityId,
     String questionId,
     Question questionData,
   ) async {
-    assert(await _checkActivityAlive(activityId), "活動不存在");
-    assert(await _checkTagAlive(activityId, questionData.tagId), "標籤不存在");
-    assert(await _checkTopicAlive(activityId, questionData.topicId), "話題不存在");
-    assert(await _isManager(activityId), '你不是管理者');
+    if (!await _checkActivityAlive(activityId)) {
+      throw const FormatException("活動不存在");
+    }
+    if (!await _checkTagAlive(activityId, questionData.tagId)) {
+      throw const FormatException("標籤不存在");
+    }
+    if (!await _checkTopicAlive(activityId, questionData.topicId)) {
+      throw const FormatException("話題不存在");
+    }
+    if (!await _isManager(activityId)) {
+      throw const FormatException("你不是管理者");
+    }
+
+    if (questionData.choices.toSet().length != questionData.choices.length) {
+      throw const FormatException("選項重複");
+    }
 
     DocumentReference questionDoc = db
         .collection(FirestoreConstants.activityCollectionPath.value)
@@ -503,16 +537,30 @@ class ActivityProvider {
         .collection(FirestoreConstants.questionCollectionPath.value)
         .doc(questionId);
 
-    assert((await questionDoc.get()).exists, '問卷不存在');
-    final activityData = await getActivity(activityId);
-    assert(
-        activityData.startDate.toEpochTime().isAfter(DateTime.now()), '活動已經開始');
+    if (!((await questionDoc.get()).exists)) {
+      throw const FormatException("問卷不存在");
+    }
+    // final activityData = await getActivity(activityId);
+    // if(
+    //     activityData.startDate.toEpochTime().isAfter(DateTime.now()), '活動已經開始');
 
-    while (questionData.choices.remove("")) {}
+    // while (questionData.choices.remove("")) {}
 
     await questionDoc.update({
       QuestionConstants.questionName.value: questionData.questionName,
       QuestionConstants.choices.value: questionData.choices
+    });
+    db
+        .collection(FirestoreConstants.activityCollectionPath.value)
+        .doc(activityId)
+        .collection(FirestoreConstants.questionCollectionPath.value)
+        .doc(questionId)
+        .collection(FirestoreConstants.replyCollectionPath.value)
+        .get()
+        .then((snapshot) {
+      for (DocumentSnapshot ds in snapshot.docs) {
+        ds.reference.delete();
+      }
     });
 
     return await getQuestion(activityId, questionId);
@@ -520,7 +568,9 @@ class ActivityProvider {
 
   /// 取得問卷
   Future<Question> getQuestion(String activityId, String questionId) async {
-    assert(await _checkActivityAlive(activityId), "活動不存在");
+    if (!await _checkActivityAlive(activityId)) {
+      throw const FormatException("活動不存在");
+    }
 
     final questionRef = db
         .collection(FirestoreConstants.activityCollectionPath.value)
@@ -529,15 +579,22 @@ class ActivityProvider {
         .doc(questionId);
 
     final questionData = await questionRef.get();
-    assert(questionData.exists, '問卷不存在');
+    if (!questionData.exists) {
+      throw const FormatException("問卷不存在");
+    }
 
     return Question.fromDocument(questionData);
   }
 
   /// 用話題取得問卷
   Future<Question> getQuestionByTopic(String activityId, String topicId) async {
-    assert(await _checkActivityAlive(activityId), "活動不存在");
-    assert(await _checkTopicAlive(activityId, topicId), "話題不存在");
+    if (!await _checkActivityAlive(activityId)) {
+      throw const FormatException("活動不存在");
+    }
+    if (!await _checkTopicAlive(activityId, topicId)) {
+      throw const FormatException("話題不存在");
+    }
+
     final questionQuery = db
         .collection(FirestoreConstants.activityCollectionPath.value)
         .doc(activityId)
@@ -545,7 +602,9 @@ class ActivityProvider {
         .where(QuestionConstants.topicId.value, isEqualTo: topicId);
 
     final questionDocs = (await questionQuery.get()).docs;
-    assert(questionDocs.isNotEmpty, '該話題沒有問卷');
+    if (questionDocs.isEmpty) {
+      throw const FormatException("該話題沒有問卷");
+    }
     return Question.fromDocument(questionDocs.first);
   }
 
@@ -565,11 +624,12 @@ class ActivityProvider {
     String activityId,
     String topicId,
   ) async {
-    assert(await _checkActivityAlive(activityId), "活動不存在");
-    assert(await _isManager(activityId), '你不是管理者');
-    // final activityData = await getActivity(activityId);
-    // assert(
-    //     activityData.startDate.toEpochTime().isAfter(DateTime.now()), '活動已經開始');
+    if (!await _checkActivityAlive(activityId)) {
+      throw const FormatException("活動不存在");
+    }
+    if (!await _isManager(activityId)) {
+      throw const FormatException("你不是管理者");
+    }
 
     final topicDoc = db
         .collection(FirestoreConstants.activityCollectionPath.value)
@@ -584,10 +644,14 @@ class ActivityProvider {
         .where(QuestionConstants.topicId.value, isEqualTo: topicId);
 
     await db.runTransaction((transaction) async {
-      assert((await topicDoc.get()).exists, '該話題不存在');
+      if (!((await topicDoc.get()).exists)) {
+        throw const FormatException("該話題不存在");
+      }
       transaction.delete(topicDoc);
       final questions = (await questionDoc.get()).docs;
-      assert(questions.isNotEmpty, '該話題沒有問卷');
+      if (questions.isEmpty) {
+        throw const FormatException("該話題沒有問卷");
+      }
       transaction.delete(questions.first.reference);
     });
   }

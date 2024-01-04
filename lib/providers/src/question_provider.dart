@@ -22,10 +22,8 @@ class QuestionProvider {
     String questionId,
     String choice,
   ) async {
-    assert(AuthProvider().fbaUser!.isAnonymous == false, '匿名無法回答問題');
 
     final email = (await AuthProvider().currentUser).email;
-    assert(email != null, 'email 不可為空');
 
     var ansRef = db
         .collection(FirestoreConstants.activityCollectionPath.value)
@@ -34,16 +32,6 @@ class QuestionProvider {
         .doc(questionId)
         .collection(FirestoreConstants.replyCollectionPath.value)
         .doc(email);
-
-    // final activityData = await ActivityProvider().getActivity(activityId);
-    // assert(
-    //   activityData.startDate.toEpochTime().isBefore(DateTime.now()),
-    //   '活動尚未開始',
-    // );
-    // assert(
-    //   activityData.endDate.toEpochTime().isAfter(DateTime.now()),
-    //   '活動已經結束',
-    // );
 
     ansRef.set({
       ReplyConstants.email.value: email,

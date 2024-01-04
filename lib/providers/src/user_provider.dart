@@ -548,7 +548,10 @@ class UserProvider {
 
   ///扣除使用者活動點數
   Future<void> minusUserActivityPoint(String activityId, int val) async {
-    assert(val > 0, "不能扣除小於1的值");
+    // assert(val > 0, "不能扣除小於1的值");
+    if(val <= 0) {
+      throw const FormatException("不能扣除小於1的值");
+    }
     final userId = AuthProvider().currentUserId;
     final userRef = db
         .collection(FireStoreUserConstants.userCollectionPath.value)

@@ -183,7 +183,9 @@ class _ActivityMainPageState extends State<ActivityMainPage>
         newUserTags.add(_currentActivityTags[i].uid);
       }
     }
-    _enableMatch = false;
+    setState(() {
+      _enableMatch = false;
+    });
     var newName = textEditingController.text;
     if (newName != _currentUser.displayName && newName.isNotEmpty) {
       _currentUser.displayName = textEditingController.text;
@@ -191,9 +193,10 @@ class _ActivityMainPageState extends State<ActivityMainPage>
     }
     await userProvider.updateUserTag(args.activityId, newUserTags);
     if (cnt > 0) {
-      _enableMatch = true;
+      setState(() {
+        _enableMatch = true;
+      });
     }
-    setState(() {});
   }
 
   String _formatTime() {

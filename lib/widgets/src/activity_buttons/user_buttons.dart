@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import '../../../models/models.dart';
 import '../../../pages/routes.dart';
@@ -370,6 +371,9 @@ class UserButtonsState extends State<UserButtons>
                           isPushButton = true;
                           setState(() {
                             if (toggle) {
+                              if(!widget.enableMatch && ! widget.enableHistoricalChatRoom && !widget.enableTagWidget){
+                                Fluttertoast.showToast(msg: "此活動沒有設定標籤，無法進行配對聊天");
+                              }
                               toggle = !toggle;
                               _controller.forward();
                               Future.delayed(Duration(milliseconds: 10), () {

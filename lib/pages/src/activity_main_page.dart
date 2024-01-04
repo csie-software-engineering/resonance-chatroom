@@ -38,6 +38,7 @@ class _ActivityMainPageState extends State<ActivityMainPage>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation _animation;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   final AsyncMemoizer _memoization = AsyncMemoizer<void>();
 
@@ -72,6 +73,7 @@ class _ActivityMainPageState extends State<ActivityMainPage>
 
   bool _enableTagWidget = false;
   bool _enableMatch = false;
+  bool _enableHistoricalChatRoom = false;
   bool isStartMatching = false;
   bool initial = false;
   bool isTryChangingPoints = false;
@@ -294,11 +296,12 @@ class _ActivityMainPageState extends State<ActivityMainPage>
       Navigator.of(context).pop();
     }
 
-    var getTags = await activityProvider.getAllTags(args.activityId);
+    _currentActivityTags = await activityProvider.getAllTags(args.activityId);
 
-    if (getTags != null) {
+    if (_currentActivityTags.isNotEmpty) {
       _enableTagWidget = true;
-      _currentActivityTags = getTags;
+      _enableHistoricalChatRoom = true;
+      _enableTagWidget = true;
     }
   }
 
@@ -373,6 +376,7 @@ class _ActivityMainPageState extends State<ActivityMainPage>
           } else {
             // 如果 Future 完成，返回數據 UI
             return Scaffold(
+              key: _scaffoldKey,
               body: Column(
                 children: [
                   Container(
@@ -414,7 +418,7 @@ class _ActivityMainPageState extends State<ActivityMainPage>
                                                     "cancelWaitingError: $e");
                                               }
                                               setState(() {
-                                                Navigator.of(context).popUntil(
+                                                Navigator.of(_scaffoldKey.currentContext!).popUntil(
                                                     ModalRoute.withName(
                                                         MainPage.routeName));
                                               });
@@ -610,7 +614,7 @@ class _ActivityMainPageState extends State<ActivityMainPage>
                     )
                   : UserButtons(
                       enableTagWidget: _enableTagWidget,
-                      enableHistoricalChatRoom: true,
+                      enableHistoricalChatRoom: _enableHistoricalChatRoom,
                       enableMatch: _enableMatch,
                       matching: matching,
                       goToHistoricalChatRoomPage: _goToHistoricalChatRoomPage,

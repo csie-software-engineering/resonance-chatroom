@@ -83,6 +83,7 @@ class _ChatPageState extends State<ChatPage> {
   bool initial = false;
   bool _isAlreadyReport = false;
   bool _enableShowTopic = true;
+  bool isAnonymous = false;
   List<bool>? isTryLaunchUrl;
 
   List<QueryDocumentSnapshot> _chatMessages = [];
@@ -123,9 +124,9 @@ class _ChatPageState extends State<ChatPage> {
     if (_isEnableSocialMedial) {
       Fluttertoast.showToast(msg: "已分享");
     } else {
-      _isEnableSocialMedial = true;
       try {
         await chatProvider.agreeShareSocialMedia(args.activityId, args.peerId);
+        _isEnableSocialMedial = true;
       } catch (e) {
         if(e is FormatException){
           debugPrint("agreeShareSocialMediaError: $e");
@@ -195,9 +196,8 @@ class _ChatPageState extends State<ChatPage> {
           debugPrint("_initGetIsAgreeShareSocialMediaBadError: $e");
         }
       }
-
+      isAnonymous = authProvider.fbaUser!.isAnonymous;
       peerUser = await userProvider.getUser(userId: args.peerId);
-
       room = await chatProvider.getRoom(args.activityId, args.peerId);
       currentUser = await authProvider.currentUser;
       _tagName =
@@ -955,6 +955,11 @@ class _ChatPageState extends State<ChatPage> {
                                                   }));
                                             },
                                           );
+                                        } else {
+                                          if(isAnonymous){
+                                            Fluttertoast.showToast(msg: "匿名無法回答問卷");
+                                            debugPrint("匿名無法回答問卷");
+                                          }
                                         }
                                       },
                                     ),
@@ -980,7 +985,7 @@ class _ChatPageState extends State<ChatPage> {
                               _enableShowTopic = true;
                               _previousTopicId = _currentTopicId;
                               _currentTopicId = room["topicId"];
-                              _height = 10 + 40 * _allTopics[_currentTopicId]!.length / 16;
+                              _height = 10 + 40 * (1 + _allTopics[_currentTopicId]!.length / 16);
                               _color = Theme.of(context).colorScheme.primary.withOpacity(0.6);
                               _colorText = Theme.of(context).colorScheme.background;
                               _topicColorChangeTimer = Timer(const Duration(seconds: 5), (){
@@ -989,10 +994,12 @@ class _ChatPageState extends State<ChatPage> {
                                   _colorText = Theme.of(context).colorScheme.primary;
                                 });
                               });
-                              _newQuestion();
+                              if(!isAnonymous){
+                                _newQuestion();
+                              }
                             } else {
                               if (_enableShowTopic) {
-                                _height = 10 + 40 * _allTopics[_currentTopicId]!.length / 16;
+                                _height = 10 + 40 * (1 + _allTopics[_currentTopicId]!.length / 16);
                               } else {
                                 _height = 20;
                               }
@@ -1034,8 +1041,8 @@ class _ChatPageState extends State<ChatPage> {
                                             child: Text(
                                               key: UniqueKey(),
                                               _enableShowTopic
-                                                  ? _allTopics[_currentTopicId] ??
-                                                      "自由聊天吧!"
+                                                  ? _allTopics[_currentTopicId]!.isEmpty ?
+                                                      "自由聊天吧 !" : _allTopics[_currentTopicId]!
                                                   : "",
                                               style: TextStyle(
                                                 fontSize: 20,

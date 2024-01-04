@@ -62,6 +62,7 @@ class _ActivityMainPageState extends State<ActivityMainPage>
 
   double _height = 0;
   Timer? _timer;
+  Timer? _diableTimer;
   int timeShowUp = 0;
 
 
@@ -114,7 +115,7 @@ class _ActivityMainPageState extends State<ActivityMainPage>
       } catch (e) {
         debugPrint("cancelWaitingError: $e");
       } finally {
-        Future.delayed(Duration(seconds: 1), () {
+        _diableTimer = Timer(const Duration(seconds: 1), () {
           setState(() {
             _enableMatch = true;
             _timer?.cancel();
@@ -352,6 +353,7 @@ class _ActivityMainPageState extends State<ActivityMainPage>
   @override
   void dispose() {
     _timer?.cancel();
+    _diableTimer?.cancel();
     super.dispose();
   }
 

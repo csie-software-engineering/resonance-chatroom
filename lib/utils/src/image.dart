@@ -4,9 +4,16 @@ import 'dart:typed_data';
 import 'package:image_picker/image_picker.dart';
 
 Future<String?> pickImageToBase64() async {
+  var maxFileSizeInBytes = 1048576; // 1 MB
   final xFile = (await ImagePicker().pickImage(source: ImageSource.gallery));
   if (xFile == null) return null;
-  return imagePathToBase64(xFile.path);
+  var imagePath = await xFile.readAsBytes();
+  var fileSize = imagePath.length; // Get the file size in bytes
+  if (fileSize <= maxFileSizeInBytes) {
+    return imagePathToBase64(xFile.path);
+  } else {
+    throw const FormatException("Image too big!");
+  }
 }
 
 Future<String?> imagePathToBase64(String imagePath) async {

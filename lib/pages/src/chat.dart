@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 import 'package:async/async.dart';
 
@@ -15,7 +16,6 @@ import 'package:resonance_chatroom/providers/providers.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../widgets/src/chat_components/questionDialog.dart';
-import '../../constants/src/firestore_constants.dart';
 import '../../widgets/src/input/widgets.dart';
 
 class ChatPageArguments {
@@ -42,6 +42,7 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   late final ChatPageArguments args =
       ModalRoute.of(context)!.settings.arguments as ChatPageArguments;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   late final User currentUser;
   late final User peerUser;
   late final Room room;
@@ -72,6 +73,9 @@ class _ChatPageState extends State<ChatPage> {
   String _previousTopicId = "";
   Question? _currentQuestion;
   List<bool>? _questionAnswers;
+  late Color _color = Theme.of(context).colorScheme.onInverseSurface;
+  late Color _colorText = Theme.of(context).colorScheme.primary;
+  Timer? _topicColorChangeTimer;
 
   bool isOn = false;
   bool isLoading = false;
@@ -95,8 +99,7 @@ class _ChatPageState extends State<ChatPage> {
               curve: Curves.easeOut);
         }
       } catch (e) {
-
-        if(e is FormatException){
+        if (e is FormatException) {
           debugPrint("_onSendMessageFormatException: $e");
           Fluttertoast.showToast(
               msg: '對方已離開，無法傳送訊息',
@@ -105,7 +108,6 @@ class _ChatPageState extends State<ChatPage> {
         } else {
           debugPrint("_onSendMessageError: $e");
         }
-
       }
     } else {
       // 當沒有文字的時候
@@ -114,14 +116,6 @@ class _ChatPageState extends State<ChatPage> {
           backgroundColor: Theme.of(context).colorScheme.onSurface,
           textColor: Theme.of(context).colorScheme.onInverseSurface);
     }
-  }
-
-  // Widget? _subTitle() {
-  //
-  // }
-
-  Future<void> nextTopic() async {
-    await chatProvider.updateRandomTopic(args.activityId, args.peerId);
   }
 
   Future<void> enableSocialMedia() async {
@@ -133,8 +127,12 @@ class _ChatPageState extends State<ChatPage> {
       try {
         await chatProvider.agreeShareSocialMedia(args.activityId, args.peerId);
       } catch (e) {
-        // todo 應該要抓對應錯誤
-        debugPrint("$e");
+        if(e is FormatException){
+          debugPrint("agreeShareSocialMediaError: $e");
+          Fluttertoast.showToast(msg: "對方已離開聊天室，無法分享");
+        } else {
+          debugPrint("agreeShareSocialMediaBadError: $e");
+        }
       }
     }
   }
@@ -160,9 +158,8 @@ class _ChatPageState extends State<ChatPage> {
     } catch (e) {
       // todo 應該要抓對應錯誤，如果是這樣代表對方沒有同意
       peerSocialMedia = null;
-    } finally {
-      return peerSocialMedia;
     }
+    return peerSocialMedia;
   }
 
   // void _launchURL(String url) async {
@@ -180,18 +177,26 @@ class _ChatPageState extends State<ChatPage> {
     listScrollController.addListener(_scrollListener);
   }
 
+  @override
+  void dispose() {
+    _topicColorChangeTimer?.cancel();
+    super.dispose();
+  }
+
   Future<void> _init() async {
     if (!initial) {
-      // await chatProvider.disagreeShareSocialMedia(args.activityId, args.peerId);
       try {
         _isEnableSocialMedial = await chatProvider.getIsAgreeShareSocialMedia(
             args.activityId, args.peerId);
       } catch (e) {
-        debugPrint("_initgetIsAgreeShareSocialMediaError: $e");
+        if(e is FormatException){
+          debugPrint("_initGetIsAgreeShareSocialMediaError: $e");
+        } else {
+          debugPrint("_initGetIsAgreeShareSocialMediaBadError: $e");
+        }
       }
 
-      peerUser = await userProvider.getUser(
-          userId: args.peerId); // todo 我可以直接載入對方的 social media?
+      peerUser = await userProvider.getUser(userId: args.peerId);
 
       room = await chatProvider.getRoom(args.activityId, args.peerId);
       currentUser = await authProvider.currentUser;
@@ -514,8 +519,10 @@ class _ChatPageState extends State<ChatPage> {
                                             return Text(
                                                 'Error: ${snapshot.error}');
                                           } else {
-                                            if(snapshot.data != null){
-                                              isTryLaunchUrl = List.generate(snapshot.data!.length, (index) => false);
+                                            if (snapshot.data != null) {
+                                              isTryLaunchUrl = List.generate(
+                                                  snapshot.data!.length,
+                                                  (index) => false);
                                             }
                                             return snapshot.data != null
                                                 ? Row(
@@ -540,7 +547,7 @@ class _ChatPageState extends State<ChatPage> {
                                                                     .circular(
                                                                         10)),
                                                           ),
-                                                          child: Center(
+                                                          child: const Center(
                                                               child: Text(
                                                                   "對方已公開")),
                                                         ),
@@ -586,20 +593,20 @@ class _ChatPageState extends State<ChatPage> {
                                                                           onPressed:
                                                                               () async {
                                                                             // todo launch;
-                                                                                if(!isTryLaunchUrl![index]) {
-                                                                                  isTryLaunchUrl![index] = true;
-                                                                                    try {
-                                                                                      snapshot.data![index].linkUrl;
-                                                                                      Uri url = Uri.parse(snapshot.data![index].linkUrl);
-                                                                                      if (!await launchUrl(url)) {
-                                                                                        throw Exception('Could not launch $url');
-                                                                                        }
-                                                                                    } catch (e) {
-                                                                                      debugPrint("_launchSocialMedialError: $e");
-                                                                                      Fluttertoast.showToast(msg: "連結有誤無法點開");
-                                                                                    }
-                                                                                    isTryLaunchUrl![index] = false;
+                                                                            if (!isTryLaunchUrl![index]) {
+                                                                              isTryLaunchUrl![index] = true;
+                                                                              try {
+                                                                                snapshot.data![index].linkUrl;
+                                                                                Uri url = Uri.parse(snapshot.data![index].linkUrl);
+                                                                                if (!await launchUrl(url)) {
+                                                                                  throw Exception('Could not launch $url');
                                                                                 }
+                                                                              } catch (e) {
+                                                                                debugPrint("_launchSocialMedialError: $e");
+                                                                                Fluttertoast.showToast(msg: "連結有誤無法點開");
+                                                                              }
+                                                                              isTryLaunchUrl![index] = false;
+                                                                            }
                                                                           }),
                                                                       Container(
                                                                         padding: const EdgeInsets
@@ -730,7 +737,7 @@ class _ChatPageState extends State<ChatPage> {
         );
       }
     } else {
-      return SizedBox.shrink();
+      return const SizedBox.shrink();
     }
   }
 
@@ -752,6 +759,7 @@ class _ChatPageState extends State<ChatPage> {
           } else {
             debugPrint("all topics:${_allTopics.length}");
             return Scaffold(
+              key: _scaffoldKey,
               body: Column(
                 children: [
                   SizedBox(height: MediaQuery.of(context).padding.top),
@@ -829,13 +837,13 @@ class _ChatPageState extends State<ChatPage> {
                                         await chatProvider.leaveRoom(
                                             args.activityId, args.peerId);
                                       } catch (e) {
-                                        if(e is! FormatException) {
+                                        if (e is! FormatException) {
                                           debugPrint("leaveRoomError:$e");
                                         }
                                       } finally {
                                         setState(() {
                                           Navigator.popUntil(
-                                              context,
+                                              _scaffoldKey.currentContext!,
                                               ModalRoute.withName(
                                                   ActivityMainPage.routeName));
                                         });
@@ -920,7 +928,8 @@ class _ChatPageState extends State<ChatPage> {
                                                             _questionAnswers!
                                                                 .length;
                                                         i++) {
-                                                      if (_questionAnswers![i]) {
+                                                      if (_questionAnswers![
+                                                          i]) {
                                                         choice =
                                                             _currentQuestion!
                                                                 .choices[i];
@@ -943,8 +952,7 @@ class _ChatPageState extends State<ChatPage> {
                                                     }
                                                   }, cancel: () {
                                                     Navigator.of(context).pop();
-                                                  })
-                                                  );
+                                                  }));
                                             },
                                           );
                                         }
@@ -972,11 +980,19 @@ class _ChatPageState extends State<ChatPage> {
                               _enableShowTopic = true;
                               _previousTopicId = _currentTopicId;
                               _currentTopicId = room["topicId"];
-                              _height = 50;
+                              _height = 10 + 40 * _allTopics[_currentTopicId]!.length / 16;
+                              _color = Theme.of(context).colorScheme.primary.withOpacity(0.6);
+                              _colorText = Theme.of(context).colorScheme.background;
+                              _topicColorChangeTimer = Timer(const Duration(seconds: 5), (){
+                                setState(() {
+                                  _color = Theme.of(context).colorScheme.onInverseSurface;
+                                  _colorText = Theme.of(context).colorScheme.primary;
+                                });
+                              });
                               _newQuestion();
                             } else {
                               if (_enableShowTopic) {
-                                _height = 50;
+                                _height = 10 + 40 * _allTopics[_currentTopicId]!.length / 16;
                               } else {
                                 _height = 20;
                               }
@@ -990,13 +1006,11 @@ class _ChatPageState extends State<ChatPage> {
                                 }
                               },
                               child: AnimatedContainer(
-                                curve: Curves.easeIn,
+                                curve: Curves.easeOutExpo,
                                 height: _height,
-                                duration: const Duration(milliseconds: 500),
+                                duration: const Duration(milliseconds: 1000),
                                 decoration: BoxDecoration(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onInverseSurface,
+                                  color: _color,
                                   boxShadow: [
                                     BoxShadow(
                                       color: Colors.black.withOpacity(0.1),
@@ -1015,17 +1029,19 @@ class _ChatPageState extends State<ChatPage> {
                                       Center(
                                         child: AnimatedSwitcher(
                                           duration: Duration(milliseconds: 500),
-                                          child: Text(
-                                            key: UniqueKey(),
-                                            _enableShowTopic
-                                                ? _allTopics[_currentTopicId] ?? "自由聊天吧!"
-                                                : "自由聊天吧!",
-                                            style: TextStyle(
-                                              fontSize: 20,
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .secondary,
-                                              fontWeight: FontWeight.w300,
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(left: 20, right: 40.0),
+                                            child: Text(
+                                              key: UniqueKey(),
+                                              _enableShowTopic
+                                                  ? _allTopics[_currentTopicId] ??
+                                                      "自由聊天吧!"
+                                                  : "",
+                                              style: TextStyle(
+                                                fontSize: 20,
+                                                color: _colorText,
+                                                fontWeight: FontWeight.w300,
+                                              ),
                                             ),
                                           ),
                                         ),

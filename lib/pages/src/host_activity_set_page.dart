@@ -199,6 +199,10 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
                         setState(() {
                           _selectedImage = value;
                         });
+                      }).catchError((e){
+                        debugPrint("pickImageToBase64Error: $e");
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(const SnackBar(content: Text('圖片太大無法使用')));
                       }),
                       child: const Text('選擇圖片'),
                     ),
@@ -258,7 +262,7 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
             return;
           }
 
-          debugPrint("活動送出");
+          debugPrint("活動送出 base64 length: ${_selectedImage!.length}");
           final activityData = Activity(
             activityName: _nameController.text,
             activityInfo: _infoController.text,

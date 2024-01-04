@@ -313,7 +313,7 @@ class ChatProvider {
   ) async {
     final fromId = AuthProvider().currentUserId;
     final room = await getRoom(activityId, peerId);
-    // assert(room.isEnable, '房間已關閉'); //todo
+
     if(!room.isEnable){
       throw const FormatException("房間已關閉");
     }
@@ -355,7 +355,10 @@ class ChatProvider {
     String peerId,
   ) async {
     final room = await getRoom(activityId, peerId);
-    assert(room.isEnable, '房間已關閉');
+
+    if(!room.isEnable){
+      throw const FormatException('房間已關閉');
+    }
     room.topicId = (await _getRandomTopicsByTagId(activityId, room.tagId))?.uid;
 
     return await updateRoom(activityId, peerId, room);
@@ -368,7 +371,10 @@ class ChatProvider {
   ) async {
     final fromId = AuthProvider().currentUserId;
     final room = await getRoom(activityId, peerId);
-    assert(room.isEnable, '房間已關閉');
+
+    if(!room.isEnable){
+      throw const FormatException("房間已關閉");
+    }
 
     final roomUserIndex = room.users.indexWhere((e) => e.id == fromId);
     assert(roomUserIndex != -1, '使用者不在房間中');
@@ -384,7 +390,11 @@ class ChatProvider {
   ) async {
     final fromId = AuthProvider().currentUserId;
     final room = await getRoom(activityId, peerId);
-    assert(room.isEnable, '房間已關閉');
+
+    if(!room.isEnable){
+      throw const FormatException('房間已關閉');
+    }
+
 
     final roomUserIndex = room.users.indexWhere((e) => e.id == fromId);
     assert(roomUserIndex != -1, '使用者不在房間中');
@@ -413,7 +423,10 @@ class ChatProvider {
   ) async {
     final fromId = AuthProvider().currentUserId;
     final room = await getRoom(activityId, peerId);
-    assert(room.isEnable, '房間已關閉');
+
+    if(!room.isEnable){
+      throw const FormatException('房間已關閉');
+    }
 
     final roomUserIndex = room.users.indexWhere((e) => e.id == fromId);
     assert(roomUserIndex != -1, '使用者不在房間中');

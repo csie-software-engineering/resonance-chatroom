@@ -569,8 +569,10 @@ class UserProvider {
 
     final activity = await userActivityRef.get();
     assert(activity.exists, "使用者未參加該活動");
-    assert(activity.get(FSUserActivityConstants.point.value) >= val,
-        "使用者沒有足夠多的點數");
+    if(activity.get(FSUserActivityConstants.point.value) < val){
+      throw const FormatException("使用者沒有足夠多的點數");
+    }
+
 
     await userActivityRef.update({
       FSUserActivityConstants.point.value: FieldValue.increment(-val),

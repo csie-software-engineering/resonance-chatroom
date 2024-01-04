@@ -559,8 +559,12 @@ class _ActivityMainPageState extends State<ActivityMainPage>
                                                           Navigator.of(context).pop();
                                                         });
                                                       } catch (e) {
-                                                        debugPrint("_changePointsError $e");
-                                                        Fluttertoast.showToast(msg: "無效輸入");
+                                                        if(e is FormatException){
+                                                          debugPrint("_changePointsError $e");
+                                                          Fluttertoast.showToast(msg: "無效輸入");
+                                                        } else {
+                                                          debugPrint("_changePointsBadError $e");
+                                                        }
                                                       }
                                                       isTryChangingPoints = false;
                                                     }

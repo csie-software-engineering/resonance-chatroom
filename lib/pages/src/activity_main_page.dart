@@ -38,6 +38,7 @@ class _ActivityMainPageState extends State<ActivityMainPage>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation _animation;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   final AsyncMemoizer _memoization = AsyncMemoizer<void>();
 
@@ -375,6 +376,7 @@ class _ActivityMainPageState extends State<ActivityMainPage>
           } else {
             // 如果 Future 完成，返回數據 UI
             return Scaffold(
+              key: _scaffoldKey,
               body: Column(
                 children: [
                   Container(
@@ -416,7 +418,7 @@ class _ActivityMainPageState extends State<ActivityMainPage>
                                                     "cancelWaitingError: $e");
                                               }
                                               setState(() {
-                                                Navigator.of(context).popUntil(
+                                                Navigator.of(_scaffoldKey.currentContext!).popUntil(
                                                     ModalRoute.withName(
                                                         MainPage.routeName));
                                               });

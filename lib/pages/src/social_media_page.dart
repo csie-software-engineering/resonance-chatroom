@@ -31,11 +31,16 @@ class _SocialMediaPageState extends State<SocialMediaPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
-      appBar: myAppBar(
-        context,
-        title: const Text('社群媒體'),
+      appBar: CustomAppBar(
         leading: const BackButton(),
+        title: '社群媒體',
+        tail: null,
       ),
+      // myAppBar(
+      //   context,
+      //   title: const Text('社群媒體'),
+      //   leading: const BackButton(),
+      // ),
       body: SizedBox(
         height: MediaQuery.of(context).size.height -
             MediaQuery.of(context).viewInsets.bottom,

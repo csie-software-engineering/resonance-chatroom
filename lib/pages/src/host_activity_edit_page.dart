@@ -138,10 +138,10 @@ final DateFormat formatter = DateFormat('yyyy-MM-dd-hh-mm');
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
-      appBar: myAppBar(
-        context,
-        title: const Text('活動設定頁面'),
+      appBar: CustomAppBar(
         leading: const BackButton(),
+        title: '設定活動',
+        tail: null,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 import 'package:resonance_chatroom/providers/providers.dart';
 import '../../models/models.dart';
@@ -26,7 +27,12 @@ class _HostActivityTagPageState extends State<HostActivityTagPage> {
   late final ActivityProvider tagProvider = context.read<ActivityProvider>();
   List<Widget> fields = [];
   Future<void> _initTagContent() async {
-    var getTags = await tagProvider.getAllTags(args.activityId);
+    var getTags;
+    try {
+      getTags = await tagProvider.getAllTags(args.activityId);
+    }catch(e){
+      Fluttertoast.showToast(msg: e.toString());
+    }
 
     _originTag = getTags;
     for (int i = 0; i < _originTag.length; i++) {
@@ -84,30 +90,34 @@ class _HostActivityTagPageState extends State<HostActivityTagPage> {
                         '新增標籤',
                       ),
                       onPressed: () async {
-                        Tag tag = await tagProvider.addNewTag(
-                          args.activityId,
-                          '',
-                        );
-                        debugPrint('活動id${args.activityId}');
-                        setState(() {
-                          int ind = fields.length;
-                          fields.add(NewTagField(
-                            onDelete: (ind) {
-                              setState(() {
-                                fields.removeAt(ind);
-                                for (int i = 0; i < fields.length; i++) {
-                                  NewTagField tagField = fields[i] as NewTagField;
-                                  tagField.index = i;
-                                  fields[i] = tagField;
-                                }
-                              });
-                            },
-                            id: tag.uid,
-                            activityId: args.activityId,
-                            tagName: '',
-                            index: ind,
-                          ));
-                        });
+                        try{
+                          Tag tag = await tagProvider.addNewTag(
+                            args.activityId,
+                            '',
+                          );
+                          debugPrint('活動id${args.activityId}');
+                          setState(() {
+                            int ind = fields.length;
+                            fields.add(NewTagField(
+                              onDelete: (ind) {
+                                setState(() {
+                                  fields.removeAt(ind);
+                                  for (int i = 0; i < fields.length; i++) {
+                                    NewTagField tagField = fields[i] as NewTagField;
+                                    tagField.index = i;
+                                    fields[i] = tagField;
+                                  }
+                                });
+                              },
+                              id: tag.uid,
+                              activityId: args.activityId,
+                              tagName: '',
+                              index: ind,
+                            ));
+                          });
+                        }catch(e){
+                          Fluttertoast.showToast(msg: e.toString());
+                        }
                       },
                     ),
                   ),
@@ -174,33 +184,51 @@ class _NewTagFieldState extends State<NewTagField> {
                       focusNode: _focusNode,
                     )
                   : Text(widget.tagName),
-              onPressed: () {
-                debugPrint('跳至topic頁面');
-                Navigator.of(context).pushNamed(HostActivityTopicPage.routeName,
-                    arguments: HostActivityTopicPageArguments(
-                      activityId: widget.activityId,
-                      tagId: widget.id,
-                    ));
+              onPressed: () async {
+                try {
+                  await context.read<ActivityProvider>().getTag(
+                      widget.activityId,
+                      widget.id);
+                  debugPrint('跳至topic頁面');
+                  Navigator.of(context).pushNamed(
+                      HostActivityTopicPage.routeName,
+                      arguments: HostActivityTopicPageArguments(
+                        activityId: widget.activityId,
+                        tagId: widget.id,
+                      ));
+                }catch(e){
+                  Fluttertoast.showToast(msg: e.toString());
+                }
               },
             ),
           ),
           IconButton(
             icon: isEditing ? const Icon(Icons.check) : const Icon(Icons.edit),
             onPressed: () async {
-              setState(() {
-                isEditing = !isEditing;
-                if (isEditing == false) {
-                  widget.tagName = _controller.text;
-                } else {
+              isEditing = !isEditing;
+              if (isEditing == true){
+                setState(() {
                   _focusNode.requestFocus();
+                });
+              }
+              else{
+                try {
+                  setState(() {
+                    isEditing = !isEditing;
+                    widget.tagName = _controller.text;
+                  });
+                  await context
+                      .read<ActivityProvider>()
+                      .editTag(
+                      widget.activityId, widget.id, widget.tagName);
+                } catch (e) {
+                  setState(() {
+                    _controller.clear();
+                    widget.tagName = _controller.text;
+                  });
+                  Fluttertoast.showToast(msg: e.toString());
                 }
-              });
-              debugPrint('更改標籤');
-              await context.read<ActivityProvider>().editTag(
-                    widget.activityId,
-                    widget.id,
-                    widget.tagName,
-                  );
+              }
             },
           ),
           IconButton(
@@ -215,10 +243,14 @@ class _NewTagFieldState extends State<NewTagField> {
                     });
                   }
                 : () async {
-                    widget.onDelete!(widget.index);
-                    await context
-                        .read<ActivityProvider>()
-                        .deleteTag(widget.activityId, widget.id);
+                    try {
+                      await context
+                          .read<ActivityProvider>()
+                          .deleteTag(widget.activityId, widget.id);
+                      widget.onDelete!(widget.index);
+                    }catch(e){
+                      Fluttertoast.showToast(msg: e.toString());
+                    }
                   },
           ),
         ],

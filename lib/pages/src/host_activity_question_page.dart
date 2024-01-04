@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/models.dart';
@@ -47,33 +48,37 @@ class _HostActivityQuestionPageState extends State<HostActivityQuestionPage> {
 
   void _initQuestionContent() async {
     debugPrint("初始問卷頁面");
-    var getQuestion =
-        await questionProvider.getQuestion(args.activityId, args.questionId);
+    try {
+      var getQuestion = await questionProvider.getQuestion(
+          args.activityId, args.questionId);
 
-    _originQuestion = getQuestion;
-    _questionController.text = _originQuestion.questionName;
-    // 創建一個列表來存儲所有的_choiceiController
-    List<TextEditingController> choiceControllers = [
-      _choice1Controller,
-      _choice2Controller,
-      _choice3Controller,
-      _choice4Controller,
-      _choice5Controller
-    ];
-    // 使用for循環來遍歷_originQuestion.choices
-    for (int i = 0; i < _originQuestion.choices.length; i++) {
-      // 將每個元素賦值給對應的_choiceiController.text
-      choiceControllers[i].text = _originQuestion.choices[i];
-    }
-    // 如果_originQuestion.choices的長度小於5
-    if (_originQuestion.choices.length < 5) {
-      // 將剩下的_choiceiController.text賦值為空字符串
-      for (int i = _originQuestion.choices.length; i < 5; i++) {
-        choiceControllers[i].text = "";
+      _originQuestion = getQuestion;
+      _questionController.text = _originQuestion.questionName;
+      // 創建一個列表來存儲所有的_choiceiController
+      List<TextEditingController> choiceControllers = [
+        _choice1Controller,
+        _choice2Controller,
+        _choice3Controller,
+        _choice4Controller,
+        _choice5Controller
+      ];
+      // 使用for循環來遍歷_originQuestion.choices
+      for (int i = 0; i < _originQuestion.choices.length; i++) {
+        // 將每個元素賦值給對應的_choiceiController.text
+        choiceControllers[i].text = _originQuestion.choices[i];
       }
+      // 如果_originQuestion.choices的長度小於5
+      if (_originQuestion.choices.length < 5) {
+        // 將剩下的_choiceiController.text賦值為空字符串
+        for (int i = _originQuestion.choices.length; i < 5; i++) {
+          choiceControllers[i].text = "";
+        }
+      }
+      debugPrint(_questionController.text);
+      setState(() {});
+    }catch(e){
+      Fluttertoast.showToast(msg: e.toString());
     }
-    debugPrint(_questionController.text);
-    setState(() {});
   }
 
   @override
@@ -218,37 +223,42 @@ class _HostActivityQuestionPageState extends State<HostActivityQuestionPage> {
               SizedBox(
                 width: 100,
                 child: ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     debugPrint("問卷修改");
                     // 跳至送出頁面的邏輯
                     // 傳遞createEvent()方法的回傳值給送出頁面
-                    questionProvider
-                        .getQuestion(
-                      args.activityId,
-                      args.questionId,
-                    )
-                        .then((question) {
-                      debugPrint(question.choices.toString());
-                      question.questionName = _questionController.text;
-                      debugPrint("===========");
-                      debugPrint(choice.toString());
-                      choice[0] = _choice1Controller.text;
-                      choice[1] = _choice2Controller.text;
-                      choice[2] = _choice3Controller.text;
-                      choice[3] = _choice4Controller.text;
-                      choice[4] = _choice5Controller.text;
-                      question.choices = choice;
-                      questionProvider
-                          .editQuestion(
-                              args.activityId, args.questionId, question)
-                          .then((_) => Navigator.of(context).pushNamed(
-                                HostActivityTopicPage.routeName,
-                                arguments: HostActivityTopicPageArguments(
-                                  activityId: args.activityId,
-                                  tagId: args.tagId,
-                                ),
-                              ));
-                    });
+                    try {
+                      await questionProvider
+                          .getQuestion(
+                        args.activityId,
+                        args.questionId,
+                      )
+                          .then((question) async {
+                        debugPrint(question.choices.toString());
+                        question.questionName = _questionController.text;
+                        debugPrint("===========");
+                        debugPrint(choice.toString());
+                        choice[0] = _choice1Controller.text;
+                        choice[1] = _choice2Controller.text;
+                        choice[2] = _choice3Controller.text;
+                        choice[3] = _choice4Controller.text;
+                        choice[4] = _choice5Controller.text;
+                        question.choices = choice;
+                        await questionProvider
+                            .editQuestion(
+                            args.activityId, args.questionId, question)
+                            .then((_) =>
+                            Navigator.of(context).pushNamed(
+                              HostActivityTopicPage.routeName,
+                              arguments: HostActivityTopicPageArguments(
+                                activityId: args.activityId,
+                                tagId: args.tagId,
+                              ),
+                            ));
+                      });
+                    }catch(e){
+                      Fluttertoast.showToast(msg: e.toString());
+                    }
                   },
                   child: const Text('送出'),
                 ),

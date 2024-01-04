@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../../models/models.dart';
@@ -272,7 +273,7 @@ final DateFormat formatter = DateFormat('yyyy-MM-dd-hh-mm');
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
+        onPressed: () async {
           if (_nameController.text.isEmpty) {
             ScaffoldMessenger.of(context)
                 .showSnackBar(const SnackBar(content: Text('請填寫活動名稱')));
@@ -297,7 +298,7 @@ final DateFormat formatter = DateFormat('yyyy-MM-dd-hh-mm');
             return;
           }
 
-          debugPrint("活動送出");
+          // debugPrint("活動送出");
           final activityData = Activity(
             activityName: _nameController.text,
             activityInfo: _infoController.text,
@@ -306,14 +307,19 @@ final DateFormat formatter = DateFormat('yyyy-MM-dd-hh-mm');
             activityPhoto: _selectedImage!,
           );
           activityData.uid = args.activityId;
-          context.read<ActivityProvider>().editActivity(activityData).then(
-                (activity) => Navigator.of(context).pushNamed(
-                  HostActivityTagPage.routeName,
-                  arguments: HostActivityTagPageArguments(
-                    activityId: activity.uid,
+          try {
+            await context.read<ActivityProvider>().editActivity(activityData).then(
+                  (activity) =>
+                  Navigator.of(context).pushNamed(
+                    HostActivityTagPage.routeName,
+                    arguments: HostActivityTagPageArguments(
+                      activityId: activity.uid,
+                    ),
                   ),
-                ),
-              );
+            );
+          }catch(e){
+            Fluttertoast.showToast(msg: e.toString());
+          }
         },
         label: const Row(children: [Icon(Icons.send), Text("編輯活動")]),
       ),

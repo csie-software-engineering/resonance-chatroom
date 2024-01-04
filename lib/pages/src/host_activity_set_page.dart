@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/models.dart';
@@ -232,7 +233,7 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
+        onPressed: () async {
           if (_nameController.text.isEmpty) {
             ScaffoldMessenger.of(context)
                 .showSnackBar(const SnackBar(content: Text('請填寫活動名稱')));
@@ -265,14 +266,19 @@ class _HostActivitySetPageState extends State<HostActivitySetPage> {
             endDate: _selectedDates[1]!.toEpochString(),
             activityPhoto: _selectedImage!,
           );
-          context.read<ActivityProvider>().setNewActivity(activityData).then(
-                (activity) => Navigator.of(context).pushNamed(
-                  HostActivityTagPage.routeName,
-                  arguments: HostActivityTagPageArguments(
-                    activityId: activity.uid,
+          try {
+            await context.read<ActivityProvider>().setNewActivity(activityData).then(
+                  (activity) =>
+                  Navigator.of(context).pushNamed(
+                    HostActivityTagPage.routeName,
+                    arguments: HostActivityTagPageArguments(
+                      activityId: activity.uid,
+                    ),
                   ),
-                ),
-              );
+            );
+          }catch(e){
+            Fluttertoast.showToast(msg: e.toString());
+          }
         },
         label: const Row(children: [Icon(Icons.send), Text("新增活動")]),
       ),

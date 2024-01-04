@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 import 'package:resonance_chatroom/providers/providers.dart';
 import '../../models/models.dart';
@@ -32,40 +33,43 @@ class _HostActivityTopicPageState extends State<HostActivityTopicPage> {
 
   void _initTopicContent() {
     debugPrint("初始話題頁面");
-    activityProvider.getTopicsByTag(args.activityId, args.tagId).then((value) {
-      _originTopic = value;
-      print("_originTopic.length");
-      print(_originTopic.length);
-      for (int i = 0; i < _originTopic.length; i++) {
-        activityProvider
-            .getQuestionByTopic(args.activityId, _originTopic[i].uid)
-            .then((questionTmp) {
-          fields.add(NewTopicField(
-            onDelete: (i) {
-              setState(() {
-                fields.removeAt(i);
-                for (int i = 0; i < fields.length; i++) {
-                  NewTopicField topicField = fields[i] as NewTopicField;
-                  topicField.index = i;
-                  fields[i] = topicField;
-                }
-              });
-            },
-            index: i,
-            id: _originTopic[i].uid,
-            questionId: questionTmp.uid,
-            tagId: args.tagId,
-            activityId: args.activityId,
-            topicName: _originTopic[i].topicName,
-          ));
-          setState(() {});
-          print("fields.length長度");
-          print(fields.length);
-        }).onError((error, stackTrace) {
-          debugPrint("getQuestionByTopicError: $error");
-        });
-      }
-    });
+    try {
+      activityProvider.getTopicsByTag(args.activityId, args.tagId).then((
+          value) {
+        _originTopic = value;
+        for (int i = 0; i < _originTopic.length; i++) {
+          activityProvider
+              .getQuestionByTopic(args.activityId, _originTopic[i].uid)
+              .then((questionTmp) {
+            fields.add(NewTopicField(
+              onDelete: (i) {
+                setState(() {
+                  fields.removeAt(i);
+                  for (int i = 0; i < fields.length; i++) {
+                    NewTopicField topicField = fields[i] as NewTopicField;
+                    topicField.index = i;
+                    fields[i] = topicField;
+                  }
+                });
+              },
+              index: i,
+              id: _originTopic[i].uid,
+              questionId: questionTmp.uid,
+              tagId: args.tagId,
+              activityId: args.activityId,
+              topicName: _originTopic[i].topicName,
+            ));
+            setState(() {});
+            print("fields.length長度");
+            print(fields.length);
+          }).onError((error, stackTrace) {
+            debugPrint("getQuestionByTopicError: $error");
+          });
+        }
+      });
+    }catch(e){
+      Fluttertoast.showToast(msg: e.toString());
+    }
   }
 
   @override
@@ -107,44 +111,43 @@ class _HostActivityTopicPageState extends State<HostActivityTopicPage> {
                             activityId: args.activityId,
                             tagId: args.tagId,
                             topicName: "");
-                        Topic tmp = await activityProvider.addNewTopic(
-                          args.activityId,
-                          topic,
-                        );
-                        debugPrint("話題新增完成");
-                        Question questionTmp = Question(
-                          activityId: args.activityId,
-                          tagId: args.tagId,
-                          topicId: tmp.uid,
-                          questionName: "",
-                        );
-                        debugPrint("題目新增");
-                        Question question = await activityProvider
-                            .addNewQuestion(args.activityId, questionTmp);
-                        debugPrint("question測試");
-                        int i = fields.length;
-                        setState(() {
-                          fields.add(NewTopicField(
-                            onDelete: (i) {
-                              setState(() {
-                                fields.removeAt(i);
-                                for (int i = 0; i < fields.length; i++) {
-                                  NewTopicField topicField = fields[i] as NewTopicField;
-                                  topicField.index = i;
-                                  fields[i] = topicField;
-                                }
-                              });
-                            },
-                            index: i,
-                            id: tmp.uid,
-                            questionId: question.uid,
+                        try {
+                          Topic tmp = await activityProvider.addNewTopic(
+                            args.activityId,
+                            topic,
+                          );
+                          Question questionTmp = Question(
                             activityId: args.activityId,
                             tagId: args.tagId,
-                            topicName: "",
-                          ));
-                        });
-                        print("長度");
-                        print(fields.length);
+                            topicId: tmp.uid,
+                            questionName: "",
+                          );
+                          Question question = await activityProvider
+                              .addNewQuestion(args.activityId, questionTmp);
+                          int i = fields.length;
+                          setState(() {
+                            fields.add(NewTopicField(
+                              onDelete: (i) {
+                                setState(() {
+                                  fields.removeAt(i);
+                                  for (int i = 0; i < fields.length; i++) {
+                                    NewTopicField topicField = fields[i] as NewTopicField;
+                                    topicField.index = i;
+                                    fields[i] = topicField;
+                                  }
+                                });
+                              },
+                              index: i,
+                              id: tmp.uid,
+                              questionId: question.uid,
+                              activityId: args.activityId,
+                              tagId: args.tagId,
+                              topicName: "",
+                            ));
+                          });
+                        }catch(e){
+                          Fluttertoast.showToast(msg: e.toString());
+                        }
                       },
                     ),
                   ),
@@ -222,31 +225,50 @@ class _NewTopicFieldState extends State<NewTopicField> {
               onPressed: () async {
                 debugPrint("跳至問卷頁面");
                 debugPrint(widget.questionId);
-                Navigator.of(context)
-                    .pushNamed(HostActivityQuestionPage.routeName,
-                        arguments: HostActivityQuestionPageArguments(
-                          activityId: widget.activityId,
-                          tagId: widget.tagId,
-                          topicId: widget.id,
-                          questionId: widget.questionId,
-                        ));
+                try {
+                  await activityProvider.getTopic(
+                      widget.activityId,
+                      widget.id);
+                  Navigator.of(context)
+                      .pushNamed(HostActivityQuestionPage.routeName,
+                      arguments: HostActivityQuestionPageArguments(
+                        activityId: widget.activityId,
+                        tagId: widget.tagId,
+                        topicId: widget.id,
+                        questionId: widget.questionId,
+                      ));
+                }catch(e){
+                  Fluttertoast.showToast(msg: e.toString());
+                }
               },
             ),
           ),
           IconButton(
             icon: isEditing ? const Icon(Icons.check) : const Icon(Icons.edit),
             onPressed: () async {
-              setState(() {
-                isEditing = !isEditing;
-                if (isEditing == false) {
-                  widget.topicName = _controller.text;
-                } else {
+              isEditing = !isEditing;
+              if (isEditing == true){
+                setState(() {
                   _focusNode.requestFocus();
+                });
+              }
+              else{
+                try {
+                  setState(() {
+                    isEditing = !isEditing;
+                    widget.topicName = _controller.text;
+                  });
+                  await activityProvider.editTopic(
+                      widget.activityId, widget.id, widget.topicName);
+                } catch (e) {
+                  setState(() {
+                    _controller.clear();
+                    widget.topicName = _controller.text;
+                  });
+                  Fluttertoast.showToast(msg: e.toString());
                 }
-              });
-              await activityProvider.editTopic(
-                  widget.activityId, widget.id, widget.topicName);
-            },
+              }
+            }
           ),
           IconButton(
             icon: isEditing
@@ -258,9 +280,13 @@ class _NewTopicFieldState extends State<NewTopicField> {
                       isEditing = false;
                     });
                   }
-                : () {
-                    widget.onDelete!(widget.index);
-                    activityProvider.deleteTopicAndQuestion(widget.activityId, widget.id);
+                : () async {
+                    try {
+                      await activityProvider.deleteTopicAndQuestion(widget.activityId, widget.id);
+                      widget.onDelete!(widget.index);
+                    }catch(e){
+                      Fluttertoast.showToast(msg: e.toString());
+                    }
                   },
           ),
         ],

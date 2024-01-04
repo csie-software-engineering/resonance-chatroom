@@ -249,7 +249,7 @@ class ChatProvider {
     assert(roomData.exists, '房間不存在');
 
     if(!roomData.get(RoomConstants.isEnable.value)) {
-        throw const FormatException('房間已提用');
+        throw const FormatException('房間已停用');
     }
 
     await roomQuery.update({
